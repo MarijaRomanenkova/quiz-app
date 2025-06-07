@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Mobile Quiz App",
+    "slug": "fresh-quiz-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icons/icon.svg",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#4313E2"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.marijar.freshquizapp",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/icon.svg",
+        "backgroundColor": "#4313E2"
+      }
+    },
+    "web": {
+      "favicon": "./assets/icons/icon.svg"
+    },
+    "fonts": {
+      "BalooBhaina2-Regular": "./assets/fonts/BalooBhaina2-Regular.ttf",
+      "BalooBhaina2-Medium": "./assets/fonts/BalooBhaina2-Medium.ttf",
+      "BalooBhaina2-SemiBold": "./assets/fonts/BalooBhaina2-SemiBold.ttf",
+      "BalooBhaina2-Bold": "./assets/fonts/BalooBhaina2-Bold.ttf"
+    },
+    "developmentClient": true,
+    "plugins": ["expo-dev-client"],
+    "extra": {
+      "ENV": "dev",
+      "API_URL": "http://localhost:3000/api"
+    }
+  }
+}
+
