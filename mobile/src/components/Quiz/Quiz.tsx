@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, ActivityIndicator, Animated } from 'react-native';
-import { Text, Button, Card, Surface, ProgressBar, Portal, Dialog } from 'react-native-paper';
+import { View, StyleSheet, ActivityIndicator, Animated, TouchableOpacity, Image } from 'react-native';
+import { Text, Button, Card, Surface, ProgressBar, Portal, Dialog, IconButton, RadioButton } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../navigator/Navigator';
+import type { RootStackParamList } from '../../types/navigation';
 import { theme } from '../../theme';
 import { Question } from '../../types';
 import { fetchQuestions } from '../../services/api';
@@ -14,9 +14,14 @@ import {
   updateDailyStats,
   updateBestAttempt 
 } from '../../store/quizSlice';
-import { selectCachedQuestions, cacheQuestions, selectCachedText } from '../../store/questionsSlice';
+import { selectCurrentChunk, cacheQuestions } from '../../store/questionsSlice';
+import { store } from '../../store';
 import { Audio } from 'expo-av';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { getRandomQuestions } from '../../data/mockQuestions';
+import { Button as CustomButton } from '../../components/Button/Button';
+import { setQuizResult } from '../../store/quizResultsSlice';
+import { addWrongQuestion as addToWrongQuestions, clearWrongQuestions } from '../../store/wrongQuestionsSlice';
 
 
 
@@ -24,7 +29,7 @@ type QuizScreenRouteProp = RouteProp<RootStackParamList, 'Quiz'>;
 type QuizScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 type QuizProps = {
-  topicId: string;
+  quizId: string;
   isRepeating?: boolean;
 };
 
@@ -33,9 +38,11 @@ type QuizProps = {
  * Handles quiz logic, scoring, and feedback
  * @component
  */
-const Quiz: React.FC<QuizProps> = ({ topicId, isRepeating = false }) => {
+const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) => {
   const route = useRoute<QuizScreenRouteProp>();
   const navigation = useNavigation<QuizScreenNavigationProp>();
+  const quizId = propQuizId || route.params?.quizId;
+  console.log('Quiz: Initial props and params:', { propQuizId, isRepeating, routeParams: route.params });
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -43,29 +50,76 @@ const Quiz: React.FC<QuizProps> = ({ topicId, isRepeating = false }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [cursor, setCursor] = useState<string>();
   const [hasMore, setHasMore] = useState(true);
-  const [wrongAnswers, setWrongAnswers] = useState<Question[]>([]);
-  const [isReviewMode, setIsReviewMode] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [showFinalDialog, setShowFinalDialog] = useState(false);
   const [sound, setSound] = useState<Audio.Sound>();
   const [isPlaying, setIsPlaying] = useState(false);
-  
 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const dispatch = useDispatch();
   const startTime = useRef(Date.now());
-  const cachedQuestions = useSelector((state: RootState) => 
-    selectCachedQuestions(state, topicId)
-  );
-  const cachedText = useSelector((state: RootState) => 
-    selectCachedText(state, topicId)
-  );
+ 
 
-  const currentTopicId = useSelector((state: RootState) => state.quiz.currentTopicId);
+  const loadQuestions = async () => {
+    setIsLoading(true);
+    try {
+      console.log('Loading questions for quizId:', quizId);
+      console.log('Is repeating?', route.params?.isRepeating);
+      
+      // If we're repeating wrong questions, use them from Redux
+      if (route.params?.isRepeating) {
+        const wrongQuestions = store.getState().wrongQuestions.wrongQuestions;
+        console.log('Review mode - Wrong questions from Redux:', wrongQuestions);
+        console.log('Wrong questions length:', wrongQuestions?.length);
+        if (wrongQuestions && wrongQuestions.length > 0) {
+          console.log('Setting questions for review:', wrongQuestions);
+          setQuestions(wrongQuestions);
+          setIsLoading(false);
+          return;
+        } else {
+          console.log('No wrong questions found in Redux');
+        }
+      }
+      
+      // For normal quiz mode, get questions from cache or generate new ones
+      const questions = getRandomQuestions(quizId);
+      console.log('Loaded questions from mock:', questions.length);
+      
+      if (questions.length === 0) {
+        console.error('No questions found for topic:', quizId);
+        setIsLoading(false);
+        return;
+      }
+
+      dispatch(cacheQuestions({ 
+        topicId: quizId, 
+        questions 
+      }));
+      setQuestions(questions);
+      setHasMore(true);
+    } catch (error) {
+      console.error('Failed to load questions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
+    console.log('Quiz mounted with quizId:', quizId);
+    console.log('Route params:', route.params);
+    console.log('Is repeating?', route.params?.isRepeating);
+    console.log('Current Redux state:', store.getState());
+    if (!quizId) {
+      console.error('No quizId provided!');
+      return;
+    }
+    // Reset state when entering review mode
+    if (route.params?.isRepeating) {
+      console.log('Entering review mode, resetting state');
+      setCurrentQuestion(0);
+      setScore(0);
+    }
     loadQuestions();
-  }, [topicId]);
+  }, [quizId, route.params]);
 
   useEffect(() => {
     if (currentQuestion > questions.length - 5 && hasMore && !isLoading) {
@@ -89,36 +143,12 @@ const Quiz: React.FC<QuizProps> = ({ topicId, isRepeating = false }) => {
       : undefined;
   }, [sound]);
 
-  const loadQuestions = async () => {
-    setIsLoading(true);
-    try {
-      if (cachedQuestions) {
-        setQuestions(cachedQuestions);
-        setIsLoading(false);
-        return;
-      }
-
-      const response = await fetchQuestions(topicId);
-      dispatch(cacheQuestions({ 
-        topicId, 
-        questions: response.questions 
-      }));
-      setQuestions(response.questions);
-      setCursor(response.nextCursor);
-      setHasMore(response.hasMore);
-    } catch (error) {
-      console.error('Failed to load questions:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const loadMoreQuestions = async () => {
     if (!cursor || isLoading) return;
     
     setIsLoading(true);
     try {
-      const response = await fetchQuestions(topicId, cursor);
+      const response = await fetchQuestions(quizId, cursor);
       setQuestions(prev => [...prev, ...response.questions]);
       setCursor(response.nextCursor);
       setHasMore(response.hasMore);
@@ -138,12 +168,11 @@ const Quiz: React.FC<QuizProps> = ({ topicId, isRepeating = false }) => {
     const correct = questions[currentQuestion].correctAnswerId === selectedIndex.toString();
     
     if (correct) {
-      setScore(prev => prev + questions[currentQuestion].points);
-     
+      setScore(prev => prev + 1);
     } else {
-      setWrongAnswers(prev => [...prev, questions[currentQuestion]]);
+      console.log('Adding wrong question:', questions[currentQuestion]);
       dispatch(addWrongQuestion(questions[currentQuestion].questionId));
-
+      dispatch(addToWrongQuestions(questions[currentQuestion]));
     }
   };
 
@@ -152,49 +181,32 @@ const Quiz: React.FC<QuizProps> = ({ topicId, isRepeating = false }) => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
     } else {
-      if (wrongAnswers.length > 0 && !isReviewMode) {
-        setIsReviewMode(true);
-        setQuestions(wrongAnswers);
-        setWrongAnswers([]);
-        setCurrentQuestion(0);
-        setScore(0);
-      } else {
-        handleQuizComplete();
-        navigation.goBack();
-      }
+      // Quiz is complete, save results to Redux
+      const timeSpent = (Date.now() - startTime.current) / 1000; // in seconds
+      
+      dispatch(updateDailyStats({
+        timeSpent,
+        questionsAnswered: questions.length
+      }));
+
+      dispatch(updateBestAttempt({
+        topicId: quizId,
+        score,
+        timeSpent
+      }));
+
+      // Save current quiz result
+      dispatch(setQuizResult({
+        score: score,
+        totalQuestions: questions.length,
+        timeSpent
+      }));
+
+      // Navigate to Results screen
+      navigation.navigate('Results', {
+        quizId
+      });
     }
-  };
-
-  const handleQuizComplete = () => {
-    const timeSpent = (Date.now() - startTime.current) / 1000; // in seconds
-    
-    dispatch(updateDailyStats({
-      timeSpent,
-      questionsAnswered: questions.length
-    }));
-
-    dispatch(updateBestAttempt({
-      topicId,
-      score,
-      timeSpent
-    }));
-
-    navigation.navigate('Results', {
-      score,
-      totalQuestions: questions.length
-    });
-  };
-
-  const getButtonStyle = (index: number) => {
-    if (selectedAnswer === null) return [styles.option, { opacity: fadeAnim }];
-    
-    const isSelected = selectedAnswer === index;
-    const isCorrect = questions[currentQuestion].correctAnswerId === index.toString();
-    
-    if (isSelected && isCorrect) return [styles.option, styles.correctAnswer, { opacity: fadeAnim }];
-    if (isSelected && !isCorrect) return [styles.option, styles.wrongAnswer, { opacity: fadeAnim }];
-    if (!isSelected && isCorrect) return [styles.option, styles.correctAnswer, { opacity: fadeAnim }];
-    return [styles.option, { opacity: fadeAnim }];
   };
 
   const playSound = async (audioUrl: string) => {
@@ -230,92 +242,23 @@ const Quiz: React.FC<QuizProps> = ({ topicId, isRepeating = false }) => {
     }
   };
 
-
-  const renderQuestionContent = () => {
-    const question = questions[currentQuestion];
-
-    switch (question.type) {
-      case 'trueFalse':
-        return (
-          <View style={styles.trueFalseContainer}>
-            <Text variant="titleLarge" style={styles.readingTitle}>
-              {cachedText || 'Reading Text'}
-            </Text>
-            <Text style={styles.readingText}>
-              {cachedText || 'Text content not available'}
-            </Text>
-            <View style={styles.questionSection}>
-              <Text style={styles.questionText}>
-                {question.content}
-              </Text>
-              <View style={styles.trueFalseButtons}>
-                <Button
-                  mode="outlined"
-                  onPress={() => !selectedAnswer && handleAnswer(0)}
-                  style={getButtonStyle(0)}
-                  disabled={selectedAnswer !== null}
-                >
-                  Richtig
-                </Button>
-                <Button
-                  mode="outlined"
-                  onPress={() => !selectedAnswer && handleAnswer(1)}
-                  style={getButtonStyle(1)}
-                  disabled={selectedAnswer !== null}
-                >
-                  Falsch
-                </Button>
-              </View>
-            </View>
-          </View>
-        );
-      case 'audio':
-        return (
-          <View style={styles.audioContainer}>
-            <Button
-              mode="contained"
-              onPress={() => isPlaying ? stopSound() : playSound(question.content)}
-              style={styles.audioButton}
-              icon={() => (
-                <MaterialIcons
-                  name={isPlaying ? 'stop' : 'play-arrow'}
-                  size={24}
-                  color="white"
-                />
-              )}
-            >
-              {isPlaying ? 'Stop' : 'Play Audio'}
-            </Button>
-          </View>
-        );
-      case 'image':
-        return (
-          <Card.Cover
-            source={{ uri: question.content }}
-            style={styles.questionImage}
-          />
-        );
-      default:
-        return (
-          <View style={styles.textContainer}>
-            <Text variant="headlineSmall">
-              {question.content}
-            </Text>
-          </View>
-        );
+  // Clear wrong questions when starting a new quiz (not in review mode)
+  useEffect(() => {
+    if (!route.params?.isRepeating) {
+      dispatch(clearWrongQuestions());
     }
-  };
+  }, []);
 
   return (
-    <Surface style={styles.container}>
+    <View style={styles.container}>
       {isLoading ? (
         <Surface style={styles.loadingContainer}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text variant="bodyLarge" style={styles.loadingText}>
             Loading questions...
           </Text>
         </Surface>
-      ) : !questions || questions.length === 0 ? (
+      ) : questions.length === 0 ? (
         <Card style={styles.card}>
           <Card.Content>
             <Text variant="headlineMedium">No questions available</Text>
@@ -325,147 +268,249 @@ const Quiz: React.FC<QuizProps> = ({ topicId, isRepeating = false }) => {
           </Card.Content>
         </Card>
       ) : (
-        <Animated.View style={{ opacity: fadeAnim }}>
-          <Card style={styles.card}>
-            <Card.Content>
-              <View style={styles.progressBarContainer}>
-                <Text variant="titleLarge" style={styles.score}>
-                  Score: {score}
-                </Text>
-                <ProgressBar
-                  progress={(currentQuestion + 1) / questions.length}
-                  style={styles.progress}
-                />
-              </View>
+        <View style={styles.mainContainer}>
+          {/* Top Bar */}
+          <View style={styles.topBar}>
+            <View style={styles.header}>
+              <IconButton
+                icon="chevron-left"
+                iconColor="#583FB0"
+                size={24}
+                onPress={() => navigation.goBack()}
+              />
+              <Text style={styles.backText}>Previous</Text>
+            </View>
+            <Text variant="titleMedium" style={styles.progressText}>
+              {currentQuestion + 1}/{questions.length}
+            </Text>
+          </View>
 
-              <View style={styles.questionContainer}>
-                <View style={styles.contentWrapper}>
-                  {renderQuestionContent()}
-                </View>
+          {/* Top Half - Question */}
+          <View style={styles.topHalf}>
+            <Surface style={styles.questionCard}>
+              <View style={styles.questionContent}>
+                {questions[currentQuestion].content.startsWith('http') ? (
+                  <Image 
+                    source={{ uri: questions[currentQuestion].content }}
+                    style={styles.questionImage}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <Text variant="headlineSmall" style={styles.questionText}>
+                    {questions[currentQuestion].content}
+                  </Text>
+                )}
               </View>
+            </Surface>
+          </View>
 
-              <View style={styles.optionsContainer}>
-                {questions[currentQuestion].options.map((option, index) => (
-                  <Button
-                    key={index}
-                    mode="outlined"
-                    onPress={() => !selectedAnswer && handleAnswer(index)}
-                    style={getButtonStyle(index)}
-                    disabled={selectedAnswer !== null}
-                  >
-                    {option}
-                  </Button>
-                ))}
+          {/* Bottom Half - Options and Next Button */}
+          <View style={styles.bottomHalf}>
+            <View style={styles.optionsContainer}>
+              <View style={styles.radioWrapper}>
+                <RadioButton.Group onValueChange={(value) => !selectedAnswer && handleAnswer(parseInt(value))} value={selectedAnswer?.toString() || ''}>
+                  <View style={styles.radioContainer}>
+                    {questions[currentQuestion].options.map((option, index) => (
+                      <View key={index} style={[
+                        styles.radioItem,
+                        selectedAnswer === index && styles.selectedRadioItem
+                      ]}>
+                        <RadioButton.Item
+                          label={option}
+                          value={index.toString()}
+                          position="trailing"
+                          labelStyle={[
+                            styles.radioLabel,
+                            selectedAnswer === index && styles.selectedRadioLabel
+                          ]}
+                          style={[
+                            styles.radioButton,
+                            selectedAnswer === index && 
+                              (questions[currentQuestion].correctAnswerId === index.toString() 
+                                ? styles.correctOption 
+                                : styles.incorrectOption)
+                          ]}
+                          disabled={selectedAnswer !== null}
+                          theme={{
+                            colors: {
+                              primary: selectedAnswer === index 
+                                ? (questions[currentQuestion].correctAnswerId === index.toString() 
+                                  ? '#60BF92' 
+                                  : '#EC221F')
+                                : '#583FB0',
+                              onSurfaceDisabled: selectedAnswer === index 
+                                ? (questions[currentQuestion].correctAnswerId === index.toString() 
+                                  ? '#60BF92' 
+                                  : '#EC221F')
+                                : '#583FB0',
+                            }
+                          }}
+                        />
+                      </View>
+                    ))}
+                  </View>
+                </RadioButton.Group>
               </View>
+            </View>
 
-              {selectedAnswer !== null && (
-                <Button 
-                  mode="contained"
-                  onPress={handleNext}
-                  style={styles.nextButton}
-                >
-                  {currentQuestion < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
-                </Button>
-              )}
-            </Card.Content>
-          </Card>
-        </Animated.View>
+            <CustomButton 
+              variant="primary"
+              onPress={handleNext}
+              style={styles.nextButton}
+              disabled={selectedAnswer === null}
+            >
+              {currentQuestion === questions.length - 1 ? 'Finish' : 'Next'}
+            </CustomButton>
+          </View>
+        </View>
       )}
-    </Surface>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: '100%',
-    height: '100%',
-    padding: 8,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.secondaryContainer,
   },
-  card: {
+  mainContainer: {
     flex: 1,
-    width: '100%',
-    height: '100%',
-  
+    padding: 16,
+    paddingTop: 8,
   },
-  progressBarContainer: {
-    marginBottom:8,
-    marginTop:8,
-    flex: 1
-  },
-  score: {
-    textAlign: 'right',
-    marginBottom: 8,
-  },
-  progress: {
-    marginBottom: 16,
-  },
-  questionContainer: {
-    width: '100%',
-    flex: 2,
-    marginBottom: 16,
-  },
-  contentWrapper: {
-    height: '100%',
-    width: '100%',
-    marginBottom: 8,
-    justifyContent: 'center',
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 4,
   },
-  questionImage: {
-    width: 'auto',
-    height: '100%',
-    aspectRatio: 1,  // This will maintain square ratio
-    resizeMode: 'contain',
-    backgroundColor: '#f5f5f5',
-  },
-  textContainer: {
-    height: '100%',
-    width: '100%',
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 8,
-    backgroundColor: '#f5f5f5',
+  },
+  backText: {
+    color: '#583FB0',
+    fontSize: 16,
+    fontFamily: 'BalooBhaina2-Regular',
+  },
+  progressText: {
+    color: '#583FB0',
+    fontWeight: 'bold',
+  },
+  topHalf: {
+    flex: 1,
+    marginBottom: 16,
+  },
+  bottomHalf: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  questionCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    shadowColor: '#000000',
+    shadowOpacity: 0.15,
+    shadowOffset: {
+      width: 0,
+      height: 20,
+    },
+    shadowRadius: 50,
+    elevation: 8,
+  },
+  questionContent: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   questionText: {
     textAlign: 'center',
-    minHeight: 40,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  feedbackText: {
-    color: '#F44336',
   },
   optionsContainer: {
-    width: '100%',
-    flex: 2,
-    gap: 4,
-    marginTop: 4,
+    flex: 1,
+  },
+  radioWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  radioContainer: {
+    gap: 8,
+  },
+  radioItem: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 20,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.outline,
+  },
+  radioButton: {
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  radioLabel: {
+    fontSize: 20,
+    color: '#000000',
+    fontWeight: '600',
+  },
+  selectedRadioItem: {
+    borderWidth: 0,
+    borderColor: 'transparent',
+  },
+  selectedRadioLabel: {
+    color: '#000000',
+  },
+  nextButton: {
+    marginTop: 16,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    shadowColor: '#000000',
+    shadowOpacity: 0.15,
+    shadowOffset: {
+      width: 0,
+      height: 20,
+    },
+    shadowRadius: 50,
+    elevation: 8,
   },
   loadingText: {
     marginTop: 8,
   },
+  card: {
+    flex: 1,
+    margin: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    shadowColor: '#000000',
+    shadowOpacity: 0.15,
+    shadowOffset: {
+      width: 0,
+      height: 20,
+    },
+    shadowRadius: 50,
+    elevation: 8,
+  },
   button: {
     marginTop: 16,
   },
-  correctAnswer: {
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',  // Light green
-    borderColor: '#4CAF50',
-  },
-  wrongAnswer: {
-    backgroundColor: 'rgba(244, 67, 54, 0.1)',  // Light red
-    borderColor: '#F44336',
-  },
-  option: {
-    marginBottom: 4,
+  trueFalseContainer: {
     width: '100%',
+    height: '100%',
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+  },
+  trueFalseButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: 16,
   },
   audioContainer: {
     width: '100%',
@@ -478,15 +523,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
   },
-  nextButton: {
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  trueFalseContainer: {
+  questionImage: {
     width: '100%',
     height: '100%',
-    padding: 16,
+    resizeMode: 'contain',
+  },
+  textContainer: {
+    height: '100%',
+    width: '100%',
+    padding: 8,
     backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  feedbackText: {
+    color: '#F44336',
   },
   readingTitle: {
     marginBottom: 12,
@@ -499,10 +550,21 @@ const styles = StyleSheet.create({
   questionSection: {
     gap: 16,
   },
-  trueFalseButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    gap: 16,
+  correctOption: {
+    backgroundColor: '#E1FFC3',
+    borderColor: '#60BF92',
+    borderWidth: 2,
+  },
+  incorrectOption: {
+    backgroundColor: '#FBDCDC',
+    borderColor: '#EC221F',
+    borderWidth: 2,
+  },
+  correctOptionLabel: {
+    color: '#60BF92',
+  },
+  incorrectOptionLabel: {
+    color: '#EC221F',
   },
 });
 

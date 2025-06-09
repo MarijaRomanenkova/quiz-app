@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Surface, ActivityIndicator, Text } from 'react-native-paper';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import type { RootStackParamList } from '../../navigator/Navigator';
+import type { RootStackParamList } from '../../types/navigation';
 import Quiz from '../../components/Quiz/Quiz';
 import { theme } from '../../theme';
 
@@ -10,7 +10,7 @@ type QuizScreenRouteProp = RouteProp<RootStackParamList, 'Quiz'>;
 
 export const QuizScreen = () => {
   const route = useRoute<QuizScreenRouteProp>();
-  const { topicId, isRepeating } = route.params;
+  const { quizId, isRepeating } = route.params;
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export const QuizScreen = () => {
 
   return (
     <Surface style={styles.container}>
-      <Quiz topicId={topicId} isRepeating={isRepeating} />
+      <Quiz quizId={quizId} isRepeating={isRepeating} />
     </Surface>
   );
 };
@@ -41,7 +41,7 @@ export const QuizScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.secondaryContainer,
   },
   loadingContainer: {
     justifyContent: 'center',

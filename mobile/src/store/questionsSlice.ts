@@ -1,13 +1,13 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { Question, ReadingText } from '../types';
 import type { RootState } from './index';
 
 interface QuestionsState {
   cache: Record<string, {
     questions: Question[];
-    text?: ReadingText;
-    timestamp: number;
-    expiresIn: number;
+    currentChunk: number;
+    totalChunks: number;
+    lastFetched: number;
   }>;
 }
 
@@ -16,6 +16,7 @@ const initialState: QuestionsState = {
 };
 
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+const CHUNK_SIZE = 10;
 
 export const questionsSlice = createSlice({
   name: 'questions',
@@ -24,14 +25,19 @@ export const questionsSlice = createSlice({
     cacheQuestions: (state, action: PayloadAction<{
       topicId: string;
       questions: Question[];
-      text?: ReadingText;
     }>) => {
       state.cache[action.payload.topicId] = {
         questions: action.payload.questions,
-        text: action.payload.text,
-        timestamp: Date.now(),
-        expiresIn: CACHE_EXPIRY
+        currentChunk: 0,
+        totalChunks: Math.ceil(action.payload.questions.length / CHUNK_SIZE),
+        lastFetched: Date.now()
       };
+    },
+    nextChunk: (state, action: PayloadAction<string>) => {
+      const topicCache = state.cache[action.payload];
+      if (topicCache) {
+        topicCache.currentChunk += 1;
+      }
     },
     clearCache: (state) => {
       state.cache = {};
@@ -39,23 +45,35 @@ export const questionsSlice = createSlice({
   },
 });
 
-export const { cacheQuestions, clearCache } = questionsSlice.actions;
+// Memoized selectors
+const selectQuestionsCache = (state: RootState) => state.questions.cache;
 
-// Selector to get cached questions and text
-export const selectCachedQuestions = (state: RootState, topicId: string) => {
-  const cached = state.questions.cache[topicId];
-  if (!cached) return null;
-  
-  const isExpired = Date.now() - cached.timestamp > cached.expiresIn;
-  return isExpired ? null : cached.questions;
-};
+export const selectCurrentChunk = createSelector(
+  [selectQuestionsCache, (_state: RootState, topicId: string) => topicId],
+  (cache, topicId) => {
+    const cached = cache[topicId];
+    if (!cached) return null;
+    
+    const isExpired = Date.now() - cached.lastFetched > CACHE_EXPIRY;
+    if (isExpired) return null;
 
-export const selectCachedText = (state: RootState, topicId: string) => {
-  const cached = state.questions.cache[topicId];
-  if (!cached) return null;
-  
-  const isExpired = Date.now() - cached.timestamp > cached.expiresIn;
-  return isExpired ? null : cached.text;
-};
+    const start = cached.currentChunk * CHUNK_SIZE;
+    const end = start + CHUNK_SIZE;
+    return cached.questions.slice(start, end);
+  }
+);
+
+export const shouldLoadMore = createSelector(
+  [selectQuestionsCache, (_state: RootState, topicId: string) => topicId],
+  (cache, topicId) => {
+    const cached = cache[topicId];
+    if (!cached) return true;
+    
+    const remainingChunks = cached.totalChunks - cached.currentChunk;
+    return remainingChunks <= cached.totalChunks * 0.5; // Load more when 50% of questions are used
+  }
+);
+
+export const { cacheQuestions, nextChunk, clearCache } = questionsSlice.actions;
 
 export default questionsSlice.reducer;

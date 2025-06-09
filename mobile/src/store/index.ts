@@ -7,11 +7,15 @@ import { userSlice } from './userSlice';
 import authReducer from './authSlice';
 import { quizSlice } from './quizSlice';
 import { statisticsSlice } from './statisticsSlice';
+import categoryReducer from './categorySlice';
+import questionsReducer from './questionsSlice';
+import quizResultsReducer from './quizResultsSlice';
+import wrongQuestionsReducer from './wrongQuestionsSlice';
 
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['auth', 'user', 'quiz', 'statistics'], // include all reducers that need persistence
+  whitelist: ['auth', 'user', 'statistics', 'questions'], // only persist necessary data
 };
 
 const rootReducer = combineReducers({
@@ -19,6 +23,10 @@ const rootReducer = combineReducers({
   auth: authReducer,
   quiz: quizSlice.reducer,
   statistics: statisticsSlice.reducer,
+  category: categoryReducer,
+  questions: questionsReducer,
+  quizResults: quizResultsReducer,
+  wrongQuestions: wrongQuestionsReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

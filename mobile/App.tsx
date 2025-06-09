@@ -7,6 +7,7 @@ import { theme } from './src/theme';
 import { LogBox, Image, ActivityIndicator, View } from 'react-native';
 import { PersistGate } from 'redux-persist/integration/react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import './src/utils/devAuth'; // Import dev auth helper
 
 // Ignore specific warnings
 LogBox.ignoreLogs([

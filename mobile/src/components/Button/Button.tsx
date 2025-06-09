@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Button as PaperButton } from 'react-native-paper';
 import { theme } from '../../theme';
 
-type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
+type ButtonVariant = 'success' | 'primary' | 'secondary';
 
 interface ButtonProps {
   mode?: 'text' | 'outlined' | 'contained';
@@ -15,14 +15,30 @@ interface ButtonProps {
 }
 
 const getButtonColors = (variant: ButtonVariant) => {
-  return theme.buttons.variants[variant];
+  switch (variant) {
+    case 'success':
+      return {
+        backgroundColor: '#8BF224', // bright green
+        textColor: '#000000',
+      };
+    case 'primary':
+      return {
+        backgroundColor: theme.colors.background, // #4313E2 with opacity
+        textColor: theme.colors.surface, // white
+      };
+    case 'secondary':
+      return {
+        backgroundColor: '#EDE7FF', // pale violet
+        textColor: '#000000',
+      };
+  }
 };
 
-export const Button = ({
+export const Button = ({ 
   mode = 'contained',
-  onPress,
+  onPress, 
   children,
-  variant = 'primary',
+  variant = 'success',
   disabled = false,
   style,
 }: ButtonProps) => {
@@ -46,14 +62,16 @@ export const Button = ({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: theme.buttons.borderRadius,
-    marginVertical: theme.buttons.marginVertical,
+    borderRadius: 20,
+    marginVertical: 8,
+    height: 56, // Fixed height for all buttons
   },
   content: {
-    paddingVertical: theme.buttons.paddingVertical,
+    paddingVertical: 8,
   },
   label: {
-    fontSize: theme.buttons.fontSize,
+    fontSize: 24,
     fontFamily: theme.fonts.titleLarge.fontFamily,
+    fontWeight: 'bold',
   },
 }); 

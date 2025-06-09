@@ -4,7 +4,7 @@ export const theme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
-    primary: '#4313E2', // Deep violet
+    primary: '#EDE7FF', // Pale violet
     secondary: '#8BF224', // Bright green
     tertiary: '#6B4EFF', // Lighter violet
     error: '#FF4B4B', // Bright red
@@ -12,9 +12,10 @@ export const theme = {
     surface: '#FFFFFF',
     text: '#000000',
     textSecondary: '#FFFFFF80',
+    outline: '#6750A4', // New outline color
     // Override any blue colors from MD3LightTheme
     primaryContainer: '#4313E2',
-    secondaryContainer: '#8BF224',
+    secondaryContainer: '#EDE7FF',
     tertiaryContainer: 'rgba(67, 19, 226, 0.7)',
     onPrimaryContainer: '#FFFFFF',
     onSecondaryContainer: '#000000',

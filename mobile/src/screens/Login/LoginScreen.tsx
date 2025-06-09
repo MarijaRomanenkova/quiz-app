@@ -14,6 +14,8 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { theme } from '../../theme';
 import { useAuth } from '../../hooks/useAuth';
+import { Alert } from 'react-native';
+import { TextInput } from 'react-native-paper';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -113,17 +115,24 @@ export const LoginScreen = () => {
                 placeholder="Enter your password"
                 error={errors.password?.message}
                 secureTextEntry={!showPassword}
+                right={
+                  <TextInput.Icon
+                    icon={showPassword ? "eye-off" : "eye"}
+                    onPress={() => setShowPassword(!showPassword)}
+                  />
+                }
               />
             )}
           />
-          <Button
-            mode="text"
-            onPress={() => navigation.navigate('ForgotPassword')}
-            style={styles.forgotPasswordButton}
-            variant="tertiary"
-          >
-            Forgot your password? Recover
-          </Button>
+          <View style={styles.forgotPasswordContainer}>
+            <Text style={styles.forgotPasswordText}>Forgot your password?</Text>
+            <Text
+              onPress={() => navigation.navigate('ForgotPassword')}
+              style={styles.recoverLink}
+            >
+              Recover
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -190,7 +199,7 @@ const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
     justifyContent: 'center',
-    marginTop: -100, // Adjust this value to fine-tune the vertical centering
+    marginTop: 16, // Adjust this value to fine-tune the vertical centering
   },
   buttonContainer: {
     padding: 24,
@@ -199,9 +208,20 @@ const styles = StyleSheet.create({
   registerButton: {
     marginTop: 12,
   },
-  forgotPasswordButton: {
-    marginTop: -8,
-    marginBottom: 8,
-    alignSelf: 'flex-end',
+  forgotPasswordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  forgotPasswordText: {
+    color: theme.colors.surface,
+    fontSize: 14,
+  },
+  recoverLink: {
+    color: theme.colors.surface,
+    fontSize: 14,
+    marginLeft: 4,
+    fontWeight: 'bold',
   },
 }); 

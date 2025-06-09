@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Surface, Text, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigator/Navigator';
+import type { RootStackParamList } from '../../types/navigation';
 import { theme } from '../../theme';
 import { buttonStyles, containerStyles, textStyles } from '../../styles/components.styles';
 
@@ -34,6 +34,7 @@ export const TermsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.secondaryContainer,
     padding: 24,
   },
   title: {

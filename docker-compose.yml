@@ -7,13 +7,15 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/quiz_db
-      - JWT_SECRET=b83f4c7bb481463c378f25b22e6ea615f260807930691608a30ae1edb1c98b1cbdb1b658e289c7574874dfac94bec36d2518bf2fe8ae921cc60c06ca1b27c9b2
-      - RESEND_API_KEY=re_SBBRZEdo_4ZRFZGnJrAKhc6ekXZPXKgD8
-      - SENDER_EMAIL=onboarding@resend.dev
-      - MOBILE_URL=http://localhost:19006
-      - BACKEND_URL=http://localhost:3000
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - SENDER_EMAIL=${SENDER_EMAIL}
+      - MOBILE_URL=${MOBILE_URL}
+      - BACKEND_URL=${BACKEND_URL}
     depends_on:
       db:
         condition: service_healthy
@@ -34,10 +36,12 @@ services:
     image: postgres:15-alpine
     ports:
       - "5432:5432"
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=quiz_db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -53,4 +57,4 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data: 
+  postgres_data:

@@ -45,6 +45,7 @@ export const RegisterScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showEmailExistsModal, setShowEmailExistsModal] = useState(false);
 
   const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -71,7 +72,6 @@ export const RegisterScreen = () => {
     });
     
     try {
-      // First, make the API call to register
       console.log('Making API call to register user...');
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
@@ -87,21 +87,22 @@ export const RegisterScreen = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+        if (errorData.message === 'User with this email already exists') {
+          setShowEmailExistsModal(true);
+          return;
+        }
         throw new Error(errorData.message || 'Registration failed');
       }
 
       const responseData = await response.json();
       console.log('Registration API response:', responseData);
 
-      // If API call succeeds, dispatch to Redux
-      console.log('Dispatching user profile...');
       dispatch(setUserProfile({
         name: data.name,
         email: data.email,
         studyPaceId: data.studyPaceId,
         agreedToTerms: data.agreedToTerms,
       }));
-      console.log('User profile dispatched successfully');
       setShowSuccessModal(true);
     } catch (error: unknown) {
       console.error('Registration error:', {
@@ -115,6 +116,11 @@ export const RegisterScreen = () => {
         [{ text: 'OK' }]
       );
     }
+  };
+
+  const handleRecoverPassword = () => {
+    setShowEmailExistsModal(false);
+    navigation.navigate('ForgotPassword');
   };
 
   const handleSuccessModalDismiss = () => {
@@ -274,11 +280,24 @@ export const RegisterScreen = () => {
 
       <Portal>
         <CustomModal
+          visible={showEmailExistsModal}
+          onDismiss={() => setShowEmailExistsModal(false)}
+          title="Email Already Registered"
+          message="We already have a user associated with this email. Would you like to recover your password?"
+          primaryButtonText="Recover"
+          onPrimaryButtonPress={handleRecoverPassword}
+          secondaryButtonText="Cancel"
+          onSecondaryButtonPress={() => setShowEmailExistsModal(false)}
+        />
+      </Portal>
+
+      <Portal>
+        <CustomModal
           visible={showSuccessModal}
           onDismiss={handleSuccessModalDismiss}
           title="Registration Successful"
           message="Please check your email to verify your account."
-          primaryButtonText="Go to Login"
+          primaryButtonText="OK"
           onPrimaryButtonPress={handleSuccessModalDismiss}
         />
       </Portal>
