@@ -148,7 +148,7 @@ export const LoginScreen = () => {
           mode="contained"
           onPress={() => navigation.navigate('Register')}
           style={[styles.registerButton, { backgroundColor: '#EDE7FF' }]}
-          variant="tertiary"
+          variant="secondary"
         >
           Register
         </Button>

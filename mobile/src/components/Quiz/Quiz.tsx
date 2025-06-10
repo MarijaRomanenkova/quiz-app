@@ -179,7 +179,12 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Stop audio if it's playing
+    if (audioPlayerRef.current) {
+      await audioPlayerRef.current.stop();
+    }
+    
     setSelectedAnswer(null);   
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);

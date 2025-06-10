@@ -21,6 +21,7 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audio
   const [duration, setDuration] = React.useState(0);
   const [position, setPosition] = React.useState(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const previousUrlRef = useRef(audioUrl);
 
   useImperativeHandle(ref, () => ({
     stop: async () => {
@@ -31,13 +32,26 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audio
     }
   }));
 
+  // Cleanup sound when component unmounts or URL changes
   useEffect(() => {
-    return sound
-      ? () => {
-          sound.unloadAsync();
-        }
-      : undefined;
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
   }, [sound]);
+
+  // Handle URL changes
+  useEffect(() => {
+    if (previousUrlRef.current !== audioUrl) {
+      if (sound) {
+        sound.unloadAsync();
+        setSound(undefined);
+        setIsPlaying(false);
+      }
+      previousUrlRef.current = audioUrl;
+    }
+  }, [audioUrl]);
 
   const playSound = async () => {
     if (sound) {
