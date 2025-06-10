@@ -22,6 +22,7 @@ import { getRandomQuestions } from '../../data/mockQuestions';
 import { Button as CustomButton } from '../../components/Button/Button';
 import { setQuizResult } from '../../store/quizResultsSlice';
 import { addWrongQuestion as addToWrongQuestions, clearWrongQuestions } from '../../store/wrongQuestionsSlice';
+import { AudioPlayer, AudioPlayerRef } from '../AudioPlayer/AudioPlayer';
 
 
 
@@ -57,6 +58,7 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const dispatch = useDispatch();
   const startTime = useRef(Date.now());
+  const audioPlayerRef = useRef<AudioPlayerRef>(null);
  
 
   const loadQuestions = async () => {
@@ -160,8 +162,9 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   };
 
   const handleAnswer = async (selectedIndex: number) => {
-    if (sound) {
-      await stopSound();
+    // Stop audio if it's playing
+    if (audioPlayerRef.current) {
+      await audioPlayerRef.current.stop();
     }
     
     setSelectedAnswer(selectedIndex);
@@ -249,6 +252,38 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     }
   }, []);
 
+  const renderQuestionContent = () => {
+    const question = questions[currentQuestion];
+    
+    if (question.type === 'audio') {
+      return (
+        <AudioPlayer 
+          ref={audioPlayerRef}
+          audioUrl={question.content}
+          onPlaybackComplete={() => {
+            // Optional: Add any logic you want to execute when audio finishes
+          }}
+        />
+      );
+    }
+
+    if (question.content.startsWith('http')) {
+      return (
+        <Image 
+          source={{ uri: question.content }}
+          style={styles.questionImage}
+          resizeMode="contain"
+        />
+      );
+    }
+
+    return (
+      <Text variant="headlineSmall" style={styles.questionText}>
+        {question.content}
+      </Text>
+    );
+  };
+
   return (
     <View style={styles.container}>
       {isLoading ? (
@@ -289,17 +324,7 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
           <View style={styles.topHalf}>
             <Surface style={styles.questionCard}>
               <View style={styles.questionContent}>
-                {questions[currentQuestion].content.startsWith('http') ? (
-                  <Image 
-                    source={{ uri: questions[currentQuestion].content }}
-                    style={styles.questionImage}
-                    resizeMode="contain"
-                  />
-                ) : (
-                  <Text variant="headlineSmall" style={styles.questionText}>
-                    {questions[currentQuestion].content}
-                  </Text>
-                )}
+                {renderQuestionContent()}
               </View>
             </Surface>
           </View>
@@ -419,14 +444,12 @@ const styles = StyleSheet.create({
     },
     shadowRadius: 50,
     elevation: 8,
+    marginVertical: 48,
   },
   questionContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  questionText: {
-    textAlign: 'center',
   },
   optionsContainer: {
     flex: 1,
@@ -460,6 +483,16 @@ const styles = StyleSheet.create({
   },
   selectedRadioLabel: {
     color: '#000000',
+  },
+  correctOption: {
+    backgroundColor: '#E1FFC3',
+    borderColor: '#60BF92',
+    borderWidth: 2,
+  },
+  incorrectOption: {
+    backgroundColor: '#FBDCDC',
+    borderColor: '#EC221F',
+    borderWidth: 2,
   },
   nextButton: {
     marginTop: 16,
@@ -501,70 +534,17 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 16,
   },
-  trueFalseContainer: {
-    width: '100%',
-    height: '100%',
-    padding: 16,
-    backgroundColor: '#f5f5f5',
-  },
-  trueFalseButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    gap: 16,
-  },
-  audioContainer: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-  },
-  audioButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-  },
   questionImage: {
     width: '100%',
     height: '100%',
     resizeMode: 'contain',
   },
-  textContainer: {
-    height: '100%',
-    width: '100%',
-    padding: 8,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  feedbackText: {
-    color: '#F44336',
-  },
-  readingTitle: {
-    marginBottom: 12,
-    fontWeight: 'bold',
-  },
-  readingText: {
-    marginBottom: 24,
-    lineHeight: 24,
-  },
-  questionSection: {
-    gap: 16,
-  },
-  correctOption: {
-    backgroundColor: '#E1FFC3',
-    borderColor: '#60BF92',
-    borderWidth: 2,
-  },
-  incorrectOption: {
-    backgroundColor: '#FBDCDC',
-    borderColor: '#EC221F',
-    borderWidth: 2,
-  },
-  correctOptionLabel: {
-    color: '#60BF92',
-  },
-  incorrectOptionLabel: {
-    color: '#EC221F',
+  questionText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: theme.colors.onSurface,
+    marginBottom: 16,
+    textAlign: 'center',
   },
 });
 
