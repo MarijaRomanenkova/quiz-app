@@ -4,7 +4,7 @@ import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../../theme';
 import { Audio } from 'expo-av';
-import Svg, { Circle } from 'react-native-svg';
+import Svg, { Circle as SvgCircle } from 'react-native-svg';
 
 type AudioPlayerProps = {
   audioUrl: string;
@@ -105,7 +105,7 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audio
       <View style={styles.playerContainer}>
         <Svg width={100} height={100} style={styles.svg}>
           {/* Background circle */}
-          <Circle
+          <SvgCircle
             cx={50}
             cy={50}
             r={40}
@@ -142,7 +142,7 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audio
   );
 });
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
 
 const styles = StyleSheet.create({
   container: {

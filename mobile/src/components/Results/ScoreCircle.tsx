@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
-import Svg, { Circle } from 'react-native-svg';
+import Svg, { Circle as SvgCircle } from 'react-native-svg';
 import { theme } from '../../theme';
 
 interface ScoreCircleProps {
@@ -19,7 +19,7 @@ export const ScoreCircle: React.FC<ScoreCircleProps> = ({ score, total }) => {
     <View style={styles.container}>
       <Svg width={radius * 2} height={radius * 2}>
         {/* Background circle */}
-        <Circle
+        <SvgCircle
           cx={radius}
           cy={radius}
           r={radius - 8}
@@ -28,7 +28,7 @@ export const ScoreCircle: React.FC<ScoreCircleProps> = ({ score, total }) => {
           fill="none"
         />
         {/* Progress circle */}
-        <Circle
+        <SvgCircle
           cx={radius}
           cy={radius}
           r={radius - 8}
@@ -41,7 +41,7 @@ export const ScoreCircle: React.FC<ScoreCircleProps> = ({ score, total }) => {
           transform={`rotate(-90, ${radius}, ${radius})`}
         />
         {/* White center circle */}
-        <Circle
+        <SvgCircle
           cx={radius}
           cy={radius}
           r={radius - 16}

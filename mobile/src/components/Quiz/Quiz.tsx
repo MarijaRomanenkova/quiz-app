@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, ActivityIndicator, Animated, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Animated, TouchableOpacity, Image, ScrollView, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { Text, Button, Card, Surface, ProgressBar, Portal, Dialog, IconButton, RadioButton } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { theme } from '../../theme';
-import { Question } from '../../types';
+import type { Question, TrueFalseQuestion, TextQuestion, ImageQuestion, AudioQuestion } from '../../types';
 import { fetchQuestions } from '../../services/api';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../store';
@@ -23,8 +23,8 @@ import { Button as CustomButton } from '../../components/Button/Button';
 import { setQuizResult } from '../../store/quizResultsSlice';
 import { addWrongQuestion as addToWrongQuestions, clearWrongQuestions } from '../../store/wrongQuestionsSlice';
 import { AudioPlayer, AudioPlayerRef } from '../AudioPlayer/AudioPlayer';
-
-
+import { mockTexts } from '../../data/mockTexts';
+import { TextQuestion as TextQuestionComponent, ImageQuestion as ImageQuestionComponent, AudioQuestion as AudioQuestionComponent } from '../Questions';
 
 type QuizScreenRouteProp = RouteProp<RootStackParamList, 'Quiz'>;
 type QuizScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -54,6 +54,12 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [sound, setSound] = useState<Audio.Sound>();
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showReadingQuestions, setShowReadingQuestions] = useState(false);
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [currentReadingQuestion, setCurrentReadingQuestion] = useState(0);
+  const [currentTextId, setCurrentTextId] = useState<string | null>(null);
+  const [showReadingText, setShowReadingText] = useState(false);
 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const dispatch = useDispatch();
@@ -65,31 +71,39 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     setIsLoading(true);
     try {
       console.log('Loading questions for quizId:', quizId);
-      console.log('Is repeating?', route.params?.isRepeating);
       
-      // If we're repeating wrong questions, use them from Redux
       if (route.params?.isRepeating) {
         const wrongQuestions = store.getState().wrongQuestions.wrongQuestions;
-        console.log('Review mode - Wrong questions from Redux:', wrongQuestions);
-        console.log('Wrong questions length:', wrongQuestions?.length);
         if (wrongQuestions && wrongQuestions.length > 0) {
-          console.log('Setting questions for review:', wrongQuestions);
+          // For reading questions, we need to show the text first
+          const readingQuestions = wrongQuestions.filter(q => q.type === 'trueFalse' && q.topicId.startsWith('r'));
+          if (readingQuestions.length > 0) {
+            const textId = readingQuestions[0].textId;
+            if (textId) {
+              setCurrentTextId(textId);
+              setShowReadingText(true);
+            }
+          }
           setQuestions(wrongQuestions);
           setIsLoading(false);
           return;
-        } else {
-          console.log('No wrong questions found in Redux');
         }
       }
       
-      // For normal quiz mode, get questions from cache or generate new ones
       const questions = getRandomQuestions(quizId);
-      console.log('Loaded questions from mock:', questions.length);
-      
       if (questions.length === 0) {
         console.error('No questions found for topic:', quizId);
         setIsLoading(false);
         return;
+      }
+
+      // For reading questions, show the text first
+      if (quizId.startsWith('r')) {
+        const textId = questions[0].textId;
+        if (textId) {
+          setCurrentTextId(textId);
+          setShowReadingText(true);
+        }
       }
 
       dispatch(cacheQuestions({ 
@@ -161,36 +175,46 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     }
   };
 
-  const handleAnswer = async (selectedIndex: number) => {
-    // Stop audio if it's playing
-    if (audioPlayerRef.current) {
-      await audioPlayerRef.current.stop();
-    }
+  const handleAnswer = (selectedIndex: number) => {
+    if (selectedAnswer !== null) return; // Prevent multiple selections
     
     setSelectedAnswer(selectedIndex);
-    const correct = questions[currentQuestion].correctAnswerId === selectedIndex.toString();
+    const question = questions[currentQuestion];
     
-    if (correct) {
-      setScore(prev => prev + 1);
+    let isCorrect = false;
+    if (question.type === 'trueFalse') {
+      const tfQuestion = question as TrueFalseQuestion;
+      isCorrect = selectedIndex === 0 ? tfQuestion.correctAnswer : !tfQuestion.correctAnswer;
+      if (isCorrect) {
+        setScore(prev => prev + 1);
+      } else {
+        dispatch(addWrongQuestion(tfQuestion.questionId));
+        dispatch(addToWrongQuestions(tfQuestion));
+      }
     } else {
-      console.log('Adding wrong question:', questions[currentQuestion]);
-      dispatch(addWrongQuestion(questions[currentQuestion].questionId));
-      dispatch(addToWrongQuestions(questions[currentQuestion]));
+      const mcQuestion = question as TextQuestion | ImageQuestion | AudioQuestion;
+      isCorrect = mcQuestion.correctAnswerId === selectedIndex.toString();
+      if (isCorrect) {
+        setScore(prev => prev + 1);
+      } else {
+        dispatch(addWrongQuestion(mcQuestion.questionId));
+        dispatch(addToWrongQuestions(mcQuestion));
+      }
     }
   };
 
-  const handleNext = async () => {
-    // Stop audio if it's playing
-    if (audioPlayerRef.current) {
-      await audioPlayerRef.current.stop();
+  const handleNext = () => {
+    setSelectedAnswer(null);
+    
+    if (showReadingText) {
+      setShowReadingText(false);
+      return;
     }
     
-    setSelectedAnswer(null);   
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
     } else {
-      // Quiz is complete, save results to Redux
-      const timeSpent = (Date.now() - startTime.current) / 1000; // in seconds
+      const timeSpent = (Date.now() - startTime.current) / 1000;
       
       dispatch(updateDailyStats({
         timeSpent,
@@ -203,17 +227,13 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
         timeSpent
       }));
 
-      // Save current quiz result
       dispatch(setQuizResult({
-        score: score,
+        score,
         totalQuestions: questions.length,
         timeSpent
       }));
 
-      // Navigate to Results screen
-      navigation.navigate('Results', {
-        quizId
-      });
+      navigation.navigate('Results', { quizId });
     }
   };
 
@@ -257,139 +277,320 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     }
   }, []);
 
-  const renderQuestionContent = () => {
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+    const paddingToBottom = 20;
+    const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= 
+      contentSize.height - paddingToBottom;
+    setIsScrolledToBottom(isCloseToBottom);
+  };
+
+  const renderQuestion = () => {
+    if (showReadingText && currentTextId) {
+      const text = mockTexts.find(t => t.topicId === currentTextId);
+      if (!text) return null;
+
+      return (
+        <Surface style={[styles.questionCard, styles.fullScreenCard]}>
+          <View style={styles.questionContent}>
+            <Text variant="headlineSmall" style={styles.readingTitle}>
+              {text.title}
+            </Text>
+            <Text variant="bodyLarge" style={styles.readingText}>
+              {text.text}
+            </Text>
+          </View>
+        </Surface>
+      );
+    }
+
     const question = questions[currentQuestion];
     
-    if (question.type === 'audio') {
-      return (
-        <AudioPlayer 
-          ref={audioPlayerRef}
-          audioUrl={question.content}
-          onPlaybackComplete={() => {
-            // Optional: Add any logic you want to execute when audio finishes
-          }}
-        />
-      );
+    switch (question.type) {
+      case 'text':
+        return (
+          <View style={styles.optionsContainer}>
+            <View style={styles.radioWrapper}>
+              <RadioButton.Group 
+                onValueChange={(value) => !selectedAnswer && handleAnswer(parseInt(value))} 
+                value={selectedAnswer?.toString() || ''}
+              >
+                <View style={styles.radioContainer}>
+                  {(question as TextQuestion).options.map((option: string, index: number) => (
+                    <View key={index} style={[
+                      styles.radioItem,
+                      selectedAnswer === index && styles.selectedRadioItem,
+                      selectedAnswer === index && 
+                        (question as TextQuestion).correctAnswerId === index.toString()
+                          ? styles.correctOption 
+                          : selectedAnswer === index 
+                            ? styles.incorrectOption 
+                            : null
+                    ]}>
+                      <RadioButton.Item
+                        label={option}
+                        value={index.toString()}
+                        position="trailing"
+                        labelStyle={[
+                          styles.radioLabel,
+                          selectedAnswer === index && styles.selectedRadioLabel
+                        ]}
+                        style={styles.radioButton}
+                        disabled={selectedAnswer !== null}
+                        theme={{
+                          colors: {
+                            primary: selectedAnswer === index 
+                              ? (question as TextQuestion).correctAnswerId === index.toString()
+                                ? '#60BF92' 
+                                : '#EC221F'
+                              : '#583FB0',
+                            onSurfaceDisabled: selectedAnswer === index 
+                              ? (question as TextQuestion).correctAnswerId === index.toString()
+                                ? '#60BF92' 
+                                : '#EC221F'
+                              : '#583FB0',
+                          }
+                        }}
+                      />
+                    </View>
+                  ))}
+                </View>
+              </RadioButton.Group>
+            </View>
+          </View>
+        );
+      case 'image':
+        return (
+          <View style={styles.optionsContainer}>
+            <Image 
+              source={{ uri: (question as ImageQuestion).imageUrl }} 
+              style={styles.questionImage}
+            />
+            <View style={styles.radioWrapper}>
+              <RadioButton.Group 
+                onValueChange={(value) => !selectedAnswer && handleAnswer(parseInt(value))} 
+                value={selectedAnswer?.toString() || ''}
+              >
+                <View style={styles.radioContainer}>
+                  {(question as ImageQuestion).options.map((option: string, index: number) => (
+                    <View key={index} style={[
+                      styles.radioItem,
+                      selectedAnswer === index && styles.selectedRadioItem,
+                      selectedAnswer === index && 
+                        (question as ImageQuestion).correctAnswerId === index.toString()
+                          ? styles.correctOption 
+                          : selectedAnswer === index 
+                            ? styles.incorrectOption 
+                            : null
+                    ]}>
+                      <RadioButton.Item
+                        label={option}
+                        value={index.toString()}
+                        position="trailing"
+                        labelStyle={[
+                          styles.radioLabel,
+                          selectedAnswer === index && styles.selectedRadioLabel
+                        ]}
+                        style={styles.radioButton}
+                        disabled={selectedAnswer !== null}
+                        theme={{
+                          colors: {
+                            primary: selectedAnswer === index 
+                              ? (question as ImageQuestion).correctAnswerId === index.toString()
+                                ? '#60BF92' 
+                                : '#EC221F'
+                              : '#583FB0',
+                            onSurfaceDisabled: selectedAnswer === index 
+                              ? (question as ImageQuestion).correctAnswerId === index.toString()
+                                ? '#60BF92' 
+                                : '#EC221F'
+                              : '#583FB0',
+                          }
+                        }}
+                      />
+                    </View>
+                  ))}
+                </View>
+              </RadioButton.Group>
+            </View>
+          </View>
+        );
+      case 'audio':
+        return (
+          <View style={styles.optionsContainer}>
+            <View style={styles.audioContainer}>
+              <View style={styles.audioPlayerWrapper}>
+                <AudioPlayer
+                  ref={audioPlayerRef}
+                  audioUrl={(question as AudioQuestion).audioUrl}
+                />
+              </View>
+            </View>
+            <View style={styles.radioWrapper}>
+              <RadioButton.Group 
+                onValueChange={(value) => !selectedAnswer && handleAnswer(parseInt(value))} 
+                value={selectedAnswer?.toString() || ''}
+              >
+                <View style={styles.radioContainer}>
+                  {(question as AudioQuestion).options.map((option: string, index: number) => (
+                    <View key={index} style={[
+                      styles.radioItem,
+                      selectedAnswer === index && styles.selectedRadioItem,
+                      selectedAnswer === index && 
+                        (question as AudioQuestion).correctAnswerId === index.toString()
+                          ? styles.correctOption 
+                          : selectedAnswer === index 
+                            ? styles.incorrectOption 
+                            : null
+                    ]}>
+                      <RadioButton.Item
+                        label={option}
+                        value={index.toString()}
+                        position="trailing"
+                        labelStyle={[
+                          styles.radioLabel,
+                          selectedAnswer === index && styles.selectedRadioLabel
+                        ]}
+                        style={styles.radioButton}
+                        disabled={selectedAnswer !== null}
+                        theme={{
+                          colors: {
+                            primary: selectedAnswer === index 
+                              ? (question as AudioQuestion).correctAnswerId === index.toString()
+                                ? '#60BF92' 
+                                : '#EC221F'
+                              : '#583FB0',
+                            onSurfaceDisabled: selectedAnswer === index 
+                              ? (question as AudioQuestion).correctAnswerId === index.toString()
+                                ? '#60BF92' 
+                                : '#EC221F'
+                              : '#583FB0',
+                          }
+                        }}
+                      />
+                    </View>
+                  ))}
+                </View>
+              </RadioButton.Group>
+            </View>
+          </View>
+        );
+      case 'trueFalse':
+        return (
+          <View style={styles.optionsContainer}>
+            <View style={styles.radioWrapper}>
+              <RadioButton.Group 
+                onValueChange={(value) => !selectedAnswer && handleAnswer(parseInt(value))} 
+                value={selectedAnswer?.toString() || ''}
+              >
+                <View style={styles.radioContainer}>
+                  {['True', 'False'].map((option, index) => (
+                    <View key={index} style={[
+                      styles.radioItem,
+                      selectedAnswer === index && styles.selectedRadioItem
+                    ]}>
+                      <RadioButton.Item
+                        label={option}
+                        value={index.toString()}
+                        position="trailing"
+                        labelStyle={[
+                          styles.radioLabel,
+                          selectedAnswer === index && styles.selectedRadioLabel
+                        ]}
+                        style={[
+                          styles.radioButton,
+                          selectedAnswer === index && 
+                            (question as TrueFalseQuestion).correctAnswer === (index === 0)
+                              ? styles.correctOption 
+                              : styles.incorrectOption
+                        ]}
+                        disabled={selectedAnswer !== null}
+                        theme={{
+                          colors: {
+                            primary: selectedAnswer === index 
+                              ? (question as TrueFalseQuestion).correctAnswer === (index === 0)
+                                ? '#60BF92' 
+                                : '#EC221F'
+                              : '#583FB0',
+                            onSurfaceDisabled: selectedAnswer === index 
+                              ? (question as TrueFalseQuestion).correctAnswer === (index === 0)
+                                ? '#60BF92' 
+                                : '#EC221F'
+                              : '#583FB0',
+                          }
+                        }}
+                      />
+                    </View>
+                  ))}
+                </View>
+              </RadioButton.Group>
+            </View>
+          </View>
+        );
+      default:
+        return null;
     }
-
-    if (question.content.startsWith('http')) {
-      return (
-        <Image 
-          source={{ uri: question.content }}
-          style={styles.questionImage}
-          resizeMode="contain"
-        />
-      );
-    }
-
-    return (
-      <Text variant="headlineSmall" style={styles.questionText}>
-        {question.content}
-      </Text>
-    );
   };
 
   return (
     <View style={styles.container}>
       {isLoading ? (
-        <Surface style={styles.loadingContainer}>
+        <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text variant="bodyLarge" style={styles.loadingText}>
-            Loading questions...
-          </Text>
-        </Surface>
+        </View>
       ) : questions.length === 0 ? (
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text variant="headlineMedium">No questions available</Text>
-            <Button mode="contained" onPress={() => navigation.goBack()} style={styles.button}>
-              Go Back
-            </Button>
-          </Card.Content>
-        </Card>
+        <View style={styles.emptyContainer}>
+          <Text variant="headlineMedium">No questions available</Text>
+        </View>
       ) : (
         <View style={styles.mainContainer}>
-          {/* Top Bar */}
           <View style={styles.topBar}>
-            <View style={styles.header}>
-              <IconButton
-                icon="chevron-left"
-                iconColor="#583FB0"
-                size={24}
-                onPress={() => navigation.goBack()}
-              />
-              <Text style={styles.backText}>Previous</Text>
-            </View>
-            <Text variant="titleMedium" style={styles.progressText}>
-              {currentQuestion + 1}/{questions.length}
-            </Text>
+            {!showReadingText && (
+              <View style={styles.progressContainer}>
+                <Text variant="titleMedium" style={styles.progressText}>
+                  Question {currentQuestion + 1} of {questions.length}
+                </Text>
+                <View style={styles.progressBar}>
+                  <View 
+                    style={[
+                      styles.progressFill, 
+                      { width: `${((currentQuestion + 1) / questions.length) * 100}%` }
+                    ]} 
+                  />
+                </View>
+              </View>
+            )}
           </View>
 
-          {/* Top Half - Question */}
-          <View style={styles.topHalf}>
-            <Surface style={styles.questionCard}>
-              <View style={styles.questionContent}>
-                {renderQuestionContent()}
-              </View>
-            </Surface>
-          </View>
-
-          {/* Bottom Half - Options and Next Button */}
-          <View style={styles.bottomHalf}>
-            <View style={styles.optionsContainer}>
-              <View style={styles.radioWrapper}>
-                <RadioButton.Group onValueChange={(value) => !selectedAnswer && handleAnswer(parseInt(value))} value={selectedAnswer?.toString() || ''}>
-                  <View style={styles.radioContainer}>
-                    {questions[currentQuestion].options.map((option, index) => (
-                      <View key={index} style={[
-                        styles.radioItem,
-                        selectedAnswer === index && styles.selectedRadioItem
-                      ]}>
-                        <RadioButton.Item
-                          label={option}
-                          value={index.toString()}
-                          position="trailing"
-                          labelStyle={[
-                            styles.radioLabel,
-                            selectedAnswer === index && styles.selectedRadioLabel
-                          ]}
-                          style={[
-                            styles.radioButton,
-                            selectedAnswer === index && 
-                              (questions[currentQuestion].correctAnswerId === index.toString() 
-                                ? styles.correctOption 
-                                : styles.incorrectOption)
-                          ]}
-                          disabled={selectedAnswer !== null}
-                          theme={{
-                            colors: {
-                              primary: selectedAnswer === index 
-                                ? (questions[currentQuestion].correctAnswerId === index.toString() 
-                                  ? '#60BF92' 
-                                  : '#EC221F')
-                                : '#583FB0',
-                              onSurfaceDisabled: selectedAnswer === index 
-                                ? (questions[currentQuestion].correctAnswerId === index.toString() 
-                                  ? '#60BF92' 
-                                  : '#EC221F')
-                                : '#583FB0',
-                            }
-                          }}
-                        />
-                      </View>
-                    ))}
-                  </View>
-                </RadioButton.Group>
-              </View>
-            </View>
-
+          <View style={styles.contentContainer}>
+            {!showReadingText ? (
+              <>
+                <View style={styles.topHalf}>
+                  <Surface style={styles.questionCard}>
+                    <View style={styles.questionContent}>
+                      <Text style={styles.questionText}>
+                        {questions[currentQuestion].type === 'trueFalse' 
+                          ? (questions[currentQuestion] as TrueFalseQuestion).statement
+                          : (questions[currentQuestion] as TextQuestion | ImageQuestion | AudioQuestion).question}
+                      </Text>
+                    </View>
+                  </Surface>
+                </View>
+                <View style={styles.bottomHalf}>
+                  {renderQuestion()}
+                </View>
+              </>
+            ) : (
+              renderQuestion()
+            )}
             <CustomButton 
               variant="primary"
               onPress={handleNext}
               style={styles.nextButton}
-              disabled={selectedAnswer === null}
+              disabled={selectedAnswer === null && !showReadingText}
             >
-              {currentQuestion === questions.length - 1 ? 'Finish' : 'Next'}
+              {showReadingText ? 'Continue' : 
+                currentQuestion === questions.length - 1 ? 'Finish' : 'Next'}
             </CustomButton>
           </View>
         </View>
@@ -414,19 +615,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 4,
   },
-  header: {
+  progressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 8,
-  },
-  backText: {
-    color: '#583FB0',
-    fontSize: 16,
-    fontFamily: 'BalooBhaina2-Regular',
   },
   progressText: {
     color: '#583FB0',
     fontWeight: 'bold',
+  },
+  progressBar: {
+    height: 12,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 6,
+    flex: 1,
+    marginHorizontal: 8,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: theme.colors.primary,
+    borderRadius: 6,
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 16,
   },
   topHalf: {
     flex: 1,
@@ -434,7 +645,7 @@ const styles = StyleSheet.create({
   },
   bottomHalf: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
   },
   questionCard: {
     flex: 1,
@@ -449,55 +660,12 @@ const styles = StyleSheet.create({
     },
     shadowRadius: 50,
     elevation: 8,
-    marginVertical: 48,
   },
   questionContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  optionsContainer: {
-    flex: 1,
-  },
-  radioWrapper: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  radioContainer: {
-    gap: 8,
-  },
-  radioItem: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: 20,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.outline,
-  },
-  radioButton: {
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  radioLabel: {
-    fontSize: 20,
-    color: '#000000',
-    fontWeight: '600',
-  },
-  selectedRadioItem: {
-    borderWidth: 0,
-    borderColor: 'transparent',
-  },
-  selectedRadioLabel: {
-    color: '#000000',
-  },
-  correctOption: {
-    backgroundColor: '#E1FFC3',
-    borderColor: '#60BF92',
-    borderWidth: 2,
-  },
-  incorrectOption: {
-    backgroundColor: '#FBDCDC',
-    borderColor: '#EC221F',
-    borderWidth: 2,
+    width: '100%',
   },
   nextButton: {
     marginTop: 16,
@@ -518,38 +686,104 @@ const styles = StyleSheet.create({
     shadowRadius: 50,
     elevation: 8,
   },
-  loadingText: {
-    marginTop: 8,
-  },
-  card: {
+  emptyContainer: {
     flex: 1,
-    margin: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
-    shadowColor: '#000000',
-    shadowOpacity: 0.15,
-    shadowOffset: {
-      width: 0,
-      height: 20,
-    },
-    shadowRadius: 50,
-    elevation: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  button: {
+  readingContainer: {
+    flex: 1,
+  },
+  readingTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: theme.colors.onSurface,
+    marginBottom: 16,
+  },
+  readingText: {
+    fontSize: 18,
+    lineHeight: 28,
+    color: theme.colors.onSurface,
+  },
+  readingButtonContainer: {
     marginTop: 16,
+    paddingHorizontal: 16,
+  },
+  readingContinueButton: {
+    width: '100%',
+  },
+  fullScreenContent: {
+    padding: 0,
+  },
+  fullScreenCard: {
+    flex: 1,
+    margin: 0,
+    borderRadius: 0,
+  },
+  optionsContainer: {
+    flex: 1,
+    marginBottom: 16,
+  },
+  radioWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  radioContainer: {
+    gap: 8,
+  },
+  radioItem: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 20,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.outline,
+  },
+  radioButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  radioLabel: {
+    fontSize: 16,
+    color: '#000000',
+    fontWeight: '500',
+    marginLeft: 8,
+  },
+  selectedRadioItem: {
+    borderWidth: 2,
+  },
+  selectedRadioLabel: {
+    color: '#000000',
+    fontWeight: '600',
+  },
+  correctOption: {
+    backgroundColor: '#E1FFC3',
+    borderColor: '#60BF92',
+  },
+  incorrectOption: {
+    backgroundColor: '#FBDCDC',
+    borderColor: '#EC221F',
+  },
+  questionText: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#000000',
+    textAlign: 'center',
+    paddingHorizontal: 16,
   },
   questionImage: {
     width: '100%',
     height: '100%',
     resizeMode: 'contain',
   },
-  questionText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: theme.colors.onSurface,
-    marginBottom: 16,
-    textAlign: 'center',
+  audioContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  audioPlayerWrapper: {
+    position: 'absolute',
+    top: '-40%',
+    zIndex: 1,
   },
 });
 

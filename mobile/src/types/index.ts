@@ -2,21 +2,104 @@
  * Represents a quiz question
  * @interface Question
  * @property {string} QuestionId - Unique identifier for the question
- * @property {'text' | 'image'} type - Type of question (text or image based)
+ * @property {'text' | 'image' | 'audio' | 'trueFalse' | 'reading'} type - Type of question (text, image, audio, true/false, or reading)
  * @property {string} content - Question content or image URL
+ * @property {string} questionText - Text content of the question
  * @property {string[]} options - Array of possible answers
  * @property {string} correctAnswerId - ID of the correct answer
  * @property {number} points - Points awarded for correct answer
  * @property {string} topicId - ID of the topic this question belongs to
+ * @property {string} topic - Topic of the question
+ * @property {string} title - Title of the reading question
+ * @property {string} text - Text content of the reading question
  */
+
+// Base question interface
+export interface BaseQuestion {
+  questionId: string;
+  type: QuestionType;
+  points: number;
+  topicId: string;
+}
+
+// Text question
+export interface TextQuestion extends BaseQuestion {
+  type: 'text';
+  question: string;
+  options: string[];
+  correctAnswerId: string;
+}
+
+// Image question
+export interface ImageQuestion extends BaseQuestion {
+  type: 'image';
+  imageUrl: string;
+  question: string;
+  options: string[];
+  correctAnswerId: string;
+}
+
+// Audio question
+export interface AudioQuestion extends BaseQuestion {
+  type: 'audio';
+  audioUrl: string;
+  question: string;
+  options: string[];
+  correctAnswerId: string;
+}
+
+// Reading question
+export interface ReadingQuestion extends BaseQuestion {
+  type: 'reading';
+  title: string;
+  text: string;
+  questions: TrueFalseQuestion[];
+}
+
+// True/False question
+export interface TrueFalseQuestion extends BaseQuestion {
+  type: 'trueFalse';
+  statement: string;
+  correctAnswer: boolean;
+}
+
+export type QuestionType = 'text' | 'image' | 'audio' | 'reading' | 'trueFalse';
+
 export interface Question {
   questionId: string;
   type: 'text' | 'image' | 'audio' | 'trueFalse';
-  content: string;
-  options: string[];
-  correctAnswerId: string;
   points: number;
   topicId: string;
+  textId?: string;  // Optional textId for reading questions
+}
+
+export interface TextQuestion extends Question {
+  type: 'text';
+  question: string;
+  options: string[];
+  correctAnswerId: string;
+}
+
+export interface ImageQuestion extends Question {
+  type: 'image';
+  imageUrl: string;
+  question: string;
+  options: string[];
+  correctAnswerId: string;
+}
+
+export interface AudioQuestion extends Question {
+  type: 'audio';
+  audioUrl: string;
+  question: string;
+  options: string[];
+  correctAnswerId: string;
+}
+
+export interface TrueFalseQuestion extends Question {
+  type: 'trueFalse';
+  statement: string;
+  correctAnswer: boolean;
 }
 
 export interface ReadingText {
