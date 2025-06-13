@@ -1,307 +1,422 @@
-import { Question, TextQuestion, ImageQuestion, AudioQuestion, ReadingQuestion, TrueFalseQuestion } from '../types';
+import { Question } from '../types';
 import { mockTexts } from './mockTexts';
 
 export const mockQuestions: Question[] = [
   // Fruits & Vegetables
   {
+    id: '1',
     questionId: '1',
-    type: 'text',
-    question: 'What is the English translation of "Apfel"?',
+    questionText: 'What is the English translation of "Apfel"?',
     options: ['Pear', 'Apple', 'Orange', 'Banana'],
     correctAnswerId: '1',
     points: 10,
-    topicId: 'w1'
-  } as TextQuestion,
+    topicId: 'w1',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: '2',
     questionId: '2',
-    type: 'image',
+    questionText: 'What is this?',
     imageUrl: 'https://res.cloudinary.com/djgtzqgut/image/upload/v1738692039/tomato-simple_dbgb9b.jpg',
-    question: 'What is this?',
     options: ['Apple', 'Clemintine', 'Tomato', 'Carrot'],
     correctAnswerId: '2',
     points: 10,
-    topicId: 'w1'
-  } as ImageQuestion,
+    topicId: 'w1',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: '3',
     questionId: '3',
-    type: 'audio',
+    questionText: 'Was kauft Lisa?',
     audioUrl: 'https://res.cloudinary.com/djgtzqgut/video/upload/v1738913375/shopping_b5h2ax.mp3',
-    question: 'Was kauft Lisa?',
     options: ['Lisa kauft Käse', 'Lisa kauft Milch', 'Lisa kauft Brot', 'Lisa kauft Eier'],
     correctAnswerId: '0',
     points: 10,
-    topicId: 'l1'
-  } as AudioQuestion,
+    topicId: 'l1',
+    categoryId: 'listening',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: '4',
+    questionId: '4',
+    questionText: 'Was sucht der Mann?',
+    audioUrl: 'https://res.cloudinary.com/djgtzqgut/video/upload/v1738913375/askdirection_hd0yg8.mp3',
+    options: ['Der Mann sucht nach Bibliothek', 'Man ist 42', 'Die Frau sucht nach Apotheke', 'Die Frau ist 23'],
+    correctAnswerId: '0',
+    points: 10,
+    topicId: 'l1',
+    categoryId: 'listening',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
 
   // Grammar - Articles (g1)
   {
+    id: 'g1',
     questionId: 'g1',
-    type: 'text',
-    question: 'Which article is correct? "___ Buch ist neu."',
+    questionText: 'Which article is correct? "___ Buch ist neu."',
     options: ['Der', 'Die', 'Das', 'Den'],
     correctAnswerId: '2',
     points: 10,
-    topicId: 'g1'
-  } as TextQuestion,
+    topicId: 'g1',
+    categoryId: 'grammar',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'g2',
     questionId: 'g2',
-    type: 'text',
-    question: 'Which article is correct? "___ Frau ist jung."',
+    questionText: 'Which article is correct? "___ Frau ist jung."',
     options: ['Der', 'Die', 'Das', 'Den'],
     correctAnswerId: '1',
     points: 10,
-    topicId: 'g1'
-  } as TextQuestion,
+    topicId: 'g1',
+    categoryId: 'grammar',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'g3',
     questionId: 'g3',
-    type: 'text',
-    question: 'Which article is correct? "___ Mann ist groß."',
+    questionText: 'Which article is correct? "___ Mann ist groß."',
     options: ['Der', 'Die', 'Das', 'Den'],
     correctAnswerId: '0',
     points: 10,
-    topicId: 'g1'
-  } as TextQuestion,
+    topicId: 'g1',
+    categoryId: 'grammar',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
 
   // Grammar - Present Tense (g2)
   {
+    id: 'g4',
     questionId: 'g4',
-    type: 'text',
-    question: 'What is the correct form? "Ich ___ Deutsch."',
+    questionText: 'What is the correct form? "Ich ___ Deutsch."',
     options: ['lerne', 'lernst', 'lernt', 'lernen'],
     correctAnswerId: '0',
     points: 10,
-    topicId: 'g2'
-  } as TextQuestion,
+    topicId: 'g2',
+    categoryId: 'grammar',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'g5',
     questionId: 'g5',
-    type: 'text',
-    question: 'What is the correct form? "Du ___ gut."',
+    questionText: 'What is the correct form? "Du ___ gut."',
     options: ['spiele', 'spielst', 'spielt', 'spielen'],
     correctAnswerId: '1',
     points: 10,
-    topicId: 'g2'
-  } as TextQuestion,
+    topicId: 'g2',
+    categoryId: 'grammar',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'g6',
     questionId: 'g6',
-    type: 'text',
-    question: 'What is the correct form? "Er ___ Kaffee."',
+    questionText: 'What is the correct form? "Er ___ Kaffee."',
     options: ['trinke', 'trinkst', 'trinkt', 'trinken'],
     correctAnswerId: '2',
     points: 10,
-    topicId: 'g2'
-  } as TextQuestion,
+    topicId: 'g2',
+    categoryId: 'grammar',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
 
   // Grammar - Past Tense (g3)
   {
+    id: 'g7',
     questionId: 'g7',
-    type: 'text',
-    question: 'What is the correct past tense? "Ich ___ gestern."',
+    questionText: 'What is the correct past tense? "Ich ___ gestern."',
     options: ['gehe', 'ging', 'gegangen', 'geht'],
     correctAnswerId: '1',
     points: 10,
-    topicId: 'g3'
-  } as TextQuestion,
+    topicId: 'g3',
+    categoryId: 'grammar',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'g8',
     questionId: 'g8',
-    type: 'text',
-    question: 'What is the correct past tense? "Wir ___ nach Hause."',
+    questionText: 'What is the correct past tense? "Wir ___ nach Hause."',
     options: ['fahren', 'fuhren', 'gefahren', 'fahrt'],
     correctAnswerId: '1',
     points: 10,
-    topicId: 'g3'
-  } as TextQuestion,
+    topicId: 'g3',
+    categoryId: 'grammar',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'g9',
     questionId: 'g9',
-    type: 'text',
-    question: 'What is the correct past tense? "Sie ___ das Buch."',
+    questionText: 'What is the correct past tense? "Sie ___ das Buch."',
     options: ['lese', 'las', 'gelesen', 'liest'],
     correctAnswerId: '1',
     points: 10,
-    topicId: 'g3'
-  } as TextQuestion,
+    topicId: 'g3',
+    categoryId: 'grammar',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
 
   // Words - Fruit & Veggies (w1)
   {
+    id: 'w3',
     questionId: 'w3',
-    type: 'text',
-    question: 'What is the English translation of "Karotte"?',
+    questionText: 'What is the English translation of "Karotte"?',
     options: ['Potato', 'Carrot', 'Cucumber', 'Pepper'],
     correctAnswerId: '1',
     points: 10,
-    topicId: 'w1'
-  } as TextQuestion,
+    topicId: 'w1',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
 
   // Words - Fashion (w2)
   {
+    id: 'w4',
     questionId: 'w4',
-    type: 'text',
-    question: 'What is the English translation of "Kleid"?',
+    questionText: 'What is the English translation of "Kleid"?',
     options: ['Shirt', 'Dress', 'Pants', 'Shoes'],
     correctAnswerId: '1',
     points: 10,
-    topicId: 'w2'
-  } as TextQuestion,
+    topicId: 'w2',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'w5',
     questionId: 'w5',
-    type: 'text',
-    question: 'What is the English translation of "Hose"?',
+    questionText: 'What is the English translation of "Hose"?',
     options: ['Shirt', 'Dress', 'Pants', 'Shoes'],
     correctAnswerId: '2',
     points: 10,
-    topicId: 'w2'
-  } as TextQuestion,
+    topicId: 'w2',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'w6',
     questionId: 'w6',
-    type: 'text',
-    question: 'What is the English translation of "Schuhe"?',
+    questionText: 'What is the English translation of "Schuhe"?',
     options: ['Shirt', 'Dress', 'Pants', 'Shoes'],
     correctAnswerId: '3',
     points: 10,
-    topicId: 'w2'
-  } as TextQuestion,
+    topicId: 'w2',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
 
   // Words - Family & Friends (w3)
   {
+    id: 'w7',
     questionId: 'w7',
-    type: 'text',
-    question: 'What is the English translation of "Mutter"?',
+    questionText: 'What is the English translation of "Mutter"?',
     options: ['Father', 'Mother', 'Sister', 'Brother'],
     correctAnswerId: '1',
     points: 10,
-    topicId: 'w3'
-  } as TextQuestion,
+    topicId: 'w3',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'w8',
     questionId: 'w8',
-    type: 'text',
-    question: 'What is the English translation of "Vater"?',
+    questionText: 'What is the English translation of "Vater"?',
     options: ['Father', 'Mother', 'Sister', 'Brother'],
     correctAnswerId: '0',
     points: 10,
-    topicId: 'w3'
-  } as TextQuestion,
+    topicId: 'w3',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'w9',
     questionId: 'w9',
-    type: 'text',
-    question: 'What is the English translation of "Freund"?',
+    questionText: 'What is the English translation of "Freund"?',
     options: ['Friend', 'Enemy', 'Neighbor', 'Colleague'],
     correctAnswerId: '0',
     points: 10,
-    topicId: 'w3'
-  } as TextQuestion,
+    topicId: 'w3',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
 
   // Words - Travel (w4)
   {
+    id: 'w10',
     questionId: 'w10',
-    type: 'text',
-    question: 'What is the English translation of "Reise"?',
+    questionText: 'What is the English translation of "Reise"?',
     options: ['Stay', 'Travel', 'Visit', 'Return'],
     correctAnswerId: '1',
     points: 10,
-    topicId: 'w4'
-  } as TextQuestion,
+    topicId: 'w4',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'w11',
     questionId: 'w11',
-    type: 'text',
-    question: 'What is the English translation of "Flughafen"?',
+    questionText: 'What is the English translation of "Flughafen"?',
     options: ['Train Station', 'Bus Stop', 'Airport', 'Harbor'],
     correctAnswerId: '2',
     points: 10,
-    topicId: 'w4'
-  } as TextQuestion,
+    topicId: 'w4',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'w12',
     questionId: 'w12',
-    type: 'text',
-    question: 'What is the English translation of "Zug"?',
+    questionText: 'What is the English translation of "Zug"?',
     options: ['Bus', 'Car', 'Train', 'Plane'],
     correctAnswerId: '2',
     points: 10,
-    topicId: 'w4'
-  } as TextQuestion,
+    topicId: 'w4',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
 
   // Words - Basics (w5)
   {
+    id: 'w13',
     questionId: 'w13',
-    type: 'text',
-    question: 'What is the English translation of "Hallo"?',
+    questionText: 'What is the English translation of "Hallo"?',
     options: ['Goodbye', 'Hello', 'Thank you', 'Please'],
     correctAnswerId: '1',
     points: 10,
-    topicId: 'w5'
-  } as TextQuestion,
+    topicId: 'w5',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'w14',
     questionId: 'w14',
-    type: 'text',
-    question: 'What is the English translation of "Danke"?',
+    questionText: 'What is the English translation of "Danke"?',
     options: ['Goodbye', 'Hello', 'Thank you', 'Please'],
     correctAnswerId: '2',
     points: 10,
-    topicId: 'w5'
-  } as TextQuestion,
+    topicId: 'w5',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'w15',
     questionId: 'w15',
-    type: 'text',
-    question: 'What is the English translation of "Bitte"?',
+    questionText: 'What is the English translation of "Bitte"?',
     options: ['Goodbye', 'Hello', 'Thank you', 'Please'],
     correctAnswerId: '3',
     points: 10,
-    topicId: 'w5'
-  } as TextQuestion,
+    topicId: 'w5',
+    categoryId: 'vocabulary',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
 
-  // Reading Questions (now as separate true/false questions)
+  // Reading Questions
   {
+    id: 'rq1',
     questionId: 'rq1',
-    type: 'trueFalse',
-    statement: 'Lisa kauft Käse im Supermarkt.',
-    correctAnswer: false,
+    questionText: 'Lisa kauft Käse im Supermarkt.',
+    options: ['True', 'False'],
+    correctAnswerId: '1',
     points: 5,
     topicId: 'r1',
-    textId: 'r1'  // Reference to the reading text
-  } as TrueFalseQuestion,
+    categoryId: 'reading',
+    readingTextId: 'r1',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'rq2',
     questionId: 'rq2',
-    type: 'trueFalse',
-    statement: 'Lisa kauft Brot und Milch.',
-    correctAnswer: true,
+    questionText: 'Lisa kauft Brot und Milch.',
+    options: ['True', 'False'],
+    correctAnswerId: '0',
     points: 5,
     topicId: 'r1',
-    textId: 'r1'  // Reference to the reading text
-  } as TrueFalseQuestion,
+    categoryId: 'reading',
+    readingTextId: 'r1',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'rq3',
     questionId: 'rq3',
-    type: 'trueFalse',
-    statement: 'Anna wohnt in München.',
-    correctAnswer: false,
+    questionText: 'Anna wohnt in München.',
+    options: ['True', 'False'],
+    correctAnswerId: '1',
     points: 5,
     topicId: 'r2',
-    textId: 'r2'
-  } as TrueFalseQuestion,
+    categoryId: 'reading',
+    readingTextId: 'r2',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
   {
+    id: 'rq4',
     questionId: 'rq4',
-    type: 'trueFalse',
-    statement: 'Anna geht nach der Arbeit spazieren.',
-    correctAnswer: true,
+    questionText: 'Anna geht nach der Arbeit spazieren.',
+    options: ['True', 'False'],
+    correctAnswerId: '0',
     points: 5,
     topicId: 'r2',
-    textId: 'r2'
-  } as TrueFalseQuestion
+    categoryId: 'reading',
+    readingTextId: 'r2',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
 ];
 
 export const QUESTIONS_PER_QUIZ = 10;
 
 export function getQuestionsByTopic(topicId: string): Question[] {
-  return mockQuestions.filter(q => q.topicId === topicId);
+  const questions = mockQuestions.filter(q => q.topicId === topicId);
+  console.log(`Found ${questions.length} questions for topic ${topicId}:`, questions);
+  return questions;
 }
 
 export function getRandomQuestions(topicId: string): Question[] {
+  console.log('Getting questions for topic:', topicId);
+  
   // For reading topics, we need to group questions by textId
   if (topicId.startsWith('r')) {
     const topicQuestions = getQuestionsByTopic(topicId);
-    const textId = topicQuestions[0]?.textId;
+    const textId = topicQuestions[0]?.readingTextId;
     if (!textId) return [];
 
     // Get all questions for this text
-    const readingQuestions = topicQuestions.filter(q => q.textId === textId);
+    const readingQuestions = topicQuestions.filter(q => q.readingTextId === textId);
     return readingQuestions;
+  }
+
+  // For audio topics, return all questions
+  if (topicId.startsWith('l')) {
+    const audioQuestions = getQuestionsByTopic(topicId);
+    console.log('Found audio questions:', audioQuestions);
+    return audioQuestions;
   }
 
   // For other topics, return regular questions

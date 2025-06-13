@@ -1,4 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
+import type { RootState } from './index';
+import type { Question } from '../types';
 
 interface QuizState {
   currentTopicId: string | null;
@@ -14,6 +16,13 @@ interface QuizState {
     date: string;
     timeSpent: number;
   }[];
+  activeQuiz: {
+    currentQuestion: number;
+    score: number;
+    selectedAnswer: number | null;
+    currentTextId: string | null;
+    showReadingText: boolean;
+  } | null;
 }
 
 const initialState: QuizState = {
@@ -21,6 +30,7 @@ const initialState: QuizState = {
   wrongQuestionIds: [],
   dailyStats: [],
   bestAttempts: [],
+  activeQuiz: null,
 };
 
 export const quizSlice = createSlice({
@@ -38,6 +48,12 @@ export const quizSlice = createSlice({
     },
     updateDailyStats: (state, action: PayloadAction<{ timeSpent: number; questionsAnswered: number }>) => {
       const today = new Date().toISOString().split('T')[0];
+      
+      // Ensure dailyStats is an array
+      if (!Array.isArray(state.dailyStats)) {
+        state.dailyStats = [];
+      }
+      
       const existingDayIndex = state.dailyStats.findIndex(stat => stat.date === today);
       
       if (existingDayIndex >= 0) {
@@ -76,6 +92,41 @@ export const quizSlice = createSlice({
         });
       }
     },
+    // New actions for active quiz state
+    startQuiz: (state) => {
+      state.activeQuiz = {
+        currentQuestion: 0,
+        score: 0,
+        selectedAnswer: null,
+        currentTextId: null,
+        showReadingText: false,
+      };
+    },
+    selectAnswer: (state, action: PayloadAction<number | null>) => {
+      if (state.activeQuiz) {
+        state.activeQuiz.selectedAnswer = action.payload;
+      }
+    },
+    nextQuestion: (state) => {
+      if (state.activeQuiz) {
+        state.activeQuiz.currentQuestion += 1;
+        state.activeQuiz.selectedAnswer = null;
+      }
+    },
+    updateScore: (state, action: PayloadAction<number>) => {
+      if (state.activeQuiz) {
+        state.activeQuiz.score = action.payload;
+      }
+    },
+    setReadingText: (state, action: PayloadAction<{ textId: string; show: boolean }>) => {
+      if (state.activeQuiz) {
+        state.activeQuiz.currentTextId = action.payload.textId;
+        state.activeQuiz.showReadingText = action.payload.show;
+      }
+    },
+    endQuiz: (state) => {
+      state.activeQuiz = null;
+    },
   },
 });
 
@@ -84,5 +135,44 @@ export const {
   addWrongQuestion, 
   clearWrongQuestions,
   updateDailyStats,
-  updateBestAttempt 
+  updateBestAttempt,
+  startQuiz,
+  selectAnswer,
+  nextQuestion,
+  updateScore,
+  setReadingText,
+  endQuiz,
 } = quizSlice.actions; 
+
+// Selectors
+const selectQuizState = (state: RootState) => state.quiz;
+
+export const selectCurrentTopicId = createSelector(
+  [selectQuizState],
+  (quizState) => quizState.currentTopicId
+);
+
+export const selectWrongQuestionIds = createSelector(
+  [selectQuizState],
+  (quizState) => quizState.wrongQuestionIds
+);
+
+export const selectDailyStats = createSelector(
+  [selectQuizState],
+  (quizState) => quizState.dailyStats
+);
+
+export const selectBestAttempts = createSelector(
+  [selectQuizState],
+  (quizState) => quizState.bestAttempts
+);
+
+export const selectBestAttemptByTopic = createSelector(
+  [selectBestAttempts, (_state: RootState, topicId: string) => topicId],
+  (bestAttempts, topicId) => bestAttempts.find(attempt => attempt.topicId === topicId)
+);
+
+export const selectActiveQuiz = createSelector(
+  [selectQuizState],
+  (quizState) => quizState.activeQuiz
+); 

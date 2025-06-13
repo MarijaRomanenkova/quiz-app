@@ -1,135 +1,118 @@
-import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
-import { Text } from 'react-native-paper';
+import React, { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { theme } from '../../theme';
 import { Audio } from 'expo-av';
+import { theme } from '../../theme';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
 
-type AudioPlayerProps = {
+interface AudioPlayerProps {
   audioUrl: string;
-  onPlaybackComplete?: () => void;
-};
+}
 
-export type AudioPlayerRef = {
-  stop: () => Promise<void>;
-};
+export interface AudioPlayerRef {
+  stop: () => void;
+}
 
-export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audioUrl, onPlaybackComplete }, ref) => {
+export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audioUrl }, ref) => {
   const [sound, setSound] = React.useState<Audio.Sound>();
   const [isPlaying, setIsPlaying] = React.useState(false);
-  const [duration, setDuration] = React.useState(0);
-  const [position, setPosition] = React.useState(0);
-  const progressAnim = useRef(new Animated.Value(0)).current;
-  const previousUrlRef = useRef(audioUrl);
+  const [progress, setProgress] = useState(0);
+
+  const radius = 50;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference * (1 - progress);
 
   useImperativeHandle(ref, () => ({
     stop: async () => {
-      if (sound && isPlaying) {
+      if (sound) {
         await sound.stopAsync();
         setIsPlaying(false);
+        setProgress(0);
       }
     }
   }));
 
-  // Cleanup sound when component unmounts or URL changes
-  useEffect(() => {
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [sound]);
-
-  // Handle URL changes
-  useEffect(() => {
-    if (previousUrlRef.current !== audioUrl) {
-      if (sound) {
-        sound.unloadAsync();
-        setSound(undefined);
-        setIsPlaying(false);
-      }
-      previousUrlRef.current = audioUrl;
-    }
-  }, [audioUrl]);
-
   const playSound = async () => {
     if (sound) {
-      if (isPlaying) {
-        await sound.pauseAsync();
-        setIsPlaying(false);
-      } else {
-        await sound.playAsync();
-        setIsPlaying(true);
-      }
-      return;
+      await sound.unloadAsync();
     }
 
     try {
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: audioUrl },
-        { shouldPlay: true },
-        onPlaybackStatusUpdate
+        { shouldPlay: true }
       );
       setSound(newSound);
       setIsPlaying(true);
+
+      newSound.setOnPlaybackStatusUpdate((status) => {
+        if (status && 'didJustFinish' in status && status.didJustFinish) {
+          setIsPlaying(false);
+          setProgress(0);
+        } else if (status && 'positionMillis' in status && 'durationMillis' in status && status.durationMillis) {
+          setProgress(status.positionMillis / status.durationMillis);
+        }
+      });
+
+      await newSound.playAsync();
     } catch (error) {
       console.error('Error playing sound:', error);
     }
   };
 
-  const onPlaybackStatusUpdate = (status: any) => {
-    if (status.isLoaded) {
-      setDuration(status.durationMillis || 0);
-      setPosition(status.positionMillis || 0);
-      
-      // Update progress animation
-      const progress = status.positionMillis / status.durationMillis;
-      progressAnim.setValue(progress);
-
-      if (status.didJustFinish) {
-        setIsPlaying(false);
-        onPlaybackComplete?.();
-      }
+  const stopSound = async () => {
+    if (sound) {
+      await sound.stopAsync();
+      setIsPlaying(false);
+      setProgress(0);
     }
   };
 
-  const circumference = 2 * Math.PI * 40; // radius = 40
-  const strokeDashoffset = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [circumference, 0],
-  });
+  React.useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
 
   return (
     <View style={styles.container}>
       <View style={styles.playerContainer}>
-        <Svg width={100} height={100} style={styles.svg}>
+        <Svg width={radius * 2} height={radius * 2} style={styles.svg}>
           {/* Background circle */}
           <SvgCircle
-            cx={50}
-            cy={50}
-            r={40}
+            cx={radius}
+            cy={radius}
+            r={radius - 4}
             stroke="#E6E0F8"
-            strokeWidth={12}
+            strokeWidth={8}
             fill="none"
           />
           {/* Progress circle */}
-          <AnimatedCircle
-            cx={50}
-            cy={50}
-            r={40}
+          <SvgCircle
+            cx={radius}
+            cy={radius}
+            r={radius - 4}
             stroke="#583FB0"
-            strokeWidth={12}
+            strokeWidth={8}
             fill="none"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
-            transform={`rotate(-90, 50, 50)`}
+            transform={`rotate(-90, ${radius}, ${radius})`}
+          />
+          {/* White center circle */}
+          <SvgCircle
+            cx={radius}
+            cy={radius}
+            r={radius - 8}
+            fill="white"
           />
         </Svg>
         <TouchableOpacity
           style={styles.playButton}
-          onPress={playSound}
+          onPress={isPlaying ? stopSound : playSound}
         >
           <MaterialCommunityIcons
             name={isPlaying ? 'pause' : 'play'}
@@ -142,13 +125,10 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audio
   );
 });
 
-const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
-
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
   },
   playerContainer: {
     width: 100,
@@ -160,11 +140,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   playButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: theme.colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-  },
+  }
 }); 

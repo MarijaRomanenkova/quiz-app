@@ -1,5 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { Question } from '../types';
+import type { RootState } from './index';
 
 interface WrongQuestionsState {
   wrongQuestions: Question[];
@@ -21,6 +22,14 @@ const wrongQuestionsSlice = createSlice({
     },
   },
 });
+
+// Selectors
+export const selectWrongQuestions = (state: RootState) => state.wrongQuestions.wrongQuestions;
+
+export const selectWrongQuestionsByTopic = createSelector(
+  [selectWrongQuestions, (_state: RootState, topicId: string) => topicId],
+  (questions, topicId) => questions.filter(q => q.topicId === topicId)
+);
 
 export const { addWrongQuestion, clearWrongQuestions } = wrongQuestionsSlice.actions;
 export default wrongQuestionsSlice.reducer; 

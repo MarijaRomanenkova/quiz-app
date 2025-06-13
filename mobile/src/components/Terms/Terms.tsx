@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import { theme } from '../../theme';
 
-export default function Terms() {
+export function Terms() {
   return (
     <Surface style={styles.container}>
       <ScrollView style={styles.scroll}>

@@ -51,7 +51,6 @@ export const ResultsScreen = () => {
         <View style={styles.buttonContainer}>
           {wrongQuestions.length > 0 && (
             <>
-  
               <CustomButton
                 variant="primary"
                 onPress={handleRepeatWrongQuestions}

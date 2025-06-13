@@ -14,99 +14,59 @@
  * @property {string} text - Text content of the reading question
  */
 
-// Base question interface
-export interface BaseQuestion {
-  questionId: string;
-  type: QuestionType;
-  points: number;
-  topicId: string;
-}
-
-// Text question
-export interface TextQuestion extends BaseQuestion {
-  type: 'text';
-  question: string;
-  options: string[];
-  correctAnswerId: string;
-}
-
-// Image question
-export interface ImageQuestion extends BaseQuestion {
-  type: 'image';
-  imageUrl: string;
-  question: string;
-  options: string[];
-  correctAnswerId: string;
-}
-
-// Audio question
-export interface AudioQuestion extends BaseQuestion {
-  type: 'audio';
-  audioUrl: string;
-  question: string;
-  options: string[];
-  correctAnswerId: string;
-}
-
-// Reading question
-export interface ReadingQuestion extends BaseQuestion {
-  type: 'reading';
-  title: string;
-  text: string;
-  questions: TrueFalseQuestion[];
-}
-
-// True/False question
-export interface TrueFalseQuestion extends BaseQuestion {
-  type: 'trueFalse';
-  statement: string;
-  correctAnswer: boolean;
-}
-
-export type QuestionType = 'text' | 'image' | 'audio' | 'reading' | 'trueFalse';
-
+/**
+ * Base question type that matches our database structure
+ * Every question has text content, and may have additional media or reading text
+ */
 export interface Question {
+  id: string;
   questionId: string;
-  type: 'text' | 'image' | 'audio' | 'trueFalse';
+  questionText: string;
   points: number;
   topicId: string;
-  textId?: string;  // Optional textId for reading questions
-}
-
-export interface TextQuestion extends Question {
-  type: 'text';
-  question: string;
-  options: string[];
+  categoryId: string;
   correctAnswerId: string;
+  options: string[];  // Array of option texts
+  // Optional fields for different question types
+  imageUrl?: string;
+  audioUrl?: string;
+  readingTextId?: string;
+  createdAt: string;  // ISO string date
+  updatedAt: string;  // ISO string date
 }
 
-export interface ImageQuestion extends Question {
-  type: 'image';
-  imageUrl: string;
-  question: string;
-  options: string[];
-  correctAnswerId: string;
-}
-
-export interface AudioQuestion extends Question {
-  type: 'audio';
-  audioUrl: string;
-  question: string;
-  options: string[];
-  correctAnswerId: string;
-}
-
-export interface TrueFalseQuestion extends Question {
-  type: 'trueFalse';
-  statement: string;
-  correctAnswer: boolean;
-}
-
+/**
+ * Reading text type
+ */
 export interface ReadingText {
+  id: string;
   topicId: string;
   title: string;
-  text: string;
+  textContent: string;
   categoryId: string;
+  createdAt: string;  // ISO string date
+  updatedAt: string;  // ISO string date
+}
+
+/**
+ * Type guard to check if a question has an image
+ */
+export function hasImage(question: Question): boolean {
+  return !!question.imageUrl;
+}
+
+/**
+ * Type guard to check if a question has audio
+ */
+export function hasAudio(question: Question): boolean {
+  return !!question.audioUrl;
+}
+
+/**
+ * Type guard to check if a question is a reading question
+ */
+export function isReadingQuestion(question: Question): question is Question & { readingTextId: ReadingText } {
+  return !!question.readingTextId;
 }
 
 /**
