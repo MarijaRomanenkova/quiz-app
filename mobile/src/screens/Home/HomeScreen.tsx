@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, RadioButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -8,9 +8,8 @@ import { theme } from '../../theme';
 import type { UserProfile } from '../../types';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
-import { setSelectedCategory } from '../../store/categorySlice';
+import { setSelectedCategory, fetchCategoriesThunk } from '../../store/categorySlice';
 import { getTopicsForCategory } from '../../data/mockTopics';
-import { mockCategories } from '../../data/mockCategories';
 import type { AppDispatch } from '../../store';
 import { Button } from '../../components/Button/Button';
 
@@ -29,9 +28,17 @@ export const HomeScreen = ({ route }: HomeScreenProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   
-  // Get user from Redux state first, fallback to route params if available
+  // Get user and categories from Redux state
   const userFromRedux = useSelector((state: RootState) => state.user);
+  const { categories, isLoading, error } = useSelector((state: RootState) => state.category);
   const userProfile = route?.params?.userProfile || userFromRedux;
+
+  useEffect(() => {
+    // Only fetch if we don't have categories
+    if (categories.length === 0) {
+      dispatch(fetchCategoriesThunk());
+    }
+  }, [categories.length, dispatch]);
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -62,6 +69,22 @@ export const HomeScreen = ({ route }: HomeScreenProps) => {
     return null;
   }
 
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading categories...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text variant="titleLarge" style={styles.categoriesTitle}>
@@ -72,13 +95,13 @@ export const HomeScreen = ({ route }: HomeScreenProps) => {
         <View style={styles.radioWrapper}>
           <RadioButton.Group onValueChange={handleCategorySelect} value={selectedCategory}>
             <View style={styles.radioContainer}>
-              {mockCategories.map((category) => (
+              {categories.map((category) => (
                 <View key={category.categoryId} style={[
                   styles.radioItem,
                   selectedCategory === category.categoryId && styles.selectedRadioItem
                 ]}>
                   <RadioButton.Item
-                    label={category.title}
+                    label={category.categoryId.charAt(0).toUpperCase() + category.categoryId.slice(1)}
                     value={category.categoryId}
                     position="trailing"
                     labelStyle={[

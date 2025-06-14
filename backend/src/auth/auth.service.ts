@@ -54,6 +54,7 @@ export class AuthService {
         password: hashedPassword,
         verificationToken,
         verificationTokenExpires,
+        levelId: 'A1.1'  // Set A1.1 as default level
       });
 
       this.logger.log(`User created successfully: ${email}`);
@@ -172,9 +173,7 @@ export class AuthService {
   }
 
   async forgotPassword(email: string): Promise<void> {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
+    const user = await this.prisma.findUser({ email });
 
     if (!user) {
       // Don't reveal if the email exists or not
@@ -186,13 +185,13 @@ export class AuthService {
     const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
 
     // Save the token to the database
-    await this.prisma.user.update({
-      where: { email },
-      data: {
+    await this.prisma.updateUser(
+      { email },
+      {
         resetToken,
         resetTokenExpiry,
       },
-    });
+    );
 
     // Generate the reset link
     const resetLink = `${process.env.BACKEND_URL}/api/auth/reset-password/${resetToken}`;
@@ -219,16 +218,11 @@ export class AuthService {
   }
 
   async verifyResetToken(token: string) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        resetToken: token,
-        resetTokenExpiry: {
-          gt: new Date(),
-        },
-      },
-    });
-
-    return user;
+    const user = await this.prisma.findUser({ resetToken: token });
+    if (user && user.resetTokenExpiry && user.resetTokenExpiry > new Date()) {
+      return user;
+    }
+    return null;
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
@@ -242,13 +236,13 @@ export class AuthService {
     const hashedPassword = await hash(newPassword, 10);
 
     // Update the user's password and clear the reset token
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
+    await this.prisma.updateUser(
+      { id: user.id },
+      {
         password: hashedPassword,
         resetToken: null,
         resetTokenExpiry: null,
       },
-    });
+    );
   }
 }

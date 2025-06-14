@@ -21,20 +21,17 @@ export const ProgressScreen = () => {
     // In a real app, this would come from an API or the Redux store
     setCategories([
       {
-        categoryId: '1',
-        title: 'Grammar',
+        categoryId: 'grammar',
         description: 'Basic grammar rules',
         progress: 65
       },
       {
-        categoryId: '2',
-        title: 'Vocabulary',
+        categoryId: 'vocabulary',
         description: 'Essential vocabulary',
         progress: 40
       },
       {
-        categoryId: '3',
-        title: 'Conversation',
+        categoryId: 'conversation',
         description: 'Practical conversation',
         progress: 25
       }
@@ -157,7 +154,7 @@ export const ProgressScreen = () => {
           {categories.map((category: Category) => (
             <View key={category.categoryId} style={styles.categoryProgress}>
               <View style={styles.categoryHeader}>
-                <Paragraph>{category.title}</Paragraph>
+                <Paragraph>{category.categoryId.charAt(0).toUpperCase() + category.categoryId.slice(1)}</Paragraph>
                 <Text style={styles.progressPercentage}>{category.progress}%</Text>
               </View>
               <ProgressBar

@@ -5,8 +5,9 @@ import { setCredentials } from '../store/authSlice';
 const mockUser = {
   id: 'dev-user-1',
   email: 'dev@example.com',
-  username: 'Developer',
+  username: 'devuser',
   emailVerified: true,
+  levelId: 'A1.1'
 };
 
 // Mock token for development

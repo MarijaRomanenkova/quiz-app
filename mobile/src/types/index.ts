@@ -98,14 +98,12 @@ export interface StudyPace {
 /**
  * Category structure
  * @interface Category
- * @property {categoryId} categoryId - Unique identifier for the category
- * @property {string} title - Display name of the category
+ * @property {string} categoryId - Unique identifier for the category
  * @property {string} description - Category description
  * @property {number} progress - Learning progress (0-100)
  */
 export interface Category {
   categoryId: string;
-  title: string;
   description: string;
   progress: number;
 }
@@ -147,6 +145,19 @@ export interface QuizAttempt {
   id: string;
   score: number;
   date: string;
+}
+
+export interface Topic {
+  topicId: string;
+  title: string;
+  categoryId: string;
+}
+
+export interface ContentState {
+  categories: Category[];
+  topics: Topic[];
+  lastUpdated: string | null;
+  selectedCategoryId: string | null;
 }
 
 // Remove duplicate RootStackParamList and export it from navigation.ts

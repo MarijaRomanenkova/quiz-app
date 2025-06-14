@@ -6,6 +6,7 @@ export interface User {
   emailVerified: boolean;
   verificationToken: string | null;
   verificationTokenExpires: Date | null;
+  levelId: string;
 }
 
 export interface UserPayload {

@@ -1,37 +1,30 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import type { User } from '@prisma/client';
 import {
   UserCreateInput,
   UserUpdateInput,
   UserWhereUniqueInput,
 } from '../types/prisma.types';
 
-declare module '@prisma/client' {
-  interface PrismaClient {
-    $connect(): Promise<void>;
-    $disconnect(): Promise<void>;
-    $queryRaw<T = unknown>(
-      query: TemplateStringsArray | string,
-      ...values: any[]
-    ): Promise<T>;
-  }
-}
+type User = {
+  id: string;
+  email: string;
+  password: string;
+  username: string;
+  emailVerified: boolean;
+  verificationToken: string | null;
+  verificationTokenExpires: Date | null;
+  resetToken: string | null;
+  resetTokenExpiry: Date | null;
+  levelId: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 @Injectable()
-export class PrismaService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
-    super({
-      log: ['error', 'warn'],
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL,
-        },
-      },
-    });
+    super();
   }
 
   async onModuleInit() {
@@ -59,17 +52,17 @@ export class PrismaService
   }
 
   async findUser(where: UserWhereUniqueInput): Promise<User | null> {
-    return await this.user.findUnique({ where });
+    return this.$queryRaw`SELECT * FROM "User" WHERE ${where}`;
   }
 
   async createUser(data: UserCreateInput): Promise<User> {
-    return await this.user.create({ data });
+    return this.$queryRaw`INSERT INTO "User" (${Object.keys(data)}) VALUES (${Object.values(data)}) RETURNING *`;
   }
 
   async updateUser(
     where: UserWhereUniqueInput,
     data: UserUpdateInput,
   ): Promise<User> {
-    return await this.user.update({ where, data });
+    return this.$queryRaw`UPDATE "User" SET ${data} WHERE ${where} RETURNING *`;
   }
 }

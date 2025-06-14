@@ -3,4 +3,5 @@ export interface UserProfile {
   email: string;
   username: string;
   emailVerified: boolean;
+  levelId: string;
 } 

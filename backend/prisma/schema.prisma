@@ -17,10 +17,101 @@ model User {
   verificationTokenExpires DateTime?
   resetToken            String?   @unique
   resetTokenExpiry      DateTime?
-  currentLevel          String    @default("A1")
+  levelId               String
+  level                 Level     @relation(fields: [levelId], references: [levelId])
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  statistics            Statistics?
+  quizResults           QuizResult[]
+  wrongQuestions        WrongQuestion[]
 }
 
+model Statistics {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id])
+  totalQuizzes  Int       @default(0)
+  correctAnswers Int      @default(0)
+  totalQuestions Int      @default(0)
+  averageScore  Float     @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
 
+model Level {
+  id          String     @id @default(uuid())
+  levelId     String     @unique
+  description String?
+  topics      Topic[]
+  users       User[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
 
+model Category {
+  id          String    @id @default(uuid())
+  categoryId  String    @unique
+  description String
+  progress    Decimal     @default(0)
+  topics      Topic[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Topic {
+  id          String        @id @default(uuid())
+  topicId     String        @unique
+  levelId     String
+  level       Level         @relation(fields: [levelId], references: [levelId])
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [categoryId])
+  questions   Question[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Question {
+  questionId    String    @id @default(uuid())
+  questionText  String
+  options       String[]
+  correctAnswerId String
+  points        Int       @default(10)
+  imageUrl      String?
+  audioUrl      String?
+  readingTextId String?
+  readingText   ReadingText? @relation(fields: [readingTextId], references: [id])
+  topicId       String
+  topic         Topic     @relation(fields: [topicId], references: [topicId])
+  quizResults   QuizResult[]
+  wrongQuestions WrongQuestion[]
+}
+
+model ReadingText {
+  id          String     @id @default(uuid())
+  title       String
+  textContent String     @db.Text
+  questions   Question[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model QuizResult {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  questionId    String
+  question      Question  @relation(fields: [questionId], references: [questionId])
+  selectedAnswer String?
+  isCorrect     Boolean
+  score         Int
+  createdAt     DateTime  @default(now())
+}
+
+model WrongQuestion {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  questionId    String
+  question      Question  @relation(fields: [questionId], references: [questionId])
+  createdAt     DateTime  @default(now())
+}
