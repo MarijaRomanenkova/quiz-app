@@ -7,9 +7,9 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
-  Home: undefined;
+  Home: { userProfile?: UserProfile };
   Category: { categoryId: string };
-  Topic: { topicId: string };
+  Topic: { categoryId: string };
   Quiz: {
     quizId: string;
     isRepeating?: boolean;

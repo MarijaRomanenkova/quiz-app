@@ -1,36 +1,36 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import { Topic } from '../types';
 import { fetchTopics } from '../services/api';
-
-export const fetchTopicsThunk = createAsyncThunk(
-  'topic/fetchTopics',
-  async () => {
-    const topics = await fetchTopics();
-    return topics;
-  }
-);
+import { RootState } from './index';
 
 interface TopicState {
-  selectedTopicId: string | null;
   topics: Topic[];
-  lastUpdated: string | null;
+  selectedTopicId: string | null;
   isLoading: boolean;
   error: string | null;
 }
 
 const initialState: TopicState = {
-  selectedTopicId: null,
   topics: [],
-  lastUpdated: null,
+  selectedTopicId: null,
   isLoading: false,
   error: null,
 };
+
+export const fetchTopicsThunk = createAsyncThunk(
+  'topics/fetchTopics',
+  async (_, { getState }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token || undefined;
+    return fetchTopics(token);
+  }
+);
 
 export const topicSlice = createSlice({
   name: 'topic',
   initialState,
   reducers: {
-    setSelectedTopic: (state, action: PayloadAction<string | null>) => {
+    setSelectedTopic: (state, action: PayloadAction<string>) => {
       state.selectedTopicId = action.payload;
     },
     clearTopicSelection: (state) => {
@@ -46,7 +46,6 @@ export const topicSlice = createSlice({
       .addCase(fetchTopicsThunk.fulfilled, (state, action) => {
         state.isLoading = false;
         state.topics = action.payload;
-        state.lastUpdated = new Date().toISOString();
       })
       .addCase(fetchTopicsThunk.rejected, (state, action) => {
         state.isLoading = false;
@@ -55,9 +54,18 @@ export const topicSlice = createSlice({
   },
 });
 
-export const { 
-  setSelectedTopic,
-  clearTopicSelection
-} = topicSlice.actions;
+export const { setSelectedTopic, clearTopicSelection } = topicSlice.actions;
 
-export default topicSlice.reducer; 
+export default topicSlice.reducer;
+
+// Selector to get topics sorted by topicOrder, categoryId, and topicId
+export const selectSortedTopics = createSelector(
+  (state: RootState) => state.topic.topics,
+  (topics) =>
+    [...topics].sort(
+      (a, b) =>
+        a.topicOrder - b.topicOrder ||
+        a.categoryId.localeCompare(b.categoryId) ||
+        a.topicId.localeCompare(b.topicId)
+    )
+); 

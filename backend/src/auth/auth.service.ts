@@ -10,10 +10,15 @@ import { LoginDto } from './dto/login.dto';
 import { hash, compare } from 'bcrypt';
 import { Resend } from 'resend';
 import { randomBytes } from 'crypto';
-import { UserPayload } from '../types/user.types';
 import { PrismaService } from '../prisma/prisma.service';
 import { verificationEmailTemplate } from '../templates/email/verification.template';
 import { passwordResetTemplate } from '../templates/email/password-reset.template';
+import { Prisma, User } from '@prisma/client';
+
+interface UserPayload {
+  sub: string;
+  email: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -54,7 +59,11 @@ export class AuthService {
         password: hashedPassword,
         verificationToken,
         verificationTokenExpires,
-        levelId: 'A1.1'  // Set A1.1 as default level
+        level: {
+          connect: {
+            levelId: 'A1.1'
+          }
+        }
       });
 
       this.logger.log(`User created successfully: ${email}`);
@@ -75,7 +84,7 @@ export class AuthService {
 
   async login(loginDto: LoginDto): Promise<{
     access_token: string;
-    user: { id: string; email: string; username: string };
+    user: { id: string; email: string; username: string; levelId: string };
   }> {
     const { email, password } = loginDto;
     this.logger.log(`Login attempt for email: ${email}`);
@@ -88,8 +97,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const isPasswordValid = (await compare(password, user.password)) as boolean;
+    const isPasswordValid = await compare(password, user.password);
     this.logger.log(`Password valid: ${isPasswordValid}`);
 
     if (!isPasswordValid) {
@@ -114,6 +122,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
+        levelId: user.levelId,
       },
     };
   }

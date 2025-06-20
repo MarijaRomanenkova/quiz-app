@@ -1,72 +1,136 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, RadioButton } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../types/navigation';
+import type { RootStackParamList } from '../../navigation/AppNavigator';
 import { theme } from '../../theme';
-import type { UserProfile } from '../../types';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
-import { setSelectedCategory, fetchCategoriesThunk } from '../../store/categorySlice';
-import { getTopicsForCategory } from '../../data/mockTopics';
+import { fetchCategoriesThunk, setSelectedCategory } from '../../store/categorySlice';
+import { fetchTopicsThunk } from '../../store/topicSlice';
+import { fetchAllQuestionsThunk } from '../../store/questionsSlice';
+import { fetchAllReadingTextsThunk } from '../../store/readingTextsSlice';
+import { initializeCategoryProgress } from '../../store/progressSlice';
 import type { AppDispatch } from '../../store';
 import { Button } from '../../components/Button/Button';
 
 type HomeScreenProps = {
-  route?: {
-    params?: {
-      userProfile?: UserProfile;
-    };
-  };
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Main'>;
 };
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
-
-export const HomeScreen = ({ route }: HomeScreenProps) => {
-  const navigation = useNavigation<NavigationProp>();
+export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  
-  // Get user and categories from Redux state
-  const userFromRedux = useSelector((state: RootState) => state.user);
-  const { categories, isLoading, error } = useSelector((state: RootState) => state.category);
-  const userProfile = route?.params?.userProfile || userFromRedux;
+  const { categories, selectedCategoryId, isLoading, error } = useSelector((state: RootState) => state.category);
+  const { topics } = useSelector((state: RootState) => state.topic);
+  const { user, token } = useSelector((state: RootState) => state.auth);
+  const questionsState = useSelector((state: RootState) => state.questions);
+  const readingTextsState = useSelector((state: RootState) => state.readingTexts);
+
+  console.log('HomeScreen - user:', user);
+  console.log('HomeScreen - token:', token ? 'Present' : 'Missing');
+  console.log('HomeScreen - categories length:', categories.length);
+  console.log('HomeScreen - categories:', categories);
 
   useEffect(() => {
-    // Only fetch if we don't have categories
-    if (categories.length === 0) {
+    // Only fetch data once when user is authenticated and data is not loaded
+    if (user && categories.length === 0) {
+      console.log('HomeScreen - Initial data fetch for authenticated user...');
+      // Fetch all data in sequence: categories, topics, questions, then reading texts
       dispatch(fetchCategoriesThunk());
+      dispatch(fetchTopicsThunk()).then(() => {
+        // Fetch questions first
+        console.log('HomeScreen - Topics loaded, now fetching questions...');
+        dispatch(fetchAllQuestionsThunk()).unwrap()
+          .then((questionsData) => {
+            console.log('HomeScreen - Questions loaded successfully:', Object.keys(questionsData).length, 'topics');
+            // Fetch reading texts after questions are loaded
+            console.log('HomeScreen - Now fetching reading texts...');
+            return dispatch(fetchAllReadingTextsThunk()).unwrap();
+          })
+          .then((readingTextsData) => {
+            console.log('HomeScreen - Reading texts loaded successfully:', Object.keys(readingTextsData.byId).length, 'texts');
+          })
+          .catch((error) => {
+            console.error('HomeScreen - Data fetch failed:', error);
+          });
+      });
     }
-  }, [categories.length, dispatch]);
+  }, [dispatch, user, categories.length]);
+
+  // Test: Manually trigger questions fetch if not loaded
+  useEffect(() => {
+    if (user && categories.length > 0 && topics.length > 0) {
+      console.log('HomeScreen - Current questions state:', questionsState);
+      
+      // Check if questions are loaded in byTopicId
+      const hasQuestions = questionsState.byTopicId && Object.keys(questionsState.byTopicId).length > 0;
+      
+      if (!hasQuestions) {
+        console.log('HomeScreen - No questions loaded, manually triggering fetch...');
+        dispatch(fetchAllQuestionsThunk()).unwrap()
+          .then((questionsData) => {
+            console.log('HomeScreen - Manual questions fetch successful:', Object.keys(questionsData).length, 'topics');
+            // Also trigger reading texts fetch
+            return dispatch(fetchAllReadingTextsThunk()).unwrap();
+          })
+          .then((readingTextsData) => {
+            console.log('HomeScreen - Manual reading texts fetch successful:', Object.keys(readingTextsData.byId).length, 'texts');
+          })
+          .catch((error) => {
+            console.error('HomeScreen - Manual fetch failed:', error);
+          });
+      } else {
+        console.log('HomeScreen - Questions already loaded in byTopicId:', Object.keys(questionsState.byTopicId));
+        // Check if reading texts are loaded
+        const hasReadingTexts = readingTextsState.byId && Object.keys(readingTextsState.byId).length > 0;
+        if (!hasReadingTexts) {
+          console.log('HomeScreen - No reading texts loaded, manually triggering fetch...');
+          dispatch(fetchAllReadingTextsThunk()).unwrap()
+            .then((readingTextsData) => {
+              console.log('HomeScreen - Manual reading texts fetch successful:', Object.keys(readingTextsData.byId).length, 'texts');
+            })
+            .catch((error) => {
+              console.error('HomeScreen - Manual reading texts fetch failed:', error);
+            });
+        }
+      }
+    }
+  }, [dispatch, user, categories.length, topics.length, questionsState.byTopicId]);
+
+  // Initialize progress tracking after both categories and topics are loaded
+  useEffect(() => {
+    if (categories.length > 0 && topics.length > 0) {
+      console.log('HomeScreen - Initializing progress tracking...');
+      categories.forEach(category => {
+        const categoryTopics = topics.filter(topic => topic.categoryId === category.categoryId);
+        const initialUnlocked = category.categoryId === 'listening' || category.categoryId === 'words' ? 3 : categoryTopics.length;
+        
+        dispatch(initializeCategoryProgress({
+          categoryId: category.categoryId,
+          totalTopics: categoryTopics.length,
+          initialUnlocked
+        }));
+      });
+    }
+  }, [dispatch, categories.length, topics.length]);
 
   const handleCategorySelect = (categoryId: string) => {
-    setSelectedCategory(categoryId);
+    dispatch(setSelectedCategory(categoryId));
   };
 
   const handleContinue = () => {
-    if (selectedCategory) {
-      dispatch({ type: 'category/setSelectedCategory', payload: selectedCategory });
-      const topicsForCategory = getTopicsForCategory(selectedCategory);
-      if (topicsForCategory.length > 0) {
-        navigation.navigate('Topic', { topicId: topicsForCategory[0].topicId });
-      }
+    if (selectedCategoryId) {
+      navigation.navigate('Topic', { categoryId: selectedCategoryId });
     }
   };
 
-  // Safety check - if no user is found at all, redirect to Onboarding
-  React.useEffect(() => {
-    if (!userProfile || !userProfile.name) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
-    }
-  }, [userProfile, navigation]);
-
-  // Don't render until we have a user
-  if (!userProfile || !userProfile.name) {
-    return null;
+  // Show loading state while checking authentication
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text>Please log in to access categories...</Text>
+      </View>
+    );
   }
 
   if (isLoading) {
@@ -87,98 +151,89 @@ export const HomeScreen = ({ route }: HomeScreenProps) => {
 
   return (
     <View style={styles.container}>
-      <Text variant="titleLarge" style={styles.categoriesTitle}>
-        Choose what to study:
+      <Text variant="headlineMedium" style={styles.title}>
+        Select a Category:
       </Text>
-
-      <View style={styles.categoriesContainer}>
-        <View style={styles.radioWrapper}>
-          <RadioButton.Group onValueChange={handleCategorySelect} value={selectedCategory}>
-            <View style={styles.radioContainer}>
-              {categories.map((category) => (
-                <View key={category.categoryId} style={[
-                  styles.radioItem,
-                  selectedCategory === category.categoryId && styles.selectedRadioItem
-                ]}>
-                  <RadioButton.Item
-                    label={category.categoryId.charAt(0).toUpperCase() + category.categoryId.slice(1)}
-                    value={category.categoryId}
-                    position="trailing"
-                    labelStyle={[
-                      styles.radioLabel,
-                      selectedCategory === category.categoryId && styles.selectedRadioLabel
-                    ]}
-                    style={styles.radioButton}
-                    theme={{
-                      colors: {
-                        primary: theme.colors.primaryContainer,
-                      }
-                    }}
-                  />
-                </View>
-              ))}
+      
+      <View style={styles.radioContainer}>
+        <RadioButton.Group onValueChange={handleCategorySelect} value={selectedCategoryId || ''}>
+          {categories.map((category) => (
+            <View key={category.categoryId} style={[
+              styles.radioItem,
+              selectedCategoryId === category.categoryId && styles.selectedRadioItem
+            ]}>
+              <RadioButton.Item
+                label={category.categoryId}
+                value={category.categoryId}
+                position="trailing"
+                labelStyle={[
+                  styles.radioLabel,
+                  selectedCategoryId === category.categoryId && styles.selectedRadioLabel
+                ]}
+                style={styles.radioButton}
+                theme={{
+                  colors: {
+                    primary: theme.colors.primaryContainer,
+                  }
+                }}
+              />
             </View>
-          </RadioButton.Group>
-        </View>
+          ))}
+        </RadioButton.Group>
       </View>
 
-      <Button
-        onPress={handleContinue}
-        disabled={!selectedCategory}
-        style={styles.continueButton}
-        variant="primary"
-      >
-        Go
-      </Button>
+      <View style={styles.buttonContainer}>
+        <Button
+          variant="primary"
+          onPress={handleContinue}
+          style={styles.button}
+          disabled={!selectedCategoryId}
+        >
+          Continue
+        </Button>
+      </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 24,
     backgroundColor: theme.colors.secondaryContainer,
   },
-  categoriesTitle: {
-    marginBottom: 16,
-    marginTop: 24,
-  },
-  categoriesContainer: {
-    flex: 1,
-  },
-  radioWrapper: {
-    flex: 1,
-    justifyContent: 'center',
+  title: {
+    textAlign: 'center',
+    marginBottom: 24,
   },
   radioContainer: {
-    gap: 8,
+    flex: 1,
   },
   radioItem: {
+    marginBottom: 8,
     backgroundColor: theme.colors.surface,
     borderRadius: 20,
-    marginBottom: 8,
     borderWidth: 1,
     borderColor: theme.colors.outline,
   },
-  radioButton: {
-    paddingVertical: 8,
-    borderRadius: 20,
+  selectedRadioItem: {
+    borderWidth: 2,
+    borderColor: theme.colors.primaryContainer,
   },
   radioLabel: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  selectedRadioItem: {
-    borderWidth: 2,
-  },
   selectedRadioLabel: {
     color: theme.colors.primaryContainer,
-    fontWeight: 'bold',
   },
-  continueButton: {
-    marginBottom: 40,
-    width: '100%',
-    height: 56,
-  }
+  radioButton: {
+    marginVertical: 0,
+  },
+  buttonContainer: {
+    marginTop: 24,
+  },
+  button: {
+    marginBottom: 16,
+  },
 }); 

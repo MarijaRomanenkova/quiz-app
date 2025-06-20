@@ -7,6 +7,7 @@ interface AuthState {
     email: string;
     username: string;
     emailVerified: boolean;
+    levelId: string;
   } | null;
   isLoading: boolean;
   error: string | null;

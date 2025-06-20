@@ -3,13 +3,21 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LoginScreen } from '../screens/Login';
 import { RegisterScreen } from '../screens/Register';
+import { ForgotPasswordScreen } from '../screens/ForgotPassword';
 import { useAuth } from '../hooks/useAuth';
 import { TabNavigator } from './TabNavigator';
+import { TopicScreen } from '../screens/Topic';
+import { QuizScreen } from '../screens/Quiz';
+import { ResultsScreen } from '../screens/Results';
 
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
+  ForgotPassword: undefined;
   Main: undefined;
+  Topic: { categoryId: string };
+  Quiz: { quizId: string; isRepeating?: boolean };
+  Results: { quizId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -25,10 +33,16 @@ export const AppNavigator = () => {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           </>
         ) : (
           // App screens
-          <Stack.Screen name="Main" component={TabNavigator} />
+          <>
+            <Stack.Screen name="Main" component={TabNavigator} />
+            <Stack.Screen name="Topic" component={TopicScreen} />
+            <Stack.Screen name="Quiz" component={QuizScreen} />
+            <Stack.Screen name="Results" component={ResultsScreen} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

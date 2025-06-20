@@ -2,16 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../navigator/Navigator';
+import type { RootStackParamList } from '../../types/navigation';
 import { Text, ActivityIndicator } from 'react-native-paper';
 import { theme } from '../../theme';
 import { Logo } from '../../components/Logo';
 import * as Font from 'expo-font';
+import { useDispatch } from 'react-redux';
+import { fetchCategoriesThunk } from '../../store/categorySlice';
+import { fetchTopicsThunk } from '../../store/topicSlice';
+import { AppDispatch } from '../../store';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
 export const SplashScreen = () => {
   const navigation = useNavigation<NavigationProp>();
+  const dispatch = useDispatch<AppDispatch>();
   const [loadingText, setLoadingText] = useState('Initializing...');
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
@@ -36,14 +41,13 @@ export const SplashScreen = () => {
   useEffect(() => {
     if (!fontsLoaded) return;
 
-    // Mock authentication check sequence
-    const checkAuth = async () => {
+    const initializeApp = async () => {
       try {
-        setLoadingText('Checking authentication...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        setLoadingText('Loading categories...');
+        await dispatch(fetchCategoriesThunk()).unwrap();
         
-        setLoadingText('Loading user preferences...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        setLoadingText('Loading topics...');
+        await dispatch(fetchTopicsThunk()).unwrap();
         
         setLoadingText('Preparing your learning journey...');
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -57,13 +61,13 @@ export const SplashScreen = () => {
           navigation.replace('Login');
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
+        console.error('Initialization failed:', error);
         navigation.replace('Login');
       }
     };
 
-    checkAuth();
-  }, [fontsLoaded]);
+    initializeApp();
+  }, [fontsLoaded, dispatch, navigation]);
 
   if (!fontsLoaded) {
     return (
@@ -76,24 +80,18 @@ export const SplashScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text variant="displayLarge" style={styles.title}>
-          DEUTSCH
-        </Text>
-        <Logo width={200} height={200} />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color="#FFFFFF" />
-          <Text variant="bodyLarge" style={styles.loadingText}>{loadingText}</Text>
+        <View style={styles.logoContainer}>
+          <View style={styles.logoCircle}>
+            <Logo width={120} height={120} />
+          </View>
+          <Text style={styles.logoTextFresh}>Fresh</Text>
+          <Text style={styles.logoTextQuiz}>Quiz</Text>
+          <Text style={styles.logoTextApp}>App</Text>
         </View>
-        <View style={styles.footer}>
-          <Text variant="headlineSmall" style={styles.title}>
-            Learn
-          </Text>
-          <Text variant="displayLarge" style={styles.title}>
-            German
-          </Text>
-          <Text variant="titleMedium" style={styles.title}>
-            Build your language skills
-          </Text>
+        
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FFFFFF" />
+          <Text style={styles.loadingText}>{loadingText}</Text>
         </View>
       </View>
     </View>

@@ -9,7 +9,6 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { enableScreens } from 'react-native-screens';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import './src/utils/devAuth'; // Import dev auth helper
 
 // Enable screens for better performance
 enableScreens();

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -9,6 +9,8 @@ import { theme } from '../../theme';
 import { ScoreCircle } from '../../components/Results/ScoreCircle';
 import { RootState } from '../../store';
 import { Button as CustomButton } from '../../components/Button/Button';
+import { selectCategoryProgress, selectUnlockedTopicsForCategory } from '../../store/progressSlice';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 type ResultsScreenRouteProp = RouteProp<RootStackParamList, 'Results'>;
 type ResultsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -19,6 +21,48 @@ export const ResultsScreen = () => {
   const user = useSelector((state: RootState) => state.user);
   const quizResult = useSelector((state: RootState) => state.quizResults.currentResult);
   const wrongQuestions = useSelector((state: RootState) => state.wrongQuestions.wrongQuestions);
+  
+  // Get progress information
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+  
+  // Memoize selectors to prevent unnecessary re-renders
+  const categoryProgress = useSelector((state: RootState) => 
+    categoryId ? selectCategoryProgress(state, categoryId) : null
+  );
+  
+  // Get all topics for the category to show total count
+  const allCategoryTopics = useSelector((state: RootState) => 
+    categoryId ? state.topic.topics.filter(topic => topic.categoryId === categoryId) : []
+  );
+
+  // Memoize the hasNewUnlocks calculation
+  const hasNewUnlocks = useMemo(() => {
+    return categoryProgress && categoryProgress.completedTopics >= 3;
+  }, [categoryProgress]);
+
+  // Determine category ID from the quiz result
+  useEffect(() => {
+    if (quizResult && route.params.quizId) {
+      // Get category from the first question in wrong questions or from the quiz ID
+      const firstWrongQuestion = wrongQuestions[0];
+      if (firstWrongQuestion?.categoryId) {
+        setCategoryId(firstWrongQuestion.categoryId);
+      } else {
+        // Fallback: try to determine category from quiz ID
+        // This is a simple mapping - you might want to improve this
+        const quizId = route.params.quizId;
+        if (quizId.includes('grammar') || quizId.includes('articles') || quizId.includes('tense')) {
+          setCategoryId('grammar');
+        } else if (quizId.includes('reading') || quizId.includes('stories')) {
+          setCategoryId('reading');
+        } else if (quizId.includes('listening') || quizId.includes('audio')) {
+          setCategoryId('listening');
+        } else if (quizId.includes('words') || quizId.includes('vocabulary')) {
+          setCategoryId('words');
+        }
+      }
+    }
+  }, [quizResult, route.params.quizId, wrongQuestions]);
 
   if (!quizResult) {
     return null;
@@ -31,6 +75,14 @@ export const ResultsScreen = () => {
     } as any);
   };
 
+  const handleGoToCategory = () => {
+    if (categoryId) {
+      navigation.navigate('Topic', { categoryId });
+    } else {
+      navigation.navigate('Home' as never);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -41,6 +93,28 @@ export const ResultsScreen = () => {
           <Text variant="headlineMedium" style={styles.messageText}>
             Great job, {user?.name || 'User'}!
           </Text>
+          
+          {/* Show progress update */}
+          {categoryProgress && (
+            <View style={styles.progressContainer}>
+              <Text variant="titleMedium" style={styles.progressText}>
+                Progress: {categoryProgress.completedTopics} / {allCategoryTopics.length} topics completed
+              </Text>
+              {hasNewUnlocks && (
+                <View style={styles.unlockContainer}>
+                  <MaterialCommunityIcons 
+                    name="star" 
+                    size={24} 
+                    color={theme.colors.primary} 
+                  />
+                  <Text variant="titleMedium" style={styles.unlockText}>
+                    New topics unlocked!
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+          
           {(wrongQuestions.length > 0 || quizResult.score < quizResult.totalQuestions) && (
             <Text variant="titleLarge" style={styles.questionText}>
               Would you like to train harder questions?
@@ -50,22 +124,31 @@ export const ResultsScreen = () => {
 
         <View style={styles.buttonContainer}>
           {wrongQuestions.length > 0 && (
-            <>
-              <CustomButton
-                variant="primary"
-                onPress={handleRepeatWrongQuestions}
-                style={styles.button}
-              >
-                Repeat 
-              </CustomButton>
-            </>
+            <CustomButton
+              variant="primary"
+              onPress={handleRepeatWrongQuestions}
+              style={styles.button}
+            >
+              Repeat Wrong Questions
+            </CustomButton>
           )}
+          
+          {hasNewUnlocks && (
+            <CustomButton
+              variant="secondary"
+              onPress={handleGoToCategory}
+              style={styles.button}
+            >
+              Explore New Topics
+            </CustomButton>
+          )}
+          
           <CustomButton
             variant="success"
             onPress={() => navigation.navigate('Home' as never)}
             style={styles.button}
           >
-            I'm good
+            Continue Learning
           </CustomButton>
         </View>
       </View>
@@ -110,5 +193,27 @@ const styles = StyleSheet.create({
   percentage: {
     color: '#583FB0',
     textAlign: 'center',
+  },
+  progressContainer: {
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  progressText: {
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  unlockContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.primaryContainer,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginTop: 8,
+  },
+  unlockText: {
+    marginLeft: 8,
+    color: theme.colors.primary,
+    fontWeight: 'bold',
   },
 }); 

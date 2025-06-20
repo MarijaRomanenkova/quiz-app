@@ -14,7 +14,7 @@ import { CustomModal } from '../../components/Modal/CustomModal';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { API_URL } from '../../config';
+import authService from '../../services/authService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -73,29 +73,11 @@ export const RegisterScreen = () => {
     
     try {
       console.log('Making API call to register user...');
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          username: data.name,
-          password: data.password,
-        }),
+      await authService.register({
+        email: data.email,
+        username: data.name,
+        password: data.password,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.message === 'User with this email already exists') {
-          setShowEmailExistsModal(true);
-          return;
-        }
-        throw new Error(errorData.message || 'Registration failed');
-      }
-
-      const responseData = await response.json();
-      console.log('Registration API response:', responseData);
 
       dispatch(setUserProfile({
         name: data.name,
@@ -110,6 +92,12 @@ export const RegisterScreen = () => {
         email: data.email,
         timestamp: new Date().toISOString(),
       });
+      
+      if (error instanceof Error && error.message === 'User with this email already exists') {
+        setShowEmailExistsModal(true);
+        return;
+      }
+      
       Alert.alert(
         'Registration Failed',
         error instanceof Error ? error.message : 'Please try again later.',

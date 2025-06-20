@@ -8,110 +8,111 @@ datasource db {
 }
 
 model User {
-  id                    String    @id @default(uuid())
-  email                 String    @unique
-  password              String
-  username              String    @unique
-  emailVerified         Boolean   @default(false)
-  verificationToken     String?   @unique
+  id                       String          @id @default(uuid())
+  email                    String          @unique
+  password                 String
+  username                 String          @unique
+  emailVerified            Boolean         @default(false)
+  verificationToken        String?         @unique
   verificationTokenExpires DateTime?
-  resetToken            String?   @unique
-  resetTokenExpiry      DateTime?
-  levelId               String
-  level                 Level     @relation(fields: [levelId], references: [levelId])
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-  statistics            Statistics?
-  quizResults           QuizResult[]
-  wrongQuestions        WrongQuestion[]
+  resetToken               String?         @unique
+  resetTokenExpiry         DateTime?
+  levelId                  String
+  createdAt                DateTime        @default(now())
+  updatedAt                DateTime        @updatedAt
+  quizResults              QuizResult[]
+  statistics               Statistics?
+  level                    Level           @relation(fields: [levelId], references: [levelId])
+  wrongQuestions           WrongQuestion[]
 }
 
 model Statistics {
-  id            String    @id @default(uuid())
-  userId        String    @unique
-  user          User      @relation(fields: [userId], references: [id])
-  totalQuizzes  Int       @default(0)
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  totalQuizzes   Int      @default(0)
   correctAnswers Int      @default(0)
   totalQuestions Int      @default(0)
-  averageScore  Float     @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  averageScore   Float    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id])
 }
 
 model Level {
-  id          String     @id @default(uuid())
-  levelId     String     @unique
+  id          String   @id @default(uuid())
+  levelId     String   @unique
   description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   topics      Topic[]
   users       User[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
 }
 
 model Category {
-  id          String    @id @default(uuid())
-  categoryId  String    @unique
+  id          String   @id @default(uuid())
+  categoryId  String   @unique
   description String
-  progress    Decimal     @default(0)
+  progress    Decimal  @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   topics      Topic[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
 }
 
 model Topic {
-  id          String        @id @default(uuid())
-  topicId     String        @unique
-  levelId     String
-  level       Level         @relation(fields: [levelId], references: [levelId])
-  categoryId  String
-  category    Category      @relation(fields: [categoryId], references: [categoryId])
-  questions   Question[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id         String     @id @default(uuid())
+  topicId    String     @unique
+  levelId    String
+  categoryId String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  topicOrder Int
+  questions  Question[]
+  category   Category   @relation(fields: [categoryId], references: [categoryId])
+  level      Level      @relation(fields: [levelId], references: [levelId])
 }
 
 model Question {
-  questionId    String    @id @default(uuid())
-  questionText  String
-  options       String[]
+  questionId      String          @id @default(uuid())
+  questionText    String
+  options         String[]
   correctAnswerId String
-  points        Int       @default(10)
-  imageUrl      String?
-  audioUrl      String?
-  readingTextId String?
-  readingText   ReadingText? @relation(fields: [readingTextId], references: [id])
-  topicId       String
-  topic         Topic     @relation(fields: [topicId], references: [topicId])
-  quizResults   QuizResult[]
-  wrongQuestions WrongQuestion[]
+  points          Int             @default(10)
+  imageUrl        String?
+  audioUrl        String?
+  readingTextId   String?
+  topicId         String
+  readingText     ReadingText?    @relation(fields: [readingTextId], references: [id])
+  topic           Topic           @relation(fields: [topicId], references: [topicId])
+  quizResults     QuizResult[]
+  wrongQuestions  WrongQuestion[]
 }
 
 model ReadingText {
   id          String     @id @default(uuid())
   title       String
-  textContent String     @db.Text
-  questions   Question[]
+  textContent String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  questions   Question[]
 }
 
 model QuizResult {
-  id            String    @id @default(uuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  questionId    String
-  question      Question  @relation(fields: [questionId], references: [questionId])
+  id             String   @id @default(uuid())
+  userId         String
+  questionId     String
   selectedAnswer String?
-  isCorrect     Boolean
-  score         Int
-  createdAt     DateTime  @default(now())
+  isCorrect      Boolean
+  score          Int
+  createdAt      DateTime @default(now())
+  question       Question @relation(fields: [questionId], references: [questionId])
+  user           User     @relation(fields: [userId], references: [id])
 }
 
 model WrongQuestion {
-  id            String    @id @default(uuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  questionId    String
-  question      Question  @relation(fields: [questionId], references: [questionId])
-  createdAt     DateTime  @default(now())
+  id         String   @id @default(uuid())
+  userId     String
+  questionId String
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [questionId])
+  user       User     @relation(fields: [userId], references: [id])
 }

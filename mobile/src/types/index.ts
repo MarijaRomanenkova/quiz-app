@@ -112,14 +112,10 @@ export interface Category {
  * Represents a learning topic within a category
  * @interface QuizTopic
  * @property {string} topicId - Unique identifier for the topic
- * @property {string} title - Display name of the topic
- * @property {string} text - Text content of the topic
- * @property {Category} categoryId - Category this topic belongs to
+ * @property {string} categoryId - Category this topic belongs to
  */
 export interface QuizTopic {
   topicId: string;
-  title: string;
-  text?: string; 
   categoryId: string;
 }
 
@@ -135,7 +131,7 @@ export interface UserProfile {
   studyPaceId?: number;
   agreedToTerms: boolean;
   email?: string;
-  level?: number;
+  level?: string;
   marketingEmails?: boolean;
   shareDevices?: boolean;
   pushNotifications?: boolean;
@@ -149,8 +145,9 @@ export interface QuizAttempt {
 
 export interface Topic {
   topicId: string;
-  title: string;
   categoryId: string;
+  levelId: string;
+  topicOrder: number;
 }
 
 export interface ContentState {

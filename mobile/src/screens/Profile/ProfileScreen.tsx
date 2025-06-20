@@ -2,16 +2,23 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Surface, IconButton, Switch, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../navigation/AppNavigator';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { setUserProfile } from '../../store/userSlice';
 import { theme } from '../../theme';
 import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceSelector';
+import { useAuth } from '../../hooks/useAuth';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
 export const ProfileScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
   const dispatch = useDispatch();
-  const { name, email, level, studyPaceId = 1, agreedToTerms } = useSelector((state: RootState) => state.user);
+  const { logout } = useAuth();
+  const { name, studyPaceId = 1, agreedToTerms } = useSelector((state: RootState) => state.user);
+  const { user } = useSelector((state: RootState) => state.auth);
   
   const [marketingEmails, setMarketingEmails] = useState(false);
   const [shareDevices, setShareDevices] = useState(false);
@@ -20,8 +27,8 @@ export const ProfileScreen = () => {
   const handleSave = () => {
     dispatch(setUserProfile({
       name,
-      email,
-      level,
+      email: user?.email || '',
+      level: user?.levelId || '',
       studyPaceId,
       agreedToTerms,
       marketingEmails,
@@ -29,6 +36,11 @@ export const ProfileScreen = () => {
       pushNotifications
     }));
     navigation.goBack();
+  };
+
+  const handleLogout = () => {
+    logout();
+    // The navigation will be handled by the auth state change
   };
 
   return (
@@ -47,14 +59,14 @@ export const ProfileScreen = () => {
 
         {/* User Info */}
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>{name}</Text>
+          <Text style={styles.userName}>{name || user?.username}</Text>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Email:</Text>
-            <Text style={styles.infoValue}>{email}</Text>
+            <Text style={styles.infoValue}>{user?.email}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Level:</Text>
-            <Text style={styles.infoValue}>{level}</Text>
+            <Text style={styles.infoValue}>{user?.levelId}</Text>
           </View>
         </View>
 
@@ -93,6 +105,17 @@ export const ProfileScreen = () => {
           buttonColor="#8BF224"
         >
           Save
+        </Button>
+
+        {/* Logout Button */}
+        <Button
+          mode="outlined"
+          onPress={handleLogout}
+          style={styles.logoutButton}
+          textColor="#FFFFFF"
+          buttonColor="transparent"
+        >
+          Log Out
         </Button>
       </ScrollView>
     </Surface>
@@ -173,5 +196,12 @@ const styles = StyleSheet.create({
     margin: 24,
     marginBottom: 40,
     paddingVertical: 8,
+  },
+  logoutButton: {
+    margin: 24,
+    marginTop: 16,
+    marginBottom: 40,
+    paddingVertical: 8,
+    borderColor: '#FFFFFF',
   },
 });

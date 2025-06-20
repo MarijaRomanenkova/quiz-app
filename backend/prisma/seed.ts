@@ -43,11 +43,13 @@ async function main() {
 
     for (const level of levels) {
       console.log(`Creating level: ${level.levelId}`);
-      await prisma.level.create({
-        data: {
+      await prisma.level.upsert({
+        where: { levelId: level.levelId },
+        update: {},
+        create: {
           levelId: level.levelId,
           description: level.description
-        }
+        } as unknown as Prisma.LevelCreateInput
       });
     }
     console.log('Levels created successfully');
@@ -79,12 +81,14 @@ async function main() {
 
     for (const category of categories) {
       console.log(`Creating category: ${category.categoryId}`);
-      await prisma.category.create({
-        data: {
+      await prisma.category.upsert({
+        where: { categoryId: category.categoryId },
+        update: {},
+        create: {
           categoryId: category.categoryId,
           description: category.description,
-          progress: new Prisma.Decimal(category.progress.toString())
-        }
+          progress: new Prisma.Decimal('0')
+        } as unknown as Prisma.CategoryCreateInput
       });
     }
     console.log('Categories created successfully');
@@ -92,37 +96,43 @@ async function main() {
     // Create Topics
     console.log('Creating topics...');
     const topics = [
-      // Grammar topics for A1.1
-      { topicId: 'articles', levelId: 'A1.1', categoryId: 'grammar' },
-      { topicId: 'present-tense', levelId: 'A1.1', categoryId: 'grammar' },
-      { topicId: 'past-tense', levelId: 'A1.1', categoryId: 'grammar' },
+      // Grammar topics for A1.1 (Priority 1: Core fundamentals)
+      { topicId: 'articles', levelId: 'A1.1', categoryId: 'grammar', topicOrder: 1 },
+      { topicId: 'present-tense', levelId: 'A1.1', categoryId: 'grammar', topicOrder: 2 },
+      { topicId: 'past-tense', levelId: 'A1.1', categoryId: 'grammar', topicOrder: 3 },
+      { topicId: 'plurals', levelId: 'A1.1', categoryId: 'grammar', topicOrder: 4 },
+      { topicId: 'adjectives', levelId: 'A1.1', categoryId: 'grammar', topicOrder: 5 },
+      { topicId: 'prepositions', levelId: 'A1.1', categoryId: 'grammar', topicOrder: 6 },
       
-      // Reading topics for A1.1
-      { topicId: 'short-stories', levelId: 'A1.1', categoryId: 'reading' },
-      { topicId: 'news-articles', levelId: 'A1.1', categoryId: 'reading' },
-      { topicId: 'dialogues', levelId: 'A1.1', categoryId: 'reading' },
+      // Reading topics for A1.1 (Priority 1: Basic comprehension)
+      { topicId: 'short-stories', levelId: 'A1.1', categoryId: 'reading', topicOrder: 1 },
+      { topicId: 'dialogues', levelId: 'A1.1', categoryId: 'reading', topicOrder: 1 },
+      { topicId: 'news-articles', levelId: 'A1.1', categoryId: 'reading', topicOrder: 2 },
       
-      // Listening topics for A1.1
-      { topicId: 'basic-listening', levelId: 'A1.1', categoryId: 'listening' },
-      { topicId: 'news-reports', levelId: 'A1.1', categoryId: 'listening' },
-      { topicId: 'songs', levelId: 'A1.1', categoryId: 'listening' },
+      // Listening topics for A1.1 (Priority 1: Basic listening)
+      { topicId: 'basic-listening', levelId: 'A1.1', categoryId: 'listening', topicOrder: 1 },
+      { topicId: 'songs', levelId: 'A1.1', categoryId: 'listening', topicOrder: 1 },
+      { topicId: 'news-reports', levelId: 'A1.1', categoryId: 'listening', topicOrder: 2 },
       
-      // Words topics for A1.1
-      { topicId: 'fruit-veggies', levelId: 'A1.1', categoryId: 'words' },
-      { topicId: 'fashion', levelId: 'A1.1', categoryId: 'words' },
-      { topicId: 'family-friends', levelId: 'A1.1', categoryId: 'words' },
-      { topicId: 'travel', levelId: 'A1.1', categoryId: 'words' },
-      { topicId: 'basics', levelId: 'A1.1', categoryId: 'words' }
+      // Words topics for A1.1 (Priority 1: Essential vocabulary)
+      { topicId: 'basics', levelId: 'A1.1', categoryId: 'words', topicOrder: 1 },
+      { topicId: 'family-friends', levelId: 'A1.1', categoryId: 'words', topicOrder: 1 },
+      { topicId: 'fruit-veggies', levelId: 'A1.1', categoryId: 'words', topicOrder: 2 },
+      { topicId: 'fashion', levelId: 'A1.1', categoryId: 'words', topicOrder: 2 },
+      { topicId: 'travel', levelId: 'A1.1', categoryId: 'words', topicOrder: 3 }
     ];
 
     for (const topic of topics) {
       console.log(`Creating topic: ${topic.topicId}`);
-      await prisma.topic.create({
-        data: {
+      await prisma.topic.upsert({
+        where: { topicId: topic.topicId },
+        update: { topicOrder: topic.topicOrder } as Prisma.TopicUpdateInput,
+        create: {
           topicId: topic.topicId,
           levelId: topic.levelId,
-          categoryId: topic.categoryId
-        }
+          categoryId: topic.categoryId,
+          topicOrder: topic.topicOrder
+        } as Prisma.TopicUncheckedCreateInput
       });
     }
     console.log('Topics created successfully');
@@ -139,13 +149,25 @@ async function main() {
         id: 'r2',
         title: 'Mein Tag',
         textContent: 'Ich heiße Anna und wohne in Berlin. Mein Tag beginnt um 7 Uhr morgens. Ich stehe auf, dusche und frühstücke. Zum Frühstück esse ich Müsli mit Obst und trinke einen Kaffee. Um 8 Uhr fahre ich mit dem Bus zur Arbeit. Die Fahrt dauert etwa 30 Minuten. In der Arbeit bin ich von 9 bis 17 Uhr. Ich arbeite als Lehrerin in einer Grundschule. Die Kinder sind sehr aktiv und lernen schnell. Nach der Arbeit gehe ich oft spazieren oder treffe mich mit Freunden. Abends koche ich gerne und sehe mir einen Film an. Vor dem Schlafengehen lese ich noch ein Buch. Ich gehe normalerweise um 23 Uhr ins Bett. Am Wochenende schlafe ich länger und mache andere Aktivitäten.'
+      },
+      {
+        id: 'r3',
+        title: 'Im Restaurant',
+        textContent: 'Gestern Abend sind wir in ein italienisches Restaurant gegangen. Das Restaurant war sehr voll und wir mussten 15 Minuten warten. Der Kellner war sehr freundlich und hat uns die Speisekarte gebracht. Ich habe Pizza Margherita bestellt und mein Freund hat Pasta Carbonara genommen. Das Essen war sehr lecker und die Portionen waren groß. Wir haben auch einen Salat als Vorspeise gegessen. Zum Dessert haben wir Tiramisu bestellt. Das war köstlich! Die Rechnung war 45 Euro. Wir haben 50 Euro bezahlt und 5 Euro Trinkgeld gegeben. Wir werden definitiv wieder dorthin gehen.'
+      },
+      {
+        id: 'r4',
+        title: 'Das Wetter',
+        textContent: 'Das Wetter in Deutschland ist sehr wechselhaft. Im Frühling ist es oft regnerisch und kühl. Die Temperaturen liegen zwischen 10 und 20 Grad Celsius. Im Sommer ist es warm und sonnig, manchmal auch heiß mit Temperaturen über 30 Grad. Im Herbst wird es wieder kühler und die Blätter fallen von den Bäumen. Im Winter ist es kalt und es schneit oft. Die Temperaturen können unter null Grad fallen. Heute ist es bewölkt und es regnet leicht. Die Temperatur beträgt 15 Grad. Morgen soll es sonnig werden mit 22 Grad. Am Wochenende wird es wieder kühler mit nur 12 Grad.'
       }
     ];
 
     for (const text of readingTexts) {
       console.log(`Creating reading text: ${text.id}`);
-      await prisma.readingText.create({
-        data: {
+      await prisma.readingText.upsert({
+        where: { id: text.id },
+        update: {},
+        create: {
           id: text.id,
           title: text.title,
           textContent: text.textContent
@@ -159,7 +181,6 @@ async function main() {
     const questions = [
       // Grammar - Articles
       {
-        questionId: 'g1',
         questionText: 'Which article is correct? "___ Buch ist neu."',
         options: ['Der', 'Die', 'Das', 'Den'],
         correctAnswerId: '2',
@@ -167,7 +188,6 @@ async function main() {
         topicId: 'articles'
       },
       {
-        questionId: 'g2',
         questionText: 'Which article is correct? "___ Frau ist jung."',
         options: ['Der', 'Die', 'Das', 'Den'],
         correctAnswerId: '1',
@@ -175,7 +195,6 @@ async function main() {
         topicId: 'articles'
       },
       {
-        questionId: 'g3',
         questionText: 'Which article is correct? "___ Mann ist groß."',
         options: ['Der', 'Die', 'Das', 'Den'],
         correctAnswerId: '0',
@@ -185,7 +204,6 @@ async function main() {
 
       // Grammar - Present Tense
       {
-        questionId: 'g4',
         questionText: 'What is the correct form? "Ich ___ Deutsch."',
         options: ['lerne', 'lernst', 'lernt', 'lernen'],
         correctAnswerId: '0',
@@ -193,7 +211,6 @@ async function main() {
         topicId: 'present-tense'
       },
       {
-        questionId: 'g5',
         questionText: 'What is the correct form? "Du ___ gut."',
         options: ['spiele', 'spielst', 'spielt', 'spielen'],
         correctAnswerId: '1',
@@ -201,9 +218,156 @@ async function main() {
         topicId: 'present-tense'
       },
 
+      // Grammar - Past Tense
+      {
+        questionText: 'Ich ___ gestern ins Kino gegangen.',
+        options: ['bin', 'habe', 'werde', 'war'],
+        correctAnswerId: '0',
+        points: 5,
+        topicId: 'past-tense'
+      },
+      {
+        questionText: 'Er ___ das Buch gelesen.',
+        options: ['hat', 'ist', 'wird', 'war'],
+        correctAnswerId: '0',
+        points: 5,
+        topicId: 'past-tense'
+      },
+      {
+        questionText: 'Wir ___ den Film gesehen.',
+        options: ['haben', 'sind', 'werden', 'waren'],
+        correctAnswerId: '0',
+        points: 5,
+        topicId: 'past-tense'
+      },
+      {
+        questionText: 'Du ___ nach Hause gefahren.',
+        options: ['bist', 'hast', 'wirst', 'warst'],
+        correctAnswerId: '0',
+        points: 5,
+        topicId: 'past-tense'
+      },
+      {
+        questionText: 'Sie ___ das Essen gekocht.',
+        options: ['hat', 'ist', 'wird', 'war'],
+        correctAnswerId: '0',
+        points: 5,
+        topicId: 'past-tense'
+      },
+
+      // Grammar - Plurals
+      {
+        questionText: 'Das ist ein ___ (Haus).',
+        options: ['Haus', 'Häuser', 'Hauses', 'Häusern'],
+        correctAnswerId: '1',
+        points: 5,
+        topicId: 'plurals'
+      },
+      {
+        questionText: 'Ich habe zwei ___ (Buch).',
+        options: ['Buch', 'Bücher', 'Buches', 'Büchern'],
+        correctAnswerId: '1',
+        points: 5,
+        topicId: 'plurals'
+      },
+      {
+        questionText: 'Das sind drei ___ (Kind).',
+        options: ['Kind', 'Kinder', 'Kindes', 'Kindern'],
+        correctAnswerId: '1',
+        points: 5,
+        topicId: 'plurals'
+      },
+      {
+        questionText: 'Ich sehe viele ___ (Auto).',
+        options: ['Auto', 'Autos', 'Autos', 'Autos'],
+        correctAnswerId: '1',
+        points: 5,
+        topicId: 'plurals'
+      },
+      {
+        questionText: 'Die ___ (Frau) sind hier.',
+        options: ['Frau', 'Frauen', 'Fraues', 'Frauen'],
+        correctAnswerId: '1',
+        points: 5,
+        topicId: 'plurals'
+      },
+
+      // Grammar - Adjectives
+      {
+        questionText: 'Das ist ein ___ (groß) Haus.',
+        options: ['groß', 'große', 'großes', 'großen'],
+        correctAnswerId: '2',
+        points: 5,
+        topicId: 'adjectives'
+      },
+      {
+        questionText: 'Ich habe eine ___ (klein) Katze.',
+        options: ['klein', 'kleine', 'kleines', 'kleinen'],
+        correctAnswerId: '1',
+        points: 5,
+        topicId: 'adjectives'
+      },
+      {
+        questionText: 'Das ist ein ___ (alt) Mann.',
+        options: ['alt', 'alte', 'alter', 'alten'],
+        correctAnswerId: '2',
+        points: 5,
+        topicId: 'adjectives'
+      },
+      {
+        questionText: 'Ich trinke ___ (kalt) Wasser.',
+        options: ['kalt', 'kalte', 'kaltes', 'kalten'],
+        correctAnswerId: '2',
+        points: 5,
+        topicId: 'adjectives'
+      },
+      {
+        questionText: 'Das ist eine ___ (schön) Blume.',
+        options: ['schön', 'schöne', 'schönes', 'schönen'],
+        correctAnswerId: '1',
+        points: 5,
+        topicId: 'adjectives'
+      },
+
+      // Grammar - Prepositions
+      {
+        questionText: 'Ich gehe ___ Schule.',
+        options: ['in', 'auf', 'zu', 'mit'],
+        correctAnswerId: '2',
+        points: 5,
+        topicId: 'prepositions'
+      },
+      {
+        questionText: 'Das Buch liegt ___ Tisch.',
+        options: ['in', 'auf', 'zu', 'mit'],
+        correctAnswerId: '1',
+        points: 5,
+        topicId: 'prepositions'
+      },
+      {
+        questionText: 'Ich komme ___ Deutschland.',
+        options: ['in', 'aus', 'zu', 'mit'],
+        correctAnswerId: '1',
+        points: 5,
+        topicId: 'prepositions'
+      },
+      {
+        questionText: 'Ich fahre ___ Bus.',
+        options: ['in', 'auf', 'zu', 'mit'],
+        correctAnswerId: '3',
+        points: 5,
+        topicId: 'prepositions'
+      },
+      {
+        questionText: 'Das Kind spielt ___ Park.',
+        options: ['in', 'auf', 'zu', 'mit'],
+        correctAnswerId: '0',
+        points: 5,
+        topicId: 'prepositions'
+      },
+
       // Reading Questions
       {
-        questionId: 'rq1',
         questionText: 'Lisa kauft Käse im Supermarkt.',
         options: ['True', 'False'],
         correctAnswerId: '1',
@@ -212,7 +376,6 @@ async function main() {
         readingTextId: 'r1'
       },
       {
-        questionId: 'rq2',
         questionText: 'Lisa kauft Brot und Milch.',
         options: ['True', 'False'],
         correctAnswerId: '0',
@@ -221,9 +384,44 @@ async function main() {
         readingTextId: 'r1'
       },
 
+      // Reading - Dialogues
+      {
+        questionText: 'Anna wohnt in München.',
+        options: ['True', 'False'],
+        correctAnswerId: '1',
+        points: 5,
+        topicId: 'dialogues',
+        readingTextId: 'r2'
+      },
+      {
+        questionText: 'Anna geht nach der Arbeit spazieren.',
+        options: ['True', 'False'],
+        correctAnswerId: '0',
+        points: 5,
+        topicId: 'dialogues',
+        readingTextId: 'r2'
+      },
+
+      // Reading - News Articles
+      {
+        questionText: 'Das Restaurant war leer.',
+        options: ['True', 'False'],
+        correctAnswerId: '1',
+        points: 5,
+        topicId: 'news-articles',
+        readingTextId: 'r3'
+      },
+      {
+        questionText: 'Sie haben 50 Euro bezahlt.',
+        options: ['True', 'False'],
+        correctAnswerId: '0',
+        points: 5,
+        topicId: 'news-articles',
+        readingTextId: 'r3'
+      },
+
       // Words - Fruit & Veggies
       {
-        questionId: 'w1',
         questionText: 'What is the English translation of "Apfel"?',
         options: ['Pear', 'Apple', 'Orange', 'Banana'],
         correctAnswerId: '1',
@@ -231,7 +429,6 @@ async function main() {
         topicId: 'fruit-veggies'
       },
       {
-        questionId: 'w2',
         questionText: 'What is this?',
         imageUrl: 'https://res.cloudinary.com/djgtzqgut/image/upload/v1738692039/tomato-simple_dbgb9b.jpg',
         options: ['Apple', 'Clemintine', 'Tomato', 'Carrot'],
@@ -242,7 +439,6 @@ async function main() {
 
       // Listening Questions
       {
-        questionId: 'l1',
         questionText: 'Was kauft Lisa?',
         audioUrl: 'https://res.cloudinary.com/djgtzqgut/video/upload/v1738913375/shopping_b5h2ax.mp3',
         options: ['Lisa kauft Käse', 'Lisa kauft Milch', 'Lisa kauft Brot', 'Lisa kauft Eier'],
@@ -253,10 +449,9 @@ async function main() {
     ];
 
     for (const question of questions) {
-      console.log(`Creating question: ${question.questionId}`);
+      console.log(`Creating question: ${question.questionText}`);
       await prisma.question.create({
         data: {
-          questionId: question.questionId,
           questionText: question.questionText,
           options: question.options,
           correctAnswerId: question.correctAnswerId,
@@ -265,25 +460,24 @@ async function main() {
           ...(question.readingTextId && { readingTextId: question.readingTextId }),
           ...(question.imageUrl && { imageUrl: question.imageUrl }),
           ...(question.audioUrl && { audioUrl: question.audioUrl })
-        }
+        } as Prisma.QuestionUncheckedCreateInput
       });
     }
     console.log('Questions created successfully');
 
     // Create development user
     console.log('Creating development user...');
-    const devUser = {
-      email: 'dev@example.com',
-      username: 'devuser',
-      password: await hash('devpassword', 10),
-      emailVerified: true,
-      levelId: 'A1.1'
-    };
-
+    const hashedPassword = await hash('devpassword', 10);
     await prisma.user.upsert({
-      where: { email: devUser.email },
+      where: { email: 'dev@example.com' },
       update: {},
-      create: devUser
+      create: {
+        email: 'dev@example.com',
+        username: 'devuser',
+        password: hashedPassword,
+        emailVerified: true,
+        levelId: 'A1.1'
+      }
     });
     console.log('Development user created successfully');
 

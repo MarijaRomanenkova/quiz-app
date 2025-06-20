@@ -10,8 +10,10 @@ import { statisticsSlice } from './statisticsSlice';
 import categoryReducer from './categorySlice';
 import topicReducer from './topicSlice';
 import questionsReducer from './questionsSlice';
+import readingTextsReducer from './readingTextsSlice';
 import quizResultsReducer from './quizResultsSlice';
 import wrongQuestionsReducer from './wrongQuestionsSlice';
+import progressReducer from './progressSlice';
 
 const persistConfig = {
   key: 'root',
@@ -21,8 +23,10 @@ const persistConfig = {
     'user', 
     'statistics', 
     'questions',
+    'readingTexts',
     'category',
-    'topic'
+    'topic',
+    'progress'
   ],
 };
 
@@ -34,8 +38,10 @@ const rootReducer = combineReducers({
   category: categoryReducer,
   topic: topicReducer,
   questions: questionsReducer,
+  readingTexts: readingTextsReducer,
   quizResults: quizResultsReducer,
   wrongQuestions: wrongQuestionsReducer,
+  progress: progressReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -1,13 +1,4 @@
-export interface User {
-  id: string;
-  email: string;
-  username: string;
-  password: string;
-  emailVerified: boolean;
-  verificationToken: string | null;
-  verificationTokenExpires: Date | null;
-  levelId: string;
-}
+import { User } from '@prisma/client';
 
 export interface UserPayload {
   sub: string;

@@ -1,12 +1,15 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { Category } from '../types';
 import { fetchCategories } from '../services/api';
+import { RootState } from './index';
 
 // Async thunks
 export const fetchCategoriesThunk = createAsyncThunk(
   'category/fetchCategories',
-  async () => {
-    const categories = await fetchCategories();
+  async (_, { getState }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token || undefined;
+    const categories = await fetchCategories(token);
     return categories;
   }
 );

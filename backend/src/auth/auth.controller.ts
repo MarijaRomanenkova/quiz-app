@@ -15,10 +15,14 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
-import { UserPayload } from '../types/user.types';
 import { verificationSuccessTemplate } from '../templates/email/verification-success.template';
 import { ConfigService } from '@nestjs/config';
 import { resetPasswordPageTemplate } from '../templates/email/reset-password.template';
+
+interface UserPayload {
+  sub: string;
+  email: string;
+}
 
 @Controller('auth')
 export class AuthController {

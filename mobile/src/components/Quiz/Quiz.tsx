@@ -7,7 +7,7 @@ import type { RootStackParamList } from '../../types/navigation';
 import { theme } from '../../theme';
 import type { Question } from '../../types';
 import { useSelector, useDispatch } from 'react-redux';
-import type { RootState } from '../../store';
+import type { RootState, AppDispatch } from '../../store';
 import { 
   updateDailyStats,
   updateBestAttempt,
@@ -19,16 +19,18 @@ import {
   endQuiz,
   selectActiveQuiz
 } from '../../store/quizSlice';
-import { cacheQuestions, selectCurrentChunk } from '../../store/questionsSlice';
-import { getRandomQuestions } from '../../data/mockQuestions';
+import { selectQuestionsForTopic } from '../../store/questionsSlice';
+import { selectReadingTextById } from '../../store/readingTextsSlice';
+import { store } from '../../store';
 import { Button as CustomButton } from '../../components/Button/Button';
 import { setQuizResult } from '../../store/quizResultsSlice';
 import { addWrongQuestion as addToWrongQuestions, selectWrongQuestions } from '../../store/wrongQuestionsSlice';
+import { completeTopic, updateTopicAttempt, loadMoreQuestionsThunk } from '../../store/progressSlice';
 import { AudioPlayer, AudioPlayerRef } from '../AudioPlayer/AudioPlayer';
-import { mockTexts } from '../../data/mockTexts';
 import { QuizRadioGroup } from './QuizRadioGroup';
 import { ReadingText } from './ReadingText';
 import { QuizTopBar } from './QuizTopBar';
+import { useToken } from '../../hooks/useToken';
 
 type QuizScreenRouteProp = RouteProp<RootStackParamList, 'Quiz'>;
 type QuizScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -39,19 +41,28 @@ type QuizProps = {
 };
 
 const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const route = useRoute<QuizScreenRouteProp>();
   const navigation = useNavigation<QuizScreenNavigationProp>();
   const quizId = propQuizId || route.params?.quizId;
   const wrongQuestions = useSelector(selectWrongQuestions);
   const activeQuiz = useSelector(selectActiveQuiz);
-  const questions = useSelector((state: RootState) => selectCurrentChunk(state, quizId)) ?? [];
+  const questions = useSelector((state: RootState) => selectQuestionsForTopic(state, quizId));
+  const questionsState = useSelector((state: RootState) => state.questions);
+  const readingTextsState = useSelector((state: RootState) => state.readingTexts);
   const startTime = useRef(Date.now());
   const audioQuestionRef = useRef<AudioPlayerRef>(null);
+  const { token } = useToken();
+
+  console.log('Quiz - quizId:', quizId);
+  console.log('Quiz - questions from Redux:', questions.length);
+  console.log('Quiz - questions state:', questionsState);
+  console.log('Quiz - all questions by topic:', questionsState.byTopicId);
 
   const handleReadingText = (questions: Question[]) => {
     const currentQuestion = questions[activeQuiz?.currentQuestion ?? 0];
     if (currentQuestion?.readingTextId) {
+      // For reading questions, show the reading text first
       dispatch(setReadingText({
         textId: currentQuestion.readingTextId,
         show: true
@@ -62,22 +73,40 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   const loadQuestions = async () => {
     try {
       if (route.params?.isRepeating && wrongQuestions?.length) {
-        dispatch(cacheQuestions({ topicId: quizId, questions: wrongQuestions }));
+        console.log('Quiz - Using wrong questions for repeat mode');
         handleReadingText(wrongQuestions);
         return;
       }
 
-      const questions = getRandomQuestions(quizId);
-      if (!questions.length) {
-        console.error('No questions found for topic:', quizId);
+      // Use questions from Redux (loaded in bulk during app initialization)
+      if (questions.length > 0) {
+        console.log('Quiz - Using questions from Redux');
+        // Check if this is a reading topic by looking at the first question
+        if (questions[0]?.readingTextId) {
+          console.log('Quiz - This is a reading topic, showing reading text first');
+          // Check if reading texts are loaded in Redux
+          const state = store.getState();
+          const readingTextsLoaded = Object.keys(state.readingTexts.byId).length > 0;
+          console.log('Quiz - Reading texts loaded in Redux:', readingTextsLoaded);
+          console.log('Quiz - Available reading text IDs:', Object.keys(state.readingTexts.byId));
+          
+          if (!readingTextsLoaded) {
+            console.warn('Quiz - Reading texts not loaded yet, waiting...');
+            // Wait a bit and try again
+            setTimeout(() => {
+              loadQuestions();
+            }, 1000);
+            return;
+          }
+          
+          handleReadingText(questions);
+        }
         return;
       }
 
-      if (questions[0]?.categoryId === 'reading') {
-        handleReadingText(questions);
-      }
-
-      dispatch(cacheQuestions({ topicId: quizId, questions }));
+      // If no questions found, this might be an error in the data loading strategy
+      console.error('No questions found for topic:', quizId);
+      console.error('This should not happen if the data loading strategy is working correctly');
     } catch (error) {
       console.error('Failed to load questions:', error);
     }
@@ -124,6 +153,12 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
       dispatch(nextQuestion());
     } else {
       const timeSpent = (Date.now() - startTime.current) / 1000;
+      const finalScore = activeQuiz?.score ?? 0;
+      const totalQuestions = questions.length;
+      const scorePercentage = Math.round((finalScore / totalQuestions) * 100);
+      
+      // Get the category ID from the first question
+      const categoryId = questions[0]?.categoryId;
       
       dispatch(updateDailyStats({
         timeSpent,
@@ -132,29 +167,85 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
 
       dispatch(updateBestAttempt({
         topicId: quizId,
-        score: activeQuiz?.score ?? 0,
+        score: finalScore,
         timeSpent
       }));
 
       dispatch(setQuizResult({
-        score: activeQuiz?.score ?? 0,
+        score: finalScore,
         totalQuestions: questions.length,
         timeSpent
       }));
+
+      // Track progress - mark as completed if score is 70% or higher
+      if (categoryId) {
+        if (scorePercentage >= 70) {
+          dispatch(completeTopic({
+            topicId: quizId,
+            categoryId,
+            score: scorePercentage
+          }));
+        } else {
+          dispatch(updateTopicAttempt({
+            topicId: quizId,
+            categoryId,
+            score: scorePercentage
+          }));
+        }
+        
+        // Check if we should unlock more topics for this category
+        dispatch(loadMoreQuestionsThunk(categoryId));
+      }
 
       navigation.navigate('Results', { quizId });
     }
   };
 
   const question = questions[activeQuiz?.currentQuestion ?? 0];
-  const readingText = activeQuiz?.showReadingText && activeQuiz?.currentTextId 
-    ? mockTexts.find(t => t.topicId === activeQuiz.currentTextId) 
-    : null;
+  const [readingText, setReadingTextState] = React.useState<any>(null);
+
+  // Get reading text from Redux when needed
+  React.useEffect(() => {
+    if (activeQuiz?.showReadingText && activeQuiz?.currentTextId) {
+      // Get the current question to find the reading text ID
+      const currentQuestion = questions[activeQuiz?.currentQuestion ?? 0];
+      if (currentQuestion?.readingTextId) {
+        console.log('Looking for reading text with ID:', currentQuestion.readingTextId);
+        // Use Redux selector to get reading text by ID
+        const state = store.getState();
+        console.log('Current Redux state readingTexts:', state.readingTexts);
+        console.log('Reading texts by ID:', state.readingTexts.byId);
+        console.log('Reading texts by topic:', state.readingTexts.byTopicId);
+        const text = selectReadingTextById(state, currentQuestion.readingTextId);
+        if (text) {
+          console.log('Found reading text from Redux:', text.title);
+          setReadingTextState(text);
+        } else {
+          console.warn('No reading text found in Redux for ID:', currentQuestion.readingTextId);
+          console.warn('Available reading text IDs:', Object.keys(state.readingTexts.byId));
+        }
+      }
+    }
+  }, [activeQuiz?.showReadingText, activeQuiz?.currentTextId, questions]);
 
   if (!activeQuiz || questions.length === 0) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text>Loading quiz...</Text>
+      </View>
+    );
+  }
+
+  // Check if reading texts are needed and loaded
+  const needsReadingTexts = questions[0]?.readingTextId;
+  const readingTextsLoaded = Object.keys(readingTextsState.byId).length > 0;
+  
+  if (needsReadingTexts && !readingTextsLoaded) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text>Loading reading materials...</Text>
       </View>
     );
   }

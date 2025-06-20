@@ -1,5 +1,4 @@
 import { API_URL } from '../config/index';
-import { encryptData } from '../utils/encryption';
 
 interface LoginCredentials {
   email: string;
@@ -19,6 +18,7 @@ interface AuthResponse {
     email: string;
     username: string;
     emailVerified: boolean;
+    levelId: string;
   };
 }
 
@@ -46,25 +46,29 @@ const authService = {
   },
 
   async register(data: RegisterData): Promise<{ message: string }> {
-    const encryptedPassword = encryptData(data.password);
-    
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        ...data,
-        password: encryptedPassword,
-      }),
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Registration failed');
+    try {
+      console.log('Attempting registration with:', { ...data, password: '[REDACTED]' });
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to parse error response' }));
+        console.error('Registration failed:', errorData);
+        throw new Error(errorData.message || 'Registration failed');
+      }
+      
+      const result = await response.json();
+      console.log('Registration successful:', result);
+      return result;
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
     }
-    
-    return response.json();
   },
 
   async verifyEmail(token: string): Promise<{ message: string }> {

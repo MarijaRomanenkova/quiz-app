@@ -1,36 +1,56 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation, RouteProp, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../types/navigation';
+import type { RootStackParamList } from '../../navigation/AppNavigator';
 import { theme } from '../../theme';
-import { getTopicsForCategory } from '../../data/mockTopics';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { Button } from '../../components/Button/Button';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { QuizTopic } from '../../types';
-import { cacheQuestions } from '../../store/questionsSlice';
-import { getRandomQuestions } from '../../data/mockQuestions';
+import { selectUnlockedTopicsForCategory, selectTopicProgress } from '../../store/progressSlice';
 
 type TopicItemProps = {
   topic: QuizTopic;
   isSelected: boolean;
   onSelect: (topicId: string) => void;
+  isCompleted: boolean;
+  score: number;
 };
 
-const TopicItem = ({ topic, isSelected, onSelect }: TopicItemProps) => (
+const TopicItem = ({ topic, isSelected, onSelect, isCompleted, score }: TopicItemProps) => (
   <TouchableOpacity 
-    style={styles.radioItem} 
+    style={[
+      styles.radioItem,
+      isSelected && styles.selectedRadioItem,
+      isCompleted && styles.completedRadioItem
+    ]} 
     onPress={() => onSelect(topic.topicId)}
   >
-    <Text style={styles.radioLabel}>{topic.title}</Text>
+    <View style={styles.topicContent}>
+      <Text style={[
+        styles.radioLabel,
+        isSelected && styles.selectedRadioLabel,
+        isCompleted && styles.completedRadioLabel
+      ]}>{topic.topicId}</Text>
+      {isCompleted && (
+        <Text style={styles.scoreText}>Score: {score}%</Text>
+      )}
+    </View>
     {isSelected && (
       <MaterialCommunityIcons 
         name="check" 
         size={24} 
-        color={theme.colors.background} 
+        color={theme.colors.primaryContainer} 
+      />
+    )}
+    {isCompleted && !isSelected && (
+      <MaterialCommunityIcons 
+        name="check-circle" 
+        size={24} 
+        color={theme.colors.primary} 
       />
     )}
   </TouchableOpacity>
@@ -42,24 +62,23 @@ type TopicScreenRouteProp = RouteProp<RootStackParamList, 'Topic'>;
 export const TopicScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<TopicScreenRouteProp>();
-  const { topicId } = route.params;
-  const categoryId = useSelector((state: RootState) => state.category.selectedCategoryId);
+  const { categoryId } = route.params;
   const dispatch = useDispatch();
 
-  // Get topics for the selected category
-  const topicsForCategory = useMemo(() => 
-    categoryId ? getTopicsForCategory(categoryId) : [], 
-    [categoryId]
+  console.log('TopicScreen - categoryId:', categoryId);
+
+  // Get unlocked topics for the selected category from progress tracking
+  const unlockedTopics = useSelector((state: RootState) => 
+    selectUnlockedTopicsForCategory(state, categoryId)
   );
+
+  console.log('TopicScreen - unlocked topics for category:', unlockedTopics);
+
   const [selectedTopic, setSelectedTopic] = useState<string>('');
 
   const handleTopicSelect = (topicId: string) => {
     console.log('Selected topic ID:', topicId);
     setSelectedTopic(topicId);
-    // Initialize questions cache for the selected topic
-    const questions = getRandomQuestions(topicId);
-    console.log('Got questions for topic:', questions.length);
-    dispatch(cacheQuestions({ topicId, questions }));
   };
 
   const handleQuizPress = () => {
@@ -76,14 +95,22 @@ export const TopicScreen = () => {
       </Text>
       
       <ScrollView style={styles.scrollView}>
-        {topicsForCategory.map((topic) => (
-          <TopicItem
-            key={topic.topicId}
-            topic={topic}
-            isSelected={selectedTopic === topic.topicId}
-            onSelect={handleTopicSelect}
-          />
-        ))}
+        {unlockedTopics.map((topic) => {
+          const progress = useSelector((state: RootState) => 
+            selectTopicProgress(state, topic.topicId)
+          );
+          
+          return (
+            <TopicItem
+              key={topic.topicId}
+              topic={topic}
+              isSelected={selectedTopic === topic.topicId}
+              onSelect={handleTopicSelect}
+              isCompleted={progress?.completed || false}
+              score={progress?.score || 0}
+            />
+          );
+        })}
       </ScrollView>
 
       <View style={styles.buttonContainer}>
@@ -91,6 +118,7 @@ export const TopicScreen = () => {
           variant="primary"
           onPress={handleQuizPress}
           style={styles.button}
+          disabled={!selectedTopic}
         >
           Start Quiz
         </Button>
@@ -117,12 +145,38 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.outline,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: theme.colors.outline,
+  },
+  selectedRadioItem: {
+    borderWidth: 2,
+    borderColor: theme.colors.primaryContainer,
+  },
+  completedRadioItem: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primaryContainer + '20',
+  },
+  topicContent: {
+    flex: 1,
   },
   radioLabel: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  selectedRadioLabel: {
+    color: theme.colors.primaryContainer,
+  },
+  completedRadioLabel: {
+    color: theme.colors.primary,
+  },
+  scoreText: {
+    fontSize: 12,
+    color: theme.colors.primary,
+    marginTop: 4,
   },
   buttonContainer: {
     marginTop: 24,

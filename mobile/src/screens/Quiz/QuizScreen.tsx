@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Surface, ActivityIndicator, Text } from 'react-native-paper';
 import { useRoute, RouteProp } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import type { RootStackParamList } from '../../types/navigation';
+import { RootState } from '../../store';
+import { selectQuestionsLoading } from '../../store/questionsSlice';
 import Quiz from '../../components/Quiz/Quiz';
 import { theme } from '../../theme';
 
@@ -11,16 +14,7 @@ type QuizScreenRouteProp = RouteProp<RootStackParamList, 'Quiz'>;
 export const QuizScreen = () => {
   const route = useRoute<QuizScreenRouteProp>();
   const { quizId, isRepeating } = route.params;
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate loading quiz data
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const isLoading = useSelector(selectQuestionsLoading);
 
   if (isLoading) {
     return (
