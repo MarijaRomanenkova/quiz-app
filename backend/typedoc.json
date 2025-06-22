@@ -1,0 +1,7 @@
+{
+  "entryPoints": ["src/**/*.ts"],
+  "out": "docs",
+  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"],
+  "theme": "default",
+  "name": "Quiz Backend API Documentation"
+}

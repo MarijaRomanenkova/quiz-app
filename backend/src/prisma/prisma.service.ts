@@ -1,6 +1,21 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient, Prisma, User } from '@prisma/client';
 
+/**
+ * PrismaService provides a singleton PrismaClient instance for database access
+ *
+ * This service is used throughout the application to interact with the PostgreSQL database
+ * using Prisma ORM. It ensures a single connection pool and provides lifecycle hooks for
+ * graceful shutdown.
+ *
+ * @service PrismaService
+ *
+ * @example
+ * ```typescript
+ * constructor(private prisma: PrismaService) {}
+ * const users = await this.prisma.user.findMany();
+ * ```
+ */
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {

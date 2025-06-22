@@ -20,6 +20,33 @@ interface UserPayload {
   email: string;
 }
 
+/**
+ * Authentication service that handles user authentication and authorization
+ * 
+ * This service provides business logic for:
+ * - User registration with password hashing
+ * - User login with credential validation
+ * - JWT token generation and validation
+ * - Email verification handling
+ * 
+ * @service AuthService
+ * 
+ * @example
+ * ```typescript
+ * // Register a new user
+ * const result = await authService.register({
+ *   email: 'user@example.com',
+ *   password: 'password123',
+ *   username: 'username'
+ * });
+ * 
+ * // Login user
+ * const token = await authService.login({
+ *   email: 'user@example.com',
+ *   password: 'password123'
+ * });
+ * ```
+ */
 @Injectable()
 export class AuthService {
   private resend: Resend;
@@ -32,6 +59,30 @@ export class AuthService {
     this.resend = new Resend(process.env.RESEND_API_KEY);
   }
 
+  /**
+   * Register a new user account
+   * 
+   * Creates a new user with hashed password and sends verification email.
+   * The user must verify their email before they can log in.
+   * 
+   * @param registerDto - User registration data
+   * @returns Promise containing success message
+   * @throws ConflictException if user already exists
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   await authService.register({
+   *     email: 'user@example.com',
+   *     password: 'password123',
+   *     username: 'username'
+   *   });
+   *   // User registered successfully
+   * } catch (error) {
+   *   // Handle registration error
+   * }
+   * ```
+   */
   async register(registerDto: RegisterDto): Promise<{ message: string }> {
     const { email, password, username } = registerDto;
     this.logger.log(`Registration attempt for email: ${email}`);
@@ -82,6 +133,29 @@ export class AuthService {
     }
   }
 
+  /**
+   * Authenticate user and generate JWT token
+   * 
+   * Validates user credentials and returns a JWT access token if authentication
+   * is successful. The token can be used for accessing protected endpoints.
+   * 
+   * @param loginDto - User login credentials
+   * @returns Promise containing access token and user information
+   * @throws UnauthorizedException if credentials are invalid
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const result = await authService.login({
+   *     email: 'user@example.com',
+   *     password: 'password123'
+   *   });
+   *   // result.access_token contains the JWT token
+   * } catch (error) {
+   *   // Handle authentication error
+   * }
+   * ```
+   */
   async login(loginDto: LoginDto): Promise<{
     access_token: string;
     user: { id: string; email: string; username: string; levelId: string };

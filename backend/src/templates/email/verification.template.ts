@@ -1,3 +1,19 @@
+/**
+ * Email verification template
+ *
+ * Generates an HTML email template for account verification.
+ * This template is sent when a user registers and needs to verify their email address.
+ *
+ * @param verificationUrl - The URL where the user can verify their email
+ * @returns HTML string for the verification email
+ *
+ * @example
+ * ```typescript
+ * const verifyLink = 'https://yourapp.com/verify-email?token=abc123';
+ * const emailHtml = verificationEmailTemplate(verifyLink);
+ * // Send emailHtml via email service
+ * ```
+ */
 export const verificationEmailTemplate = (verificationUrl: string) => `
 <!DOCTYPE html>
 <html>
@@ -40,9 +56,9 @@ export const verificationEmailTemplate = (verificationUrl: string) => `
 <body>
   <div class="container">
     <h1>Welcome to Quiz App! 🎉</h1>
-    <p>Thank you for registering. To complete your registration and start learning, please verify your email address by clicking the button below:</p>
+    <p>Thank you for registering! Please verify your email address to complete your account setup.</p>
     
-    <a href="${verificationUrl}" class="button">Verify Email Address</a>
+    <a href="${verificationUrl}" class="button">Verify Email</a>
     
     <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
     <p style="word-break: break-all;">${verificationUrl}</p>

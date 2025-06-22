@@ -1,4 +1,20 @@
-export const resetPasswordPageTemplate = (mobileUrl: string) => `
+/**
+ * Password reset success page template
+ *
+ * Generates an HTML page template shown after a successful password reset.
+ * This template is displayed when a user completes the password reset process.
+ *
+ * @param mobileUrl - The URL to redirect users back to the mobile app
+ * @returns HTML string for the success page
+ *
+ * @example
+ * ```typescript
+ * const appUrl = 'https://yourapp.com';
+ * const successPage = resetPasswordSuccessTemplate(appUrl);
+ * // Send successPage as response to user
+ * ```
+ */
+export const resetPasswordSuccessTemplate = (mobileUrl: string) => `
 <!DOCTYPE html>
 <html>
 <head>

@@ -9,6 +9,8 @@ import {
   Query,
   Res,
   Logger,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -17,13 +19,41 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { verificationSuccessTemplate } from '../templates/email/verification-success.template';
 import { ConfigService } from '@nestjs/config';
-import { resetPasswordPageTemplate } from '../templates/email/reset-password.template';
+import { resetPasswordSuccessTemplate } from '../templates/email/reset-password-success.template';
 
 interface UserPayload {
   sub: string;
   email: string;
 }
 
+/**
+ * Authentication controller that handles user registration and login
+ * 
+ * This controller provides endpoints for user authentication including:
+ * - User registration with email verification
+ * - User login with JWT token generation
+ * 
+ * All endpoints are public and do not require authentication.
+ * 
+ * @controller auth
+ * @example
+ * ```typescript
+ * // Login
+ * POST /auth/login
+ * {
+ *   "email": "user@example.com",
+ *   "password": "password123"
+ * }
+ * 
+ * // Register
+ * POST /auth/register
+ * {
+ *   "email": "user@example.com",
+ *   "password": "password123",
+ *   "username": "username"
+ * }
+ * ```
+ */
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
@@ -33,22 +63,54 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * Register a new user account
+   * 
+   * Creates a new user account with email verification. The user will receive
+   * a verification email and must verify their account before logging in.
+   * 
+   * @param registerDto - User registration data
+   * @returns Promise indicating successful registration
+   * 
+   * @example
+   * ```typescript
+   * const result = await authController.register({
+   *   email: 'user@example.com',
+   *   password: 'password123',
+   *   username: 'username'
+   * });
+   * // Returns: { message: 'User registered successfully' }
+   * ```
+   */
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
+    this.logger.log(`Registration attempt for email: ${registerDto.email}`);
     return this.authService.register(registerDto);
   }
 
+  /**
+   * Authenticate user and generate JWT access token
+   * 
+   * Validates user credentials and returns a JWT token for authenticated requests.
+   * The token should be included in the Authorization header for protected endpoints.
+   * 
+   * @param loginDto - User login credentials
+   * @returns Promise containing access token and user information
+   * 
+   * @example
+   * ```typescript
+   * const result = await authController.login({
+   *   email: 'user@example.com',
+   *   password: 'password123'
+   * });
+   * // Returns: { access_token: 'jwt_token', user: { id, email, username } }
+   * ```
+   */
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto) {
-    this.logger.log(`Login request received for email: ${loginDto.email}`);
-    try {
-      const result = await this.authService.login(loginDto);
-      this.logger.log(`Login successful for: ${loginDto.email}`);
-      return result;
-    } catch (error) {
-      this.logger.error(`Login failed for ${loginDto.email}: ${error.message}`);
-      throw error;
-    }
+    this.logger.log(`Login attempt for email: ${loginDto.email}`);
+    return this.authService.login(loginDto);
   }
 
   @Get('verify-email')
@@ -187,7 +249,7 @@ export class AuthController {
   @Get('reset-password-success')
   showResetPasswordSuccess(@Res() res: Response) {
     const mobileUrl = process.env.MOBILE_URL || 'quizapp://';
-    res.send(resetPasswordPageTemplate(mobileUrl));
+    res.send(resetPasswordSuccessTemplate(mobileUrl));
   }
 
   @Post('reset-password/:token')

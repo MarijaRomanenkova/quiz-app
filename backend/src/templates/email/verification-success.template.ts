@@ -1,7 +1,24 @@
+/**
+ * Email verification success page template
+ *
+ * Generates an HTML page template shown after successful email verification.
+ * This template is displayed when a user clicks the verification link in their email.
+ *
+ * @param mobileUrl - The URL to redirect users back to the mobile app
+ * @returns HTML string for the success page
+ *
+ * @example
+ * ```typescript
+ * const appUrl = 'https://yourapp.com';
+ * const successPage = verificationSuccessTemplate(appUrl);
+ * // Send successPage as response to user
+ * ```
+ */
 export const verificationSuccessTemplate = (mobileUrl: string) => `
 <!DOCTYPE html>
 <html>
 <head>
+  <title>Email Verified Successfully</title>
   <style>
     body {
       font-family: Arial, sans-serif;

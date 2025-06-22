@@ -1,3 +1,19 @@
+/**
+ * Password reset email template
+ *
+ * Generates an HTML email template for password reset requests.
+ * This template is sent when a user requests a password reset via the forgot password feature.
+ *
+ * @param resetUrl - The URL where the user can reset their password
+ * @returns HTML string for the password reset email
+ *
+ * @example
+ * ```typescript
+ * const resetLink = 'https://yourapp.com/reset-password?token=abc123';
+ * const emailHtml = passwordResetTemplate(resetLink);
+ * // Send emailHtml via email service
+ * ```
+ */
 export const passwordResetTemplate = (resetUrl: string) => `
 <!DOCTYPE html>
 <html>
