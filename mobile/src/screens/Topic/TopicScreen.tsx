@@ -90,6 +90,15 @@ export const TopicScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Back button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.navigate('Main')}
+      >
+        <MaterialCommunityIcons name="chevron-left" size={32} color={theme.colors.outline} />
+        <Text style={styles.backButtonText}>Back to Categories</Text>
+      </TouchableOpacity>
+
       <Text variant="headlineMedium" style={styles.topics}>
         Select a Topic:
       </Text>
@@ -133,9 +142,24 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: theme.colors.secondaryContainer,
   },
+  backButton: {
+    position: 'absolute',
+    top: 24,
+    left: 16,
+    zIndex: 10,
+    padding: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
   topics: {
     textAlign: 'center',
     marginBottom: 24,
+    marginTop: 60,
   },
   scrollView: {
     flex: 1,

@@ -228,11 +228,20 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     }
   }, [activeQuiz?.showReadingText, activeQuiz?.currentTextId, questions]);
 
-  if (!activeQuiz || questions.length === 0) {
+  // Graceful handling for no questions
+  useEffect(() => {
+    if (questions.length === 0) {
+      // Show a message and redirect after a short delay
+      setTimeout(() => {
+        navigation.goBack(); // or navigate to Topic screen if you want
+      }, 2000);
+    }
+  }, [questions.length, navigation]);
+
+  if (questions.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text>Loading quiz...</Text>
+        <Text>No questions available for this topic. Redirecting...</Text>
       </View>
     );
   }
