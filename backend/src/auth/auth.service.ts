@@ -114,7 +114,6 @@ export class AuthService {
         agreedToTerms,
         marketingEmails: false, // Default to false
         shareDevices: false, // Default to false
-        pushNotifications: false, // Default to false
         verificationToken,
         verificationTokenExpires,
         level: {
@@ -352,7 +351,6 @@ export class AuthService {
       agreedToTerms: user.agreedToTerms,
       marketingEmails: user.marketingEmails,
       shareDevices: user.shareDevices,
-      pushNotifications: user.pushNotifications,
       emailVerified: user.emailVerified,
     };
   }
@@ -370,7 +368,6 @@ export class AuthService {
         studyPaceId: updateProfileDto.studyPaceId,
         marketingEmails: updateProfileDto.marketingEmails,
         shareDevices: updateProfileDto.shareDevices,
-        pushNotifications: updateProfileDto.pushNotifications,
       },
     );
 
@@ -383,7 +380,6 @@ export class AuthService {
       agreedToTerms: updatedUser.agreedToTerms,
       marketingEmails: updatedUser.marketingEmails,
       shareDevices: updatedUser.shareDevices,
-      pushNotifications: updatedUser.pushNotifications,
       emailVerified: updatedUser.emailVerified,
     };
   }

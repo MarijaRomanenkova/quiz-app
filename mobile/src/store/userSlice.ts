@@ -1,26 +1,63 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { UserProfile } from '../types';
+import { User } from '../types/user.types';
 
-const initialState: UserProfile = {
-  name: '',
-  studyPaceId: 1,
-  agreedToTerms: false,
-  marketingEmails: false,
-  shareDevices: false,
-  pushNotifications: false,
+interface UserState {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: UserState = {
+  user: null,
+  loading: false,
+  error: null,
 };
 
-export const userSlice = createSlice({
+const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setUserProfile: (state, action: PayloadAction<UserProfile>) => {
-      return action.payload;
+    setUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      state.error = null;
     },
-    updateUserProfile: (state, action: PayloadAction<Partial<UserProfile>>) => {
-      return { ...state, ...action.payload };
+    updateUserProfile: (state, action: PayloadAction<Partial<User>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
+    updateUserPreferences: (
+      state,
+      action: PayloadAction<{
+        studyPaceId?: number;
+        marketingEmails?: boolean;
+        shareDevices?: boolean;
+      }>
+    ) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
+    clearUser: (state) => {
+      state.user = null;
+      state.error = null;
+    },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    setError: (state, action: PayloadAction<string>) => {
+      state.error = action.payload;
     },
   },
 });
 
-export const { setUserProfile, updateUserProfile } = userSlice.actions; 
+export const {
+  setUser,
+  updateUserProfile,
+  updateUserPreferences,
+  clearUser,
+  setLoading,
+  setError,
+} = userSlice.actions;
+
+export default userSlice.reducer; 

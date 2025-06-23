@@ -3,7 +3,7 @@ import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { combineReducers } from 'redux';
 
-import { userSlice } from './userSlice';
+import userReducer from './userSlice';
 import authReducer from './authSlice';
 import { quizSlice } from './quizSlice';
 import { statisticsSlice } from './statisticsSlice';
@@ -31,7 +31,7 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-  user: userSlice.reducer,
+  user: userReducer,
   auth: authReducer,
   quiz: quizSlice.reducer,
   statistics: statisticsSlice.reducer,

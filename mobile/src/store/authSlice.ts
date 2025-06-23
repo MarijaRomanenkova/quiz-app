@@ -8,6 +8,10 @@ interface AuthState {
     username: string;
     emailVerified: boolean;
     levelId: string;
+    studyPaceId: number;
+    agreedToTerms: boolean;
+    marketingEmails: boolean;
+    shareDevices: boolean;
   } | null;
   isLoading: boolean;
   error: string | null;

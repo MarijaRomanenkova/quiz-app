@@ -24,7 +24,6 @@ export type UserCreateInput = {
   agreedToTerms?: boolean;
   marketingEmails?: boolean;
   shareDevices?: boolean;
-  pushNotifications?: boolean;
   emailVerified?: boolean;
   verificationToken?: string;
   verificationTokenExpires?: Date;
@@ -41,7 +40,6 @@ export type UserUpdateInput = {
   agreedToTerms?: boolean;
   marketingEmails?: boolean;
   shareDevices?: boolean;
-  pushNotifications?: boolean;
   emailVerified?: boolean;
   verificationToken?: string | null;
   verificationTokenExpires?: Date | null;

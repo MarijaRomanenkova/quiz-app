@@ -1,7 +1,11 @@
-export interface UserProfile {
+export interface User {
   id: string;
   email: string;
   username: string;
-  emailVerified: boolean;
   levelId: string;
+  studyPaceId: number;
+  agreedToTerms: boolean;
+  marketingEmails: boolean;
+  shareDevices: boolean;
+  emailVerified: boolean;
 } 

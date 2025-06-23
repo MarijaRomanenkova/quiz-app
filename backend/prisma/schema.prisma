@@ -22,7 +22,6 @@ model User {
   agreedToTerms            Boolean         @default(false)
   marketingEmails          Boolean         @default(false)
   shareDevices             Boolean         @default(false)
-  pushNotifications        Boolean         @default(false)
   createdAt                DateTime        @default(now())
   updatedAt                DateTime        @updatedAt
   quizResults              QuizResult[]

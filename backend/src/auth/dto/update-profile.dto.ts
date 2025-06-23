@@ -4,7 +4,7 @@ import { IsOptional, IsBoolean, IsNumber, Min, Max } from 'class-validator';
  * Data Transfer Object for updating user profile preferences
  *
  * This DTO defines the structure and validation rules for updating user preferences
- * such as study pace, marketing emails, device sharing, and push notifications.
+ * such as study pace, marketing emails, and device sharing.
  *
  * @class UpdateProfileDto
  *
@@ -14,8 +14,7 @@ import { IsOptional, IsBoolean, IsNumber, Min, Max } from 'class-validator';
  * const updateData: UpdateProfileDto = {
  *   studyPaceId: 2,
  *   marketingEmails: true,
- *   shareDevices: false,
- *   pushNotifications: true
+ *   shareDevices: false
  * };
  * ```
  */
@@ -55,15 +54,4 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsBoolean()
   shareDevices?: boolean;
-
-  /**
-   * User's preference for push notifications
-   *
-   * Boolean indicating whether the user wants to receive push notifications.
-   *
-   * @example true
-   */
-  @IsOptional()
-  @IsBoolean()
-  pushNotifications?: boolean;
 } 

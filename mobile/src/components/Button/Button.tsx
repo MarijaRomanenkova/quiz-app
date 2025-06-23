@@ -13,7 +13,14 @@ interface ButtonProps {
   style?: any;
 }
 
-const getButtonColors = (variant: ButtonVariant) => {
+const getButtonColors = (variant: ButtonVariant, disabled: boolean = false) => {
+  if (disabled) {
+    return {
+      backgroundColor: '#CCCCCC', // gray when disabled
+      textColor: '#666666',
+    };
+  }
+
   switch (variant) {
     case 'success':
       return {
@@ -41,7 +48,7 @@ export const Button = ({
   disabled = false,
   style,
 }: ButtonProps) => {
-  const colors = getButtonColors(variant);
+  const colors = getButtonColors(variant, disabled);
 
   return (
     <PaperButton

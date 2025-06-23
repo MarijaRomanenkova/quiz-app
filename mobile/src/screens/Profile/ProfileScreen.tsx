@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Text, Surface, IconButton, Switch } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -6,7 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { setUserProfile, updateUserProfile } from '../../store/userSlice';
+import { setUser, updateUserPreferences } from '../../store/userSlice';
 import { theme } from '../../theme';
 import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceSelector';
 import { Button } from '../../components/Button/Button';
@@ -20,40 +20,41 @@ export const ProfileScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const dispatch = useDispatch();
   const { logout } = useAuth();
-  const { 
-    name, 
-    studyPaceId = 1, 
-    agreedToTerms,
-    marketingEmails = false,
-    shareDevices = false,
-    pushNotifications = false
-  } = useSelector((state: RootState) => state.user);
-  const { user } = useSelector((state: RootState) => state.auth);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const [studyPaceId, setStudyPaceId] = useState(1);
+  const [marketingEmails, setMarketingEmails] = useState(false);
+  const [shareDevices, setShareDevices] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setStudyPaceId(user.studyPaceId);
+      setMarketingEmails(user.marketingEmails);
+      setShareDevices(user.shareDevices);
+      setAgreedToTerms(user.agreedToTerms);
+    }
+  }, [user]);
 
   const handleStudyPaceChange = (paceId: number) => {
-    dispatch(updateUserProfile({ studyPaceId: paceId }));
+    setStudyPaceId(paceId);
   };
 
   const handleMarketingEmailsChange = (value: boolean) => {
-    dispatch(updateUserProfile({ marketingEmails: value }));
+    setMarketingEmails(value);
   };
 
   const handleShareDevicesChange = (value: boolean) => {
-    dispatch(updateUserProfile({ shareDevices: value }));
-  };
-
-  const handlePushNotificationsChange = (value: boolean) => {
-    dispatch(updateUserProfile({ pushNotifications: value }));
+    setShareDevices(value);
   };
 
   const handleTermsChange = (value: boolean) => {
     if (value === false) {
       setShowTermsModal(true);
     } else {
-      // If user is trying to set it to true, update Redux state
-      dispatch(updateUserProfile({ agreedToTerms: true }));
+      setAgreedToTerms(true);
     }
   };
 
@@ -66,7 +67,6 @@ export const ProfileScreen = () => {
       const { token } = useSelector((state: RootState) => state.auth);
       
       if (token) {
-        // Delete account from backend
         await deleteUserAccount(token);
       }
       
@@ -86,71 +86,66 @@ export const ProfileScreen = () => {
   };
 
   const handleSave = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
     try {
-      console.log('ProfileScreen: Starting save process...');
-      const { token } = useSelector((state: RootState) => state.auth);
-      
-      console.log('ProfileScreen: Current Redux state:', {
+      console.log('Saving profile with data:', {
         studyPaceId,
         marketingEmails,
         shareDevices,
-        pushNotifications,
-        agreedToTerms
       });
-      
-      if (token) {
-        console.log('ProfileScreen: Making API call to update profile...');
-        // Save to backend
-        const result = await updateUserProfileAPI(token, {
+
+      const { token } = useSelector((state: RootState) => state.auth);
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+
+      const response = await updateUserProfileAPI(token, {
+        studyPaceId,
+        marketingEmails,
+        shareDevices,
+      });
+
+      console.log('Profile update response:', response);
+
+      dispatch(
+        updateUserPreferences({
           studyPaceId,
           marketingEmails,
           shareDevices,
-          pushNotifications,
-        });
-        console.log('ProfileScreen: API call successful:', result);
-      } else {
-        console.log('ProfileScreen: No token available, skipping backend save');
-      }
-
-      // Update Redux state
-      console.log('ProfileScreen: Updating Redux state...');
-      dispatch(setUserProfile({
-        name,
-        email: user?.email || '',
-        level: user?.levelId || '',
-        studyPaceId,
-        agreedToTerms,
-        marketingEmails,
-        shareDevices,
-        pushNotifications
-      }));
-
-      // Show success message
-      console.log('ProfileScreen: Showing success alert...');
-      Alert.alert(
-        'Success',
-        'Your settings have been successfully updated!',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack()
-          }
-        ]
+        })
       );
+
+      Alert.alert('Success', 'Profile updated successfully!');
     } catch (error) {
-      console.error('ProfileScreen: Save failed:', error);
-      Alert.alert(
-        'Save Failed',
-        'Failed to save your preferences. Please try again.',
-        [{ text: 'OK' }]
-      );
+      console.error('Error updating profile:', error);
+      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleLogout = () => {
     logout();
-    // The navigation will be handled by the auth state change
   };
+
+  const hasChanges = () => {
+    if (!user) return false;
+    return (
+      studyPaceId !== user.studyPaceId ||
+      marketingEmails !== user.marketingEmails ||
+      shareDevices !== user.shareDevices
+    );
+  };
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>User not found</Text>
+      </View>
+    );
+  }
 
   return (
     <Surface style={styles.container}>
@@ -168,14 +163,14 @@ export const ProfileScreen = () => {
 
         {/* User Info */}
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>{name || user?.username}</Text>
+          <Text style={styles.userName}>{user.username}</Text>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Email:</Text>
-            <Text style={styles.infoValue}>{user?.email}</Text>
+            <Text style={styles.infoValue}>{user.email}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Level:</Text>
-            <Text style={styles.infoValue}>{user?.levelId}</Text>
+            <Text style={styles.infoValue}>{user.levelId}</Text>
           </View>
         </View>
 
@@ -210,10 +205,6 @@ export const ProfileScreen = () => {
             <Text style={styles.toggleLabel}>Share Among Devices</Text>
             <Switch value={shareDevices} onValueChange={handleShareDevicesChange} />
           </View>
-          <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Agree to Push Notifications</Text>
-            <Switch value={pushNotifications} onValueChange={handlePushNotificationsChange} />
-          </View>
         </View>
 
         {/* Save Button */}
@@ -221,6 +212,7 @@ export const ProfileScreen = () => {
           mode="contained"
           onPress={handleSave}
           variant="success"
+          disabled={!hasChanges() || isSaving}
         >
           Save
         </Button>
@@ -329,5 +321,11 @@ const styles = StyleSheet.create({
   logoutButton: {
     marginTop: 16,
     marginBottom: 40  
+  },
+  errorText: {
+    fontSize: 16,
+    color: theme.colors.error,
+    textAlign: 'center',
+    marginTop: 50,
   },
 });

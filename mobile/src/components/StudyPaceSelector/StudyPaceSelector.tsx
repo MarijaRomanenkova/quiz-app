@@ -14,18 +14,18 @@ export const StudyPaceSelector = ({ currentPaceId, onPaceChange }: StudyPaceSele
     onPaceChange?.(parseInt(value));
   };
 
-  const selectedPace = STUDY_PACES.find(pace => pace.studyPaceId === currentPaceId.toString());
+  const selectedPace = STUDY_PACES.find(pace => pace.studyPaceId === (currentPaceId?.toString() || '1'));
 
   return (
     <View style={styles.container}>
       <SegmentedButtons
-        value={currentPaceId.toString()}
+        value={(currentPaceId || 1).toString()}
         onValueChange={handlePaceChange}
         buttons={STUDY_PACES.map(pace => ({
           value: pace.studyPaceId,
           label: pace.title,
           style: styles.button,
-          icon: currentPaceId === parseInt(pace.studyPaceId) ? 'check' : undefined,
+          icon: (currentPaceId || 1) === parseInt(pace.studyPaceId) ? 'check' : undefined,
         }))}
         style={styles.segmentedButtons}
         theme={{
