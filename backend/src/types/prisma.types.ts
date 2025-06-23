@@ -20,6 +20,11 @@ export type UserCreateInput = {
   password: string;
   username: string;
   levelId: string;
+  studyPaceId?: number;
+  agreedToTerms?: boolean;
+  marketingEmails?: boolean;
+  shareDevices?: boolean;
+  pushNotifications?: boolean;
   emailVerified?: boolean;
   verificationToken?: string;
   verificationTokenExpires?: Date;
@@ -32,6 +37,11 @@ export type UserUpdateInput = {
   password?: string;
   username?: string;
   levelId?: string;
+  studyPaceId?: number;
+  agreedToTerms?: boolean;
+  marketingEmails?: boolean;
+  shareDevices?: boolean;
+  pushNotifications?: boolean;
   emailVerified?: boolean;
   verificationToken?: string | null;
   verificationTokenExpires?: Date | null;

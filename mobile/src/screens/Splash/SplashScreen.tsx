@@ -24,10 +24,11 @@ export const SplashScreen = () => {
     const loadFonts = async () => {
       try {
         await Font.loadAsync({
-          'BalooBhaina2-Regular': require('../../../assets/fonts/BalooBhaina2-Regular.ttf'),
-          'BalooBhaina2-Medium': require('../../../assets/fonts/BalooBhaina2-Medium.ttf'),
-          'BalooBhaina2-SemiBold': require('../../../assets/fonts/BalooBhaina2-SemiBold.ttf'),
-          'BalooBhaina2-Bold': require('../../../assets/fonts/BalooBhaina2-Bold.ttf'),
+          'Baloo2-Regular': require('../../../assets/fonts/Baloo2-Regular.ttf'),
+          'Baloo2-Medium': require('../../../assets/fonts/Baloo2-Medium.ttf'),
+          'Baloo2-SemiBold': require('../../../assets/fonts/Baloo2-SemiBold.ttf'),
+          'Baloo2-Bold': require('../../../assets/fonts/Baloo2-Bold.ttf'),
+          'Baloo2-ExtraBold': require('../../../assets/fonts/Baloo2-ExtraBold.ttf'),
         });
         setFontsLoaded(true);
       } catch (error) {
@@ -139,16 +140,16 @@ const styles = StyleSheet.create({
   logoTextFresh: {
     color: '#FFFFFF',
     fontSize: 24,
-    fontFamily: 'BalooBhaina2-Regular',
+    fontFamily: 'Baloo2-Regular',
   },
   logoTextQuiz: {
     color: '#FFFFFF',
     fontSize: 48,
-    fontFamily: 'BalooBhaina2-Bold',
+    fontFamily: 'Baloo2-Bold',
   },
   logoTextApp: {
     color: '#FFFFFF',
     fontSize: 24,
-    fontFamily: 'BalooBhaina2-Regular',
+    fontFamily: 'Baloo2-Regular',
   },
 }); 

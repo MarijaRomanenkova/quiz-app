@@ -23,57 +23,57 @@ export const theme = {
   },
   fonts: {
     ...MD3LightTheme.fonts,
-    // Display styles - Baloo Bhaina 2
+    // Display styles - Baloo 2
     displayLarge: {
       ...MD3LightTheme.fonts.displayLarge,
-      fontFamily: 'BalooBhaina2-Bold',
+      fontFamily: 'Baloo2-Bold',
     },
     displayMedium: {
       ...MD3LightTheme.fonts.displayMedium,
-      fontFamily: 'BalooBhaina2-Bold',
+      fontFamily: 'Baloo2-Bold',
     },
     displaySmall: {
       ...MD3LightTheme.fonts.displaySmall,
-      fontFamily: 'BalooBhaina2-SemiBold',
+      fontFamily: 'Baloo2-SemiBold',
     },
-    // Headline styles - Baloo Bhaina 2
+    // Headline styles - Baloo 2
     headlineLarge: {
       ...MD3LightTheme.fonts.headlineLarge,
-      fontFamily: 'BalooBhaina2-Bold',
+      fontFamily: 'Baloo2-Bold',
     },
     headlineMedium: {
       ...MD3LightTheme.fonts.headlineMedium,
-      fontFamily: 'BalooBhaina2-SemiBold',
+      fontFamily: 'Baloo2-SemiBold',
     },
     headlineSmall: {
       ...MD3LightTheme.fonts.headlineSmall,
-      fontFamily: 'BalooBhaina2-Regular',
+      fontFamily: 'Baloo2-Regular',
     },
-    // Title styles - Baloo Bhaina 2
+    // Title styles - Baloo 2
     titleLarge: {
       ...MD3LightTheme.fonts.titleLarge,
-      fontFamily: 'BalooBhaina2-SemiBold',
+      fontFamily: 'Baloo2-SemiBold',
     },
     titleMedium: {
       ...MD3LightTheme.fonts.titleMedium,
-      fontFamily: 'BalooBhaina2-Regular',
+      fontFamily: 'Baloo2-Regular',
     },
     titleSmall: {
       ...MD3LightTheme.fonts.titleSmall,
-      fontFamily: 'BalooBhaina2-Regular',
+      fontFamily: 'Baloo2-Regular',
     },
-    // Body styles - OpenSans for better readability
+    // Body styles - Baloo 2 for better readability
     bodyLarge: {
       ...MD3LightTheme.fonts.bodyLarge,
-      fontFamily: 'OpenSans-Regular',
+      fontFamily: 'Baloo2-Regular',
     },
     bodyMedium: {
       ...MD3LightTheme.fonts.bodyMedium,
-      fontFamily: 'OpenSans-Regular',
+      fontFamily: 'Baloo2-Regular',
     },
     bodySmall: {
       ...MD3LightTheme.fonts.bodySmall,
-      fontFamily: 'OpenSans-Regular',
+      fontFamily: 'Baloo2-Regular',
     },
   },
   buttons: {
@@ -133,14 +133,15 @@ export const fonts = {
     xxlarge: 32
   },
   weights: {
-    // Baloo Bhaina 2 weights
-    regular: 'BalooBhaina2-Regular',
-    medium: 'BalooBhaina2-Medium',
-    semiBold: 'BalooBhaina2-SemiBold',
-    bold: 'BalooBhaina2-Bold',
-    // OpenSans weights for body text
-    bodyRegular: 'OpenSans-Regular',
-    bodyMedium: 'OpenSans-Semibold',
-    bodyBold: 'OpenSans-Bold'
+    // Baloo 2 weights
+    regular: 'Baloo2-Regular',
+    medium: 'Baloo2-Medium',
+    semiBold: 'Baloo2-SemiBold',
+    bold: 'Baloo2-Bold',
+    extraBold: 'Baloo2-ExtraBold',
+    // Baloo 2 weights for body text (replacing OpenSans)
+    bodyRegular: 'Baloo2-Regular',
+    bodyMedium: 'Baloo2-Medium',
+    bodyBold: 'Baloo2-Bold'
   }
 }; 

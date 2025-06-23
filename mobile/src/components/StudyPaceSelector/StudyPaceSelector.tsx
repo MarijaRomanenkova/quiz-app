@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   description: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontFamily: 'OpenSans-Regular',
+    fontFamily: 'Baloo2-Regular',
     textAlign: 'center',
     marginTop: 8,
   },

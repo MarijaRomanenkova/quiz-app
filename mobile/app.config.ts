@@ -24,7 +24,26 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   developmentClient: {
     silentLaunch: true
   },
-  plugins: ["expo-dev-client"],
+  plugins: [
+    "expo-dev-client",
+    [
+      "expo-font",
+      {
+        fonts: [
+          "assets/fonts/Baloo2-Regular.ttf",
+          "assets/fonts/Baloo2-Medium.ttf",
+          "assets/fonts/Baloo2-SemiBold.ttf",
+          "assets/fonts/Baloo2-Bold.ttf",
+          "assets/fonts/Baloo2-ExtraBold.ttf",
+          "assets/fonts/BalooBhaina2-Regular.ttf",
+          "assets/fonts/BalooBhaina2-Medium.ttf",
+          "assets/fonts/BalooBhaina2-SemiBold.ttf",
+          "assets/fonts/BalooBhaina2-Bold.ttf",
+          "assets/fonts/BalooBhaina2-ExtraBold.ttf"
+        ]
+      }
+    ]
+  ],
   web: {
     bundler: 'webpack'
   },

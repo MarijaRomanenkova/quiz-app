@@ -9,6 +9,8 @@ interface RegisterData {
   email: string;
   password: string;
   username: string;
+  studyPaceId: number;
+  agreedToTerms: boolean;
 }
 
 interface AuthResponse {

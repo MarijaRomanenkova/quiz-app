@@ -3,10 +3,12 @@ import {
   UnauthorizedException,
   ConflictException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { hash, compare } from 'bcrypt';
 import { Resend } from 'resend';
 import { randomBytes } from 'crypto';
@@ -84,7 +86,7 @@ export class AuthService {
    * ```
    */
   async register(registerDto: RegisterDto): Promise<{ message: string }> {
-    const { email, password, username } = registerDto;
+    const { email, password, username, studyPaceId, agreedToTerms } = registerDto;
     this.logger.log(`Registration attempt for email: ${email}`);
 
     // Check if user exists
@@ -103,11 +105,16 @@ export class AuthService {
       const verificationToken = randomBytes(32).toString('hex');
       const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-      // Create user
+      // Create user with preferences
       const user = await this.prisma.createUser({
         email,
         username,
         password: hashedPassword,
+        studyPaceId,
+        agreedToTerms,
+        marketingEmails: false, // Default to false
+        shareDevices: false, // Default to false
+        pushNotifications: false, // Default to false
         verificationToken,
         verificationTokenExpires,
         level: {
@@ -327,5 +334,76 @@ export class AuthService {
         resetTokenExpiry: null,
       },
     );
+  }
+
+  async getUserProfile(userId: string) {
+    const user = await this.prisma.findUser({ id: userId });
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      levelId: user.levelId,
+      studyPaceId: user.studyPaceId,
+      agreedToTerms: user.agreedToTerms,
+      marketingEmails: user.marketingEmails,
+      shareDevices: user.shareDevices,
+      pushNotifications: user.pushNotifications,
+      emailVerified: user.emailVerified,
+    };
+  }
+
+  async updateUserProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+    const user = await this.prisma.findUser({ id: userId });
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updatedUser = await this.prisma.updateUser(
+      { id: userId },
+      {
+        studyPaceId: updateProfileDto.studyPaceId,
+        marketingEmails: updateProfileDto.marketingEmails,
+        shareDevices: updateProfileDto.shareDevices,
+        pushNotifications: updateProfileDto.pushNotifications,
+      },
+    );
+
+    return {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      username: updatedUser.username,
+      levelId: updatedUser.levelId,
+      studyPaceId: updatedUser.studyPaceId,
+      agreedToTerms: updatedUser.agreedToTerms,
+      marketingEmails: updatedUser.marketingEmails,
+      shareDevices: updatedUser.shareDevices,
+      pushNotifications: updatedUser.pushNotifications,
+      emailVerified: updatedUser.emailVerified,
+    };
+  }
+
+  async deleteUserAccount(userId: string) {
+    const user = await this.prisma.findUser({ id: userId });
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Delete user and all related data
+    await this.prisma.user.delete({
+      where: { id: userId },
+    });
+
+    this.logger.log(`User account deleted: ${user.email}`);
+
+    return {
+      message: 'Account deleted successfully',
+    };
   }
 }

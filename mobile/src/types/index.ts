@@ -123,8 +123,11 @@ export interface QuizTopic {
  * User profile information
  * @interface UserProfile
  * @property {string} name - User's name
- * @property {StudyPaceId} studyPaceId - User's preferred study pace Id
+ * @property {number} studyPaceId - User's preferred study pace Id
  * @property {boolean} agreedToTerms - User's agreement to terms
+ * @property {boolean} marketingEmails - User's preference for marketing emails
+ * @property {boolean} shareDevices - User's preference for sharing data across devices
+ * @property {boolean} pushNotifications - User's preference for push notifications
  */
 export interface UserProfile {
   name: string;

@@ -11,11 +11,14 @@ import {
   Logger,
   HttpCode,
   HttpStatus,
+  Put,
+  Delete,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { verificationSuccessTemplate } from '../templates/email/verification-success.template';
 import { ConfigService } from '@nestjs/config';
@@ -122,8 +125,23 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req: { user: UserPayload }) {
-    return req.user;
+  async getProfile(@Request() req: { user: UserPayload }) {
+    return this.authService.getUserProfile(req.user.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('profile')
+  async updateProfile(
+    @Request() req: { user: UserPayload },
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
+    return this.authService.updateUserProfile(req.user.sub, updateProfileDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('account')
+  async deleteAccount(@Request() req: { user: UserPayload }) {
+    return this.authService.deleteUserAccount(req.user.sub);
   }
 
   @Post('forgot-password')

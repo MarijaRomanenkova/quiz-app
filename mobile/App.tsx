@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { Provider as StoreProvider } from 'react-redux';
 import { AppNavigator } from './src/navigation/AppNavigator';
@@ -9,6 +9,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { enableScreens } from 'react-native-screens';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as Font from 'expo-font';
 
 // Enable screens for better performance
 enableScreens();
@@ -48,6 +49,27 @@ const LoadingComponent = () => (
 );
 
 const App = () => {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    const loadFonts = async () => {
+      await Font.loadAsync({
+        'Baloo2-Regular': require('./assets/fonts/Baloo2-Regular.ttf'),
+        'Baloo2-Medium': require('./assets/fonts/Baloo2-Medium.ttf'),
+        'Baloo2-SemiBold': require('./assets/fonts/Baloo2-SemiBold.ttf'),
+        'Baloo2-Bold': require('./assets/fonts/Baloo2-Bold.ttf'),
+        'Baloo2-ExtraBold': require('./assets/fonts/Baloo2-ExtraBold.ttf'),
+      });
+      setFontsLoaded(true);
+    };
+
+    loadFonts();
+  }, []);
+
+  if (!fontsLoaded) {
+    return <LoadingComponent />;
+  }
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StoreProvider store={store}>

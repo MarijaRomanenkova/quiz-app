@@ -53,14 +53,18 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   const startTime = useRef(Date.now());
   const audioQuestionRef = useRef<AudioPlayerRef>(null);
   const { token } = useToken();
+  const [readingText, setReadingTextState] = React.useState<any>(null);
 
   console.log('Quiz - quizId:', quizId);
   console.log('Quiz - questions from Redux:', questions.length);
   console.log('Quiz - questions state:', questionsState);
   console.log('Quiz - all questions by topic:', questionsState.byTopicId);
+  console.log('Quiz - activeQuiz:', activeQuiz);
 
   const handleReadingText = (questions: Question[]) => {
-    const currentQuestion = questions[activeQuiz?.currentQuestion ?? 0];
+    if (!activeQuiz) return;
+    
+    const currentQuestion = questions[activeQuiz.currentQuestion];
     if (currentQuestion?.readingTextId) {
       // For reading questions, show the reading text first
       dispatch(setReadingText({
@@ -124,13 +128,13 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   }, [quizId]);
 
   const handleAnswer = (selectedIndex: number) => {
-    if (activeQuiz?.selectedAnswer !== null) return;
+    if (!activeQuiz || activeQuiz.selectedAnswer !== null) return;
     
     if (audioQuestionRef.current) {
       audioQuestionRef.current.stop();
     }
     
-    const currentQuestion = questions[activeQuiz?.currentQuestion ?? 0];
+    const currentQuestion = questions[activeQuiz.currentQuestion];
     const isCorrect = currentQuestion?.correctAnswerId === selectedIndex.toString();
     
     dispatch(selectAnswer(selectedIndex));
@@ -142,18 +146,20 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   };
 
   const handleNext = () => {
+    if (!activeQuiz) return;
+    
     dispatch(selectAnswer(null));
     
-    if (activeQuiz?.showReadingText) {
+    if (activeQuiz.showReadingText) {
       dispatch(setReadingText({ textId: activeQuiz.currentTextId ?? '', show: false }));
       return;
     }
     
-    if ((activeQuiz?.currentQuestion ?? 0) < questions.length - 1) {
+    if (activeQuiz.currentQuestion < questions.length - 1) {
       dispatch(nextQuestion());
     } else {
       const timeSpent = (Date.now() - startTime.current) / 1000;
-      const finalScore = activeQuiz?.score ?? 0;
+      const finalScore = activeQuiz.score;
       const totalQuestions = questions.length;
       const scorePercentage = Math.round((finalScore / totalQuestions) * 100);
       
@@ -201,14 +207,11 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     }
   };
 
-  const question = questions[activeQuiz?.currentQuestion ?? 0];
-  const [readingText, setReadingTextState] = React.useState<any>(null);
-
   // Get reading text from Redux when needed
   React.useEffect(() => {
     if (activeQuiz?.showReadingText && activeQuiz?.currentTextId) {
       // Get the current question to find the reading text ID
-      const currentQuestion = questions[activeQuiz?.currentQuestion ?? 0];
+      const currentQuestion = questions[activeQuiz.currentQuestion];
       if (currentQuestion?.readingTextId) {
         console.log('Looking for reading text with ID:', currentQuestion.readingTextId);
         // Use Redux selector to get reading text by ID
@@ -238,6 +241,16 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     }
   }, [questions.length, navigation]);
 
+  // Early returns after all hooks have been called
+  if (!activeQuiz) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text>Initializing quiz...</Text>
+      </View>
+    );
+  }
+
   if (questions.length === 0) {
     return (
       <View style={styles.loadingContainer}>
@@ -258,6 +271,8 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
       </View>
     );
   }
+
+  const question = questions[activeQuiz.currentQuestion];
 
   return (
     <View style={styles.container}>

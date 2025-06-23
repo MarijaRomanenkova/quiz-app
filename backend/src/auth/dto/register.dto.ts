@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsNotEmpty, Matches } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsNotEmpty, Matches, IsNumber, IsBoolean, Min, Max } from 'class-validator';
 
 /**
  * Data Transfer Object for user registration requests
@@ -14,7 +14,9 @@ import { IsEmail, IsString, MinLength, IsNotEmpty, Matches } from 'class-validat
  * const registerData: RegisterDto = {
  *   email: 'user@example.com',
  *   password: 'password123',
- *   username: 'john_doe'
+ *   username: 'john_doe',
+ *   studyPaceId: 2,
+ *   agreedToTerms: true
  * };
  * ```
  */
@@ -51,4 +53,27 @@ export class RegisterDto {
     message: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
   })
   password: string;
+
+  /**
+   * User's preferred study pace ID
+   *
+   * Must be a number between 1 and 3 representing the study pace level.
+   * 1 = Relaxed, 2 = Moderate, 3 = Intensive
+   *
+   * @example 2
+   */
+  @IsNumber()
+  @Min(1)
+  @Max(3)
+  studyPaceId: number;
+
+  /**
+   * User's agreement to terms and conditions
+   *
+   * Must be true for registration to proceed.
+   *
+   * @example true
+   */
+  @IsBoolean()
+  agreedToTerms: boolean;
 }

@@ -26,7 +26,7 @@ export const Input = ({
 }: InputProps) => {
   return (
     <View style={styles.container}>
-      <Text variant="titleMedium" style={[styles.label, { color: theme.colors.surface }]}>
+      <Text style={[styles.label, { color: theme.colors.surface, fontFamily: 'Baloo2-SemiBold', fontSize: 18 }]}>
         {label}
       </Text>
       <TextInput

@@ -3,8 +3,11 @@ import type { UserProfile } from '../types';
 
 const initialState: UserProfile = {
   name: '',
-  studyPaceId: 0,
+  studyPaceId: 1,
   agreedToTerms: false,
+  marketingEmails: false,
+  shareDevices: false,
+  pushNotifications: false,
 };
 
 export const userSlice = createSlice({

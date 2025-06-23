@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   backText: {
     color: theme.colors.surface,
     fontSize: 16,
-    fontFamily: 'BalooBhaina2-Regular',
+    fontFamily: 'Baloo2-Regular',
   },
   content: {
     flex: 1,

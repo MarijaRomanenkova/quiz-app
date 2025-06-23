@@ -142,3 +142,60 @@ export const fetchInitialData = async (token?: string): Promise<{
     throw error;
   }
 };
+
+export const fetchUserProfile = async (token: string): Promise<any> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/profile`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    throw error;
+  }
+};
+
+export const updateUserProfile = async (token: string, profileData: {
+  studyPaceId?: number;
+  marketingEmails?: boolean;
+  shareDevices?: boolean;
+  pushNotifications?: boolean;
+}): Promise<any> => {
+  try {
+    console.log('API: updateUserProfile called with:', { token: token ? 'present' : 'missing', profileData });
+    const response = await fetch(`${API_URL}/auth/profile`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(profileData)
+    });
+    console.log('API: updateUserProfile response status:', response.status);
+    const result = await handleResponse(response);
+    console.log('API: updateUserProfile result:', result);
+    return result;
+  } catch (error) {
+    console.error('API: Error updating user profile:', error);
+    throw error;
+  }
+};
+
+export const deleteUserAccount = async (token: string): Promise<any> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/account`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Error deleting user account:', error);
+    throw error;
+  }
+};

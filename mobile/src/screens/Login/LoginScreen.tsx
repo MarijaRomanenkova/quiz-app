@@ -54,7 +54,7 @@ export const LoginScreen = () => {
     try {
       const success = await login(data.email, data.password);
       if (success) {
-        navigation.navigate('Main');
+        navigation.navigate('Home', { userProfile: undefined });
       } else {
         setShowRegisterModal(true);
       }
@@ -80,10 +80,10 @@ export const LoginScreen = () => {
   return (
     <Surface style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.header}>
-          <Text variant="displayLarge" style={styles.title}>DEUTSCH</Text>
+        <View >
+          <Text style={styles.header}>DEUTSCH</Text>
           <View style={styles.logoContainer}>
-            <Logo width={120} height={120} />
+            <Logo width={160} height={160} />
           </View>
           <Text variant="headlineMedium" style={styles.title}>Learn on the go</Text>
         </View>
@@ -140,7 +140,7 @@ export const LoginScreen = () => {
         <Button
           mode="contained"
           onPress={handleSubmit(onSubmit)}
-          variant="primary"
+          variant="success"
         >
           Log In
         </Button>
@@ -183,12 +183,19 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   header: {
-    marginTop: 60,
+    marginTop: 40,
     alignItems: 'center',
+    color: theme.colors.surface,
+    textAlign: 'center',
+    fontFamily: 'BalooBhaina2-Bold',
+    fontSize: 42,
+    fontWeight: 'bold',
   },
   title: {
     color: theme.colors.surface,
     textAlign: 'center',
+    fontFamily: 'BalooBhaina2-Bold',
+    fontSize: 28,
   },
   logoContainer: {
     width: '100%',

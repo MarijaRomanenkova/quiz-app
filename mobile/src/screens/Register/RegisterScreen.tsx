@@ -77,14 +77,10 @@ export const RegisterScreen = () => {
         email: data.email,
         username: data.name,
         password: data.password,
-      });
-
-      dispatch(setUserProfile({
-        name: data.name,
-        email: data.email,
         studyPaceId: data.studyPaceId,
         agreedToTerms: data.agreedToTerms,
-      }));
+      });
+
       setShowSuccessModal(true);
     } catch (error: unknown) {
       console.error('Registration error:', {
@@ -310,7 +306,7 @@ const styles = StyleSheet.create({
   backText: {
     color: theme.colors.surface,
     fontSize: 16,
-    fontFamily: 'BalooBhaina2-Regular',
+    fontFamily: 'Baloo2-Regular',
   },
   content: {
     flex: 1,
