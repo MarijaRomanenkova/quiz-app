@@ -7,7 +7,6 @@
  * @property {string} questionText - Text content of the question
  * @property {string[]} options - Array of possible answers
  * @property {string} correctAnswerId - ID of the correct answer
- * @property {number} points - Points awarded for correct answer
  * @property {string} topicId - ID of the topic this question belongs to
  * @property {string} topic - Topic of the question
  * @property {string} title - Title of the reading question
@@ -22,7 +21,6 @@ export interface Question {
   id: string;
   questionId: string;
   questionText: string;
-  points: number;
   topicId: string;
   categoryId: string;
   correctAnswerId: string;
@@ -144,6 +142,22 @@ export interface QuizAttempt {
   id: string;
   score: number;
   date: string;
+}
+
+// Daily quiz time entry
+export interface DailyQuizTime {
+  date: string; // ISO date string (YYYY-MM-DD)
+  minutes: number;
+  lastUpdated: string; // ISO timestamp
+}
+
+// Statistics state interface
+export interface StatisticsState {
+  attempts: QuizAttempt[];
+  totalAttempts: number;
+  dailyQuizTimes: DailyQuizTime[];
+  totalQuizMinutes: number;
+  currentSessionStart: string | null;
 }
 
 export interface Topic {

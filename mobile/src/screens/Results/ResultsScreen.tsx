@@ -18,7 +18,7 @@ type ResultsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>
 export const ResultsScreen = () => {
   const navigation = useNavigation<ResultsScreenNavigationProp>();
   const route = useRoute<ResultsScreenRouteProp>();
-  const user = useSelector((state: RootState) => state.user);
+  const user = useSelector((state: RootState) => state.user.user);
   const quizResult = useSelector((state: RootState) => state.quizResults.currentResult);
   const wrongQuestions = useSelector((state: RootState) => state.wrongQuestions.wrongQuestions);
   
@@ -79,7 +79,7 @@ export const ResultsScreen = () => {
     if (categoryId) {
       navigation.navigate('Topic', { categoryId });
     } else {
-      navigation.navigate('Home' as never);
+      navigation.navigate('Home');
     }
   };
 
@@ -91,7 +91,7 @@ export const ResultsScreen = () => {
         <View style={styles.congratsContainer}>
           <Text variant="displayLarge" style={styles.congratsText}>Congrats!</Text>
           <Text variant="headlineMedium" style={styles.messageText}>
-            Great job, {user?.name || 'User'}!
+            Great job, {user?.username || 'User'}!
           </Text>
           
           {/* Show progress update */}
@@ -145,7 +145,7 @@ export const ResultsScreen = () => {
           
           <CustomButton
             variant="success"
-            onPress={() => navigation.navigate('Home' as never)}
+            onPress={() => navigation.navigate('Home')}
             style={styles.button}
           >
             Continue Learning

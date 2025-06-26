@@ -199,3 +199,58 @@ export const deleteUserAccount = async (token: string): Promise<any> => {
     throw error;
   }
 };
+
+// Quiz time sync functions
+export const syncQuizTimeData = async (token: string, quizTimeData: {
+  dailyQuizTimes: Array<{
+    date: string;
+    minutes: number;
+    lastUpdated: string;
+  }>;
+  totalQuizMinutes: number;
+}): Promise<any> => {
+  try {
+    console.log('API: Syncing quiz time data:', quizTimeData);
+    const response = await fetch(`${API_URL}/statistics/quiz-time`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(quizTimeData)
+    });
+    console.log('API: Quiz time sync response status:', response.status);
+    const result = await handleResponse(response);
+    console.log('API: Quiz time sync result:', result);
+    return result;
+  } catch (error) {
+    console.error('API: Error syncing quiz time data:', error);
+    throw error;
+  }
+};
+
+export const fetchQuizTimeData = async (token: string): Promise<{
+  dailyQuizTimes: Array<{
+    date: string;
+    minutes: number;
+    lastUpdated: string;
+  }>;
+  totalQuizMinutes: number;
+}> => {
+  try {
+    console.log('API: Fetching quiz time data');
+    const response = await fetch(`${API_URL}/statistics/quiz-time`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('API: Fetch quiz time response status:', response.status);
+    const result = await handleResponse(response);
+    console.log('API: Fetch quiz time result:', result);
+    return result;
+  } catch (error) {
+    console.error('API: Error fetching quiz time data:', error);
+    throw error;
+  }
+};

@@ -6,7 +6,7 @@ import { combineReducers } from 'redux';
 import userReducer from './userSlice';
 import authReducer from './authSlice';
 import { quizSlice } from './quizSlice';
-import { statisticsSlice } from './statisticsSlice';
+import statisticsReducer from './statisticsSlice';
 import categoryReducer from './categorySlice';
 import topicReducer from './topicSlice';
 import questionsReducer from './questionsSlice';
@@ -34,7 +34,7 @@ const rootReducer = combineReducers({
   user: userReducer,
   auth: authReducer,
   quiz: quizSlice.reducer,
-  statistics: statisticsSlice.reducer,
+  statistics: statisticsReducer,
   category: categoryReducer,
   topic: topicReducer,
   questions: questionsReducer,

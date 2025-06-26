@@ -14,7 +14,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
-  Main: undefined;
+  Home: undefined;
   Topic: { categoryId: string };
   Quiz: { quizId: string; isRepeating?: boolean };
   Results: { quizId: string };
@@ -38,7 +38,7 @@ export const AppNavigator = () => {
         ) : (
           // App screens
           <>
-            <Stack.Screen name="Main" component={TabNavigator} />
+            <Stack.Screen name="Home" component={TabNavigator} />
             <Stack.Screen name="Topic" component={TopicScreen} />
             <Stack.Screen name="Quiz" component={QuizScreen} />
             <Stack.Screen name="Results" component={ResultsScreen} />

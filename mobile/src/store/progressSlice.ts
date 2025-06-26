@@ -233,6 +233,19 @@ export const selectIsTopicUnlocked = createSelector(
   }
 );
 
+// Selector for all category progress with percentages
+export const selectAllCategoryProgress = createSelector(
+  [(state: RootState) => state.progress.categoryProgress],
+  (categoryProgress) => {
+    return Object.values(categoryProgress).map(progress => ({
+      categoryId: progress.categoryId,
+      completedTopics: progress.completedTopics,
+      totalTopics: progress.totalTopics,
+      percentage: progress.totalTopics > 0 ? Math.round((progress.completedTopics / progress.totalTopics) * 100) : 0
+    }));
+  }
+);
+
 export const { 
   initializeCategoryProgress, 
   completeTopic, 

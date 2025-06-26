@@ -1,13 +1,11 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { UserProfile } from '../types/user.types';
-import type { Question } from '../types';
 
 export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
-  Home: { userProfile?: UserProfile };
+  Home: undefined;
   Category: { categoryId: string };
   Topic: { categoryId: string };
   Quiz: {
@@ -44,6 +42,12 @@ export type RootStackParamList = {
   Progress: undefined;
   Terms: undefined;
   Onboarding: undefined;
+};
+
+export type TabParamList = {
+  Dashboard: undefined;
+  Progress: undefined;
+  Profile: undefined;
 };
 
 export type NavigationProp = NativeStackNavigationProp<RootStackParamList>; 

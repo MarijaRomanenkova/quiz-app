@@ -93,7 +93,7 @@ export const TopicScreen = () => {
       {/* Back button */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.navigate('Main')}
+        onPress={() => navigation.navigate('Home')}
       >
         <MaterialCommunityIcons name="chevron-left" size={32} color={theme.colors.outline} />
         <Text style={styles.backButtonText}>Back to Categories</Text>

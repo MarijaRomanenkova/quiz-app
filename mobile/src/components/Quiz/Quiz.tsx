@@ -26,6 +26,7 @@ import { Button as CustomButton } from '../../components/Button/Button';
 import { setQuizResult } from '../../store/quizResultsSlice';
 import { addWrongQuestion as addToWrongQuestions, selectWrongQuestions } from '../../store/wrongQuestionsSlice';
 import { completeTopic, updateTopicAttempt, loadMoreQuestionsThunk } from '../../store/progressSlice';
+import { startQuizSession, endQuizSession } from '../../store/statisticsSlice';
 import { AudioPlayer, AudioPlayerRef } from '../AudioPlayer/AudioPlayer';
 import { QuizRadioGroup } from './QuizRadioGroup';
 import { ReadingText } from './ReadingText';
@@ -120,10 +121,14 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     if (!quizId) return;
     
     dispatch(startQuiz());
+    // Start the quiz session timer
+    dispatch(startQuizSession());
     loadQuestions();
 
     return () => {
       dispatch(endQuiz());
+      // End the quiz session timer when component unmounts
+      dispatch(endQuizSession());
     };
   }, [quizId]);
 
@@ -203,6 +208,8 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
         dispatch(loadMoreQuestionsThunk(categoryId));
       }
 
+      // End the quiz session timer before navigating to results
+      dispatch(endQuizSession());
       navigation.navigate('Results', { quizId });
     }
   };

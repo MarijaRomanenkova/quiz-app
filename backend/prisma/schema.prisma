@@ -80,7 +80,6 @@ model Question {
   questionText    String
   options         String[]
   correctAnswerId String
-  points          Int             @default(10)
   imageUrl        String?
   audioUrl        String?
   readingTextId   String?

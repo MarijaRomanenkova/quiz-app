@@ -184,21 +184,18 @@ async function main() {
         questionText: 'Which article is correct? "___ Buch ist neu."',
         options: ['Der', 'Die', 'Das', 'Den'],
         correctAnswerId: '2',
-        points: 10,
         topicId: 'articles'
       },
       {
         questionText: 'Which article is correct? "___ Frau ist jung."',
         options: ['Der', 'Die', 'Das', 'Den'],
         correctAnswerId: '1',
-        points: 10,
         topicId: 'articles'
       },
       {
         questionText: 'Which article is correct? "___ Mann ist groß."',
         options: ['Der', 'Die', 'Das', 'Den'],
         correctAnswerId: '0',
-        points: 10,
         topicId: 'articles'
       },
 
@@ -207,14 +204,12 @@ async function main() {
         questionText: 'What is the correct form? "Ich ___ Deutsch."',
         options: ['lerne', 'lernst', 'lernt', 'lernen'],
         correctAnswerId: '0',
-        points: 10,
         topicId: 'present-tense'
       },
       {
         questionText: 'What is the correct form? "Du ___ gut."',
         options: ['spiele', 'spielst', 'spielt', 'spielen'],
         correctAnswerId: '1',
-        points: 10,
         topicId: 'present-tense'
       },
 
@@ -223,35 +218,30 @@ async function main() {
         questionText: 'Ich ___ gestern ins Kino gegangen.',
         options: ['bin', 'habe', 'werde', 'war'],
         correctAnswerId: '0',
-        points: 5,
         topicId: 'past-tense'
       },
       {
         questionText: 'Er ___ das Buch gelesen.',
         options: ['hat', 'ist', 'wird', 'war'],
         correctAnswerId: '0',
-        points: 5,
         topicId: 'past-tense'
       },
       {
         questionText: 'Wir ___ den Film gesehen.',
         options: ['haben', 'sind', 'werden', 'waren'],
         correctAnswerId: '0',
-        points: 5,
         topicId: 'past-tense'
       },
       {
         questionText: 'Du ___ nach Hause gefahren.',
         options: ['bist', 'hast', 'wirst', 'warst'],
         correctAnswerId: '0',
-        points: 5,
         topicId: 'past-tense'
       },
       {
         questionText: 'Sie ___ das Essen gekocht.',
         options: ['hat', 'ist', 'wird', 'war'],
         correctAnswerId: '0',
-        points: 5,
         topicId: 'past-tense'
       },
 
@@ -260,35 +250,30 @@ async function main() {
         questionText: 'Das ist ein ___ (Haus).',
         options: ['Haus', 'Häuser', 'Hauses', 'Häusern'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'plurals'
       },
       {
         questionText: 'Ich habe zwei ___ (Buch).',
         options: ['Buch', 'Bücher', 'Buches', 'Büchern'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'plurals'
       },
       {
         questionText: 'Das sind drei ___ (Kind).',
         options: ['Kind', 'Kinder', 'Kindes', 'Kindern'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'plurals'
       },
       {
         questionText: 'Ich sehe viele ___ (Auto).',
         options: ['Auto', 'Autos', 'Autos', 'Autos'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'plurals'
       },
       {
         questionText: 'Die ___ (Frau) sind hier.',
         options: ['Frau', 'Frauen', 'Fraues', 'Frauen'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'plurals'
       },
 
@@ -297,35 +282,30 @@ async function main() {
         questionText: 'Das ist ein ___ (groß) Haus.',
         options: ['groß', 'große', 'großes', 'großen'],
         correctAnswerId: '2',
-        points: 5,
         topicId: 'adjectives'
       },
       {
         questionText: 'Ich habe eine ___ (klein) Katze.',
         options: ['klein', 'kleine', 'kleines', 'kleinen'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'adjectives'
       },
       {
         questionText: 'Das ist ein ___ (alt) Mann.',
         options: ['alt', 'alte', 'alter', 'alten'],
         correctAnswerId: '2',
-        points: 5,
         topicId: 'adjectives'
       },
       {
         questionText: 'Ich trinke ___ (kalt) Wasser.',
         options: ['kalt', 'kalte', 'kaltes', 'kalten'],
         correctAnswerId: '2',
-        points: 5,
         topicId: 'adjectives'
       },
       {
         questionText: 'Das ist eine ___ (schön) Blume.',
         options: ['schön', 'schöne', 'schönes', 'schönen'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'adjectives'
       },
 
@@ -334,35 +314,30 @@ async function main() {
         questionText: 'Ich gehe ___ Schule.',
         options: ['in', 'auf', 'zu', 'mit'],
         correctAnswerId: '2',
-        points: 5,
         topicId: 'prepositions'
       },
       {
         questionText: 'Das Buch liegt ___ Tisch.',
         options: ['in', 'auf', 'zu', 'mit'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'prepositions'
       },
       {
         questionText: 'Ich komme ___ Deutschland.',
         options: ['in', 'aus', 'zu', 'mit'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'prepositions'
       },
       {
         questionText: 'Ich fahre ___ Bus.',
         options: ['in', 'auf', 'zu', 'mit'],
         correctAnswerId: '3',
-        points: 5,
         topicId: 'prepositions'
       },
       {
         questionText: 'Das Kind spielt ___ Park.',
         options: ['in', 'auf', 'zu', 'mit'],
         correctAnswerId: '0',
-        points: 5,
         topicId: 'prepositions'
       },
 
@@ -371,7 +346,6 @@ async function main() {
         questionText: 'Lisa kauft Käse im Supermarkt.',
         options: ['True', 'False'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'short-stories',
         readingTextId: 'r1'
       },
@@ -379,7 +353,6 @@ async function main() {
         questionText: 'Lisa kauft Brot und Milch.',
         options: ['True', 'False'],
         correctAnswerId: '0',
-        points: 5,
         topicId: 'short-stories',
         readingTextId: 'r1'
       },
@@ -389,7 +362,6 @@ async function main() {
         questionText: 'Anna wohnt in München.',
         options: ['True', 'False'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'dialogues',
         readingTextId: 'r2'
       },
@@ -397,7 +369,6 @@ async function main() {
         questionText: 'Anna geht nach der Arbeit spazieren.',
         options: ['True', 'False'],
         correctAnswerId: '0',
-        points: 5,
         topicId: 'dialogues',
         readingTextId: 'r2'
       },
@@ -407,7 +378,6 @@ async function main() {
         questionText: 'Das Restaurant war leer.',
         options: ['True', 'False'],
         correctAnswerId: '1',
-        points: 5,
         topicId: 'news-articles',
         readingTextId: 'r3'
       },
@@ -415,7 +385,6 @@ async function main() {
         questionText: 'Sie haben 50 Euro bezahlt.',
         options: ['True', 'False'],
         correctAnswerId: '0',
-        points: 5,
         topicId: 'news-articles',
         readingTextId: 'r3'
       },
@@ -425,7 +394,6 @@ async function main() {
         questionText: 'What is the English translation of "Apfel"?',
         options: ['Pear', 'Apple', 'Orange', 'Banana'],
         correctAnswerId: '1',
-        points: 10,
         topicId: 'fruit-veggies'
       },
       {
@@ -433,7 +401,6 @@ async function main() {
         imageUrl: 'https://res.cloudinary.com/djgtzqgut/image/upload/v1738692039/tomato-simple_dbgb9b.jpg',
         options: ['Apple', 'Clemintine', 'Tomato', 'Carrot'],
         correctAnswerId: '2',
-        points: 10,
         topicId: 'fruit-veggies'
       },
 
@@ -443,7 +410,6 @@ async function main() {
         audioUrl: 'https://res.cloudinary.com/djgtzqgut/video/upload/v1738913375/shopping_b5h2ax.mp3',
         options: ['Lisa kauft Käse', 'Lisa kauft Milch', 'Lisa kauft Brot', 'Lisa kauft Eier'],
         correctAnswerId: '0',
-        points: 10,
         topicId: 'basic-listening'
       }
     ];
@@ -455,7 +421,6 @@ async function main() {
           questionText: question.questionText,
           options: question.options,
           correctAnswerId: question.correctAnswerId,
-          points: question.points,
           topicId: question.topicId,
           ...(question.readingTextId && { readingTextId: question.readingTextId }),
           ...(question.imageUrl && { imageUrl: question.imageUrl }),

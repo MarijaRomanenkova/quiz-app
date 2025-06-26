@@ -1,106 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
-import { Card, Title, Paragraph, ProgressBar } from 'react-native-paper';
+import { Card, Title } from 'react-native-paper';
 import { theme } from '../../theme';
-import { Category } from '../../types';
+import { CustomBarChart } from '../../components/CustomBarChart';
+import { LevelProgress } from '../../components/Results/LevelProgress';
+import { 
+  selectCurrentWeekData,
+  selectLastFiveWeeksData,
+  selectCurrentMonthTotal,
+  selectCurrentWeekTotal,
+  selectLevelProgress,
+  selectWeeklyGoalProgress,
+  selectMonthlyGoalProgress
+} from '../../store/statisticsSlice';
+import { selectAllCategoryProgress } from '../../store/progressSlice';
+
+const screenWidth = Dimensions.get('window').width;
 
 /**
  * Statistics screen displaying user's progress and study habits
  */
 export const ProgressScreen = () => {
-  const user = useSelector((state: RootState) => state.user);
-  const quizState = useSelector((state: RootState) => state.quiz);
-  const statistics = useSelector((state: RootState) => state.statistics);
-  // Mock categories data since there's no categories in the store
-  const [categories, setCategories] = useState<Category[]>([]);
-  
-  // Load sample categories for demo purposes
-  useEffect(() => {
-    // In a real app, this would come from an API or the Redux store
-    setCategories([
-      {
-        categoryId: 'grammar',
-        description: 'Basic grammar rules',
-        progress: 65
-      },
-      {
-        categoryId: 'vocabulary',
-        description: 'Essential vocabulary',
-        progress: 40
-      },
-      {
-        categoryId: 'conversation',
-        description: 'Practical conversation',
-        progress: 25
-      }
-    ]);
-  }, []);
-  
-  // Calculate statistics
-  const [statsData, setStatsData] = useState({
-    totalTimeSpent: 0,
-    averageDailyTime: 0,
-    daysStudied: 0,
-    totalQuestions: 0,
-    studyStreak: 0
-  });
-
-  useEffect(() => {
-    // Calculate total time spent
-    const totalTimeSpent = quizState.dailyStats.reduce((acc, day) => acc + day.timeSpent, 0);
-    
-    // Calculate days studied
-    const daysStudied = quizState.dailyStats.length;
-    
-    // Calculate average daily time
-    const averageDailyTime = daysStudied > 0 ? totalTimeSpent / daysStudied : 0;
-    
-    // Calculate total questions answered
-    const totalQuestions = quizState.dailyStats.reduce((acc, day) => acc + day.questionsAnswered, 0);
-    
-    // Calculate study streak (consecutive days)
-    let studyStreak = 0;
-    if (daysStudied > 0) {
-      // Sort dates in descending order (newest first)
-      const sortedDates = [...quizState.dailyStats]
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      
-      // Check if the most recent date is today or yesterday
-      const mostRecentDate = new Date(sortedDates[0].date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const isRecentEnough = 
-        mostRecentDate.getTime() === today.getTime() || 
-        mostRecentDate.getTime() === today.getTime() - 86400000; // 1 day in milliseconds
-      
-      if (isRecentEnough) {
-        // Count consecutive days
-        studyStreak = 1;
-        for (let i = 0; i < sortedDates.length - 1; i++) {
-          const currentDate = new Date(sortedDates[i].date);
-          const previousDate = new Date(sortedDates[i + 1].date);
-          
-          // Check if dates are consecutive
-          if (currentDate.getTime() - previousDate.getTime() === 86400000) {
-            studyStreak++;
-          } else {
-            break;
-          }
-        }
-      }
-    }
-    
-    setStatsData({
-      totalTimeSpent,
-      averageDailyTime,
-      daysStudied,
-      totalQuestions,
-      studyStreak
-    });
-  }, [quizState.dailyStats]);
+  const currentWeekData = useSelector(selectCurrentWeekData);
+  const lastFiveWeeksData = useSelector(selectLastFiveWeeksData);
+  const currentMonthTotal = useSelector(selectCurrentMonthTotal);
+  const currentWeekTotal = useSelector(selectCurrentWeekTotal);
+  const levelProgress = useSelector(selectLevelProgress);
+  const weeklyGoalProgress = useSelector(selectWeeklyGoalProgress);
+  const monthlyGoalProgress = useSelector(selectMonthlyGoalProgress);
+  const categoryProgress = useSelector(selectAllCategoryProgress);
 
   // Format time (minutes to hours and minutes)
   const formatTime = (minutes: number): string => {
@@ -110,82 +39,95 @@ export const ProgressScreen = () => {
     return `${hours}h ${mins}min`;
   };
 
+  // Format goal percentage
+  const formatGoalPercentage = (percentage: number): string => {
+    if (percentage > 100) {
+      return `+${percentage - 100} % of the target`;
+    } else if (percentage < 100) {
+      return `-${100 - percentage} % of the target`;
+    } else {
+      return '100 % of target';
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Content>
-          <Title>Study Summary</Title>
-          <View style={styles.statRow}>
-            <View style={styles.statItem}>
-              <Paragraph style={styles.statLabel}>Total Time</Paragraph>
-              <Text style={styles.statValue}>{formatTime(statsData.totalTimeSpent)}</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Paragraph style={styles.statLabel}>Daily Average</Paragraph>
-              <Text style={styles.statValue}>{formatTime(statsData.averageDailyTime)}</Text>
-            </View>
-          </View>
-          <View style={styles.statRow}>
-            <View style={styles.statItem}>
-              <Paragraph style={styles.statLabel}>Days Studied</Paragraph>
-              <Text style={styles.statValue}>{statsData.daysStudied}</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Paragraph style={styles.statLabel}>Current Streak</Paragraph>
-              <Text style={styles.statValue}>{statsData.studyStreak} days</Text>
-            </View>
-          </View>
-          <View style={styles.statRow}>
-            <View style={styles.statItem}>
-              <Paragraph style={styles.statLabel}>Questions Answered</Paragraph>
-              <Text style={styles.statValue}>{statsData.totalQuestions}</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Paragraph style={styles.statLabel}>Quiz Attempts</Paragraph>
-              <Text style={styles.statValue}>{statistics.totalAttempts}</Text>
-            </View>
-          </View>
-        </Card.Content>
-      </Card>
-
-      <Card style={styles.card}>
-        <Card.Content>
-          <Title>Category Progress</Title>
-          {categories.map((category: Category) => (
-            <View key={category.categoryId} style={styles.categoryProgress}>
-              <View style={styles.categoryHeader}>
-                <Paragraph>{category.categoryId.charAt(0).toUpperCase() + category.categoryId.slice(1)}</Paragraph>
-                <Text style={styles.progressPercentage}>{category.progress}%</Text>
+      <View style={styles.screenTitle}>
+        <Text style={styles.screenTitle}>Progress</Text>
+      </View>
+      {/* Charts Row */}
+      <View style={styles.chartsRow}>
+        {/* Current Week Chart */}
+        <Card style={[styles.chartCard, { width: screenWidth / 2 - 40, height: screenWidth / 2 - 40 }]}>
+          <Card.Content style={styles.cardContent}>
+            <View style={styles.titleSection}>
+              <View style={styles.chartHeader}>
+                <View>
+                  <Title style={styles.chartTitle}>This week</Title>
+                  <Text style={styles.chartSubtitle}>{formatTime(currentWeekTotal)}</Text>
+                  <Text style={styles.chartTitle}>{formatGoalPercentage(weeklyGoalProgress.percentage)}</Text>
+                </View>
               </View>
-              <ProgressBar
-                progress={category.progress / 100}
-                color={theme.colors.primary}
-                style={styles.progressBar}
+            </View>
+            
+            <View style={styles.barsSection}>
+              <CustomBarChart
+                data={currentWeekData.map(item => ({
+                  value: item.minutes
+                }))}
+                width={screenWidth / 2 - 40}
               />
             </View>
-          ))}
-          {categories.length === 0 && (
-            <Paragraph>No categories available</Paragraph>
-          )}
-        </Card.Content>
-      </Card>
+          </Card.Content>
+        </Card>
 
-      <Card style={styles.card}>
-        <Card.Content>
-          <Title>Recent Activity</Title>
-          {quizState.dailyStats.slice(0, 5).map((day, index) => (
-            <View key={index} style={styles.recentActivity}>
-              <Text style={styles.activityDate}>{new Date(day.date).toLocaleDateString()}</Text>
-              <Text style={styles.activityDetails}>
-                {formatTime(day.timeSpent)} • {day.questionsAnswered} questions
-              </Text>
+        {/* Last 5 Weeks Chart */}
+        <Card style={[styles.chartCard, styles.secondChart, { width: screenWidth / 2 - 40, height: screenWidth / 2 - 40 }]}>
+          <Card.Content style={styles.cardContent}>
+            <View style={styles.titleSection}>
+              <View style={styles.chartHeader}>
+                <View>
+                  <Title style={styles.chartTitle}>This month</Title>
+                  <Text style={styles.chartSubtitle}>{formatTime(currentMonthTotal)}</Text>
+                  <Text style={styles.chartTitle}>{formatGoalPercentage(monthlyGoalProgress.percentage)}</Text>
+                </View>
+              </View>
             </View>
-          ))}
-          {quizState.dailyStats.length === 0 && (
-            <Paragraph>No recent activity</Paragraph>
-          )}
-        </Card.Content>
-      </Card>
+            
+            <View style={styles.barsSection}>
+              <CustomBarChart
+                data={lastFiveWeeksData.map(item => ({
+                  value: item.minutes,
+                  label: item.week
+                }))}
+                width={screenWidth / 2 - 40}
+              />
+            </View>
+          </Card.Content>
+        </Card>
+      </View>
+
+      {/* Level Progress Section */}
+      <View style={styles.levelSection}>
+        <LevelProgress
+          level={levelProgress.level}
+          completedTopics={levelProgress.completedTopics}
+          totalTopics={levelProgress.totalTopics}
+          percentage={levelProgress.percentage}
+        />
+      </View>
+
+      {/* Category Progress Section */}
+      <View style={styles.categorySection}>
+        {categoryProgress.map((category) => (
+          <View key={category.categoryId} style={styles.categoryItem}>
+            <Text style={styles.categoryName}>
+              {category.categoryId.charAt(0).toUpperCase() + category.categoryId.slice(1)}
+            </Text>
+            <Text style={styles.categoryPercentage}>{category.percentage}%</Text>
+          </View>
+        ))}
+      </View>
     </ScrollView>
   );
 };
@@ -193,57 +135,92 @@ export const ProgressScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.secondaryContainer,
     padding: 16,
   },
-  card: {
-    marginBottom: 16,
-    elevation: 2,
+  screenTitle: {
+    fontFamily: 'Baloo2-SemiBold',
+    fontSize: 32,
+    marginBottom: 2,
+    textAlign: 'center',
   },
-  statRow: {
+  levelSection: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  chartsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 8,
+    alignItems: 'flex-start',
+    gap: 20,
+    paddingTop: 20,
   },
-  statItem: {
+  chartCard: {
     flex: 1,
+    marginHorizontal: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    shadowColor: '#000000',
+    shadowOpacity: 0.15,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowRadius: 50,
+    elevation: 8,
   },
-  statLabel: {
-    color: theme.colors.secondary,
-    opacity: 0.7,
-    fontSize: 14,
+  chartTitle: {
+    fontFamily: 'BalooBhaina2-Regular',
+    fontSize: 16,
+    marginBottom: 2,
+    color: theme.colors.outline,
   },
-  statValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
-  },
-  categoryProgress: {
-    marginVertical: 8,
-  },
-  categoryHeader: {
+  chartSubtitle: {
+    fontFamily: 'BalooBhaina2-Regular',
+    fontSize: 32,
+    color: theme.colors.text,
+    marginBottom: 2,
+  },  
+
+  chartHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    alignItems: 'flex-start',
   },
-  progressBar: {
-    height: 10,
-    borderRadius: 5,
+
+  cardContent: {
+    flex: 1,
+    justifyContent: 'space-between',
   },
-  progressPercentage: {
-    fontWeight: 'bold',
+  titleSection: {
+    height: '50%',
+    justifyContent: 'center',
+    paddingVertical: 8,
   },
-  recentActivity: {
-    marginVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.background,
-    paddingBottom: 8,
+  barsSection: {
+    height: '50%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 32,
   },
-  activityDate: {
-    fontWeight: 'bold',
+  secondChart: {
+    marginTop: ((screenWidth / 3)) / 3,
   },
-  activityDetails: {
-    color: theme.colors.secondary,
-    opacity: 0.7,
-  }
+  categorySection: {
+    paddingVertical: 20,
+  },
+  categoryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  categoryName: {
+    fontFamily: 'Baloo2-Bold',
+    fontSize: 20,
+  },
+  categoryPercentage: {
+    fontFamily: 'Baloo2-Bold',
+    fontSize: 20,
+  },
 }); 

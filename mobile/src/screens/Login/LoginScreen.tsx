@@ -54,7 +54,7 @@ export const LoginScreen = () => {
     try {
       const success = await login(data.email, data.password);
       if (success) {
-        navigation.navigate('Home', { userProfile: undefined });
+        navigation.navigate('Home');
       } else {
         setShowRegisterModal(true);
       }

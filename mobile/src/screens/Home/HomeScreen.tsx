@@ -15,7 +15,7 @@ import type { AppDispatch } from '../../store';
 import { Button } from '../../components/Button/Button';
 
 type HomeScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Main'>;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
 };
 
 export const HomeScreen = ({ navigation }: HomeScreenProps) => {

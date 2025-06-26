@@ -55,3 +55,4 @@ export class UpdateProfileDto {
   @IsBoolean()
   shareDevices?: boolean;
 } 
+ 

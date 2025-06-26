@@ -3,20 +3,34 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { setCredentials, setLoading, setError, logout } from '../store/authSlice';
 import { updateUserProfile } from '../store/userSlice';
+import { loadQuizTimeData } from '../store/statisticsSlice';
 import authService from '../services/authService';
-import { fetchUserProfile } from '../services/api';
+import { fetchUserProfile, fetchQuizTimeData, syncQuizTimeData } from '../services/api';
 
 export const useAuth = () => {
   const dispatch = useDispatch();
   const { token, user, isLoading, error } = useSelector((state: RootState) => state.auth);
+  const { dailyQuizTimes, totalQuizMinutes } = useSelector((state: RootState) => state.statistics);
 
   const login = useCallback(async (email: string, password: string) => {
     try {
       dispatch(setLoading(true));
       const response = await authService.login({ email, password });
+      
+      // Set basic user info initially
       dispatch(setCredentials({
         token: response.access_token,
-        user: response.user,
+        user: {
+          id: response.user.id,
+          email: response.user.email,
+          username: response.user.username,
+          emailVerified: response.user.emailVerified,
+          levelId: response.user.levelId,
+          studyPaceId: 1, // Default value, will be updated from profile
+          agreedToTerms: true, // Default value, will be updated from profile
+          marketingEmails: false, // Default value, will be updated from profile
+          shareDevices: false, // Default value, will be updated from profile
+        },
       }));
       
       // Fetch complete user profile data from backend
@@ -24,18 +38,26 @@ export const useAuth = () => {
         const profileData = await fetchUserProfile(response.access_token);
         if (profileData) {
           dispatch(updateUserProfile({
-            name: profileData.username || '',
+            username: profileData.username || '',
             email: profileData.email || '',
-            level: profileData.levelId || '',
+            levelId: profileData.levelId || '',
             studyPaceId: profileData.studyPaceId || 1,
             agreedToTerms: profileData.agreedToTerms || false,
             marketingEmails: profileData.marketingEmails || false,
             shareDevices: profileData.shareDevices || false,
-            pushNotifications: profileData.pushNotifications || false,
           }));
         }
       } catch (profileError) {
         console.warn('Failed to fetch user profile:', profileError);
+        // This is not critical - user can still use the app
+      }
+
+      // Fetch quiz time data from backend
+      try {
+        const quizTimeData = await fetchQuizTimeData(response.access_token);
+        dispatch(loadQuizTimeData(quizTimeData));
+      } catch (quizTimeError) {
+        console.warn('Failed to fetch quiz time data:', quizTimeError);
         // This is not critical - user can still use the app
       }
       
@@ -50,10 +72,10 @@ export const useAuth = () => {
     }
   }, [dispatch]);
 
-  const register = useCallback(async (email: string, password: string, username: string) => {
+  const register = useCallback(async (email: string, password: string, username: string, studyPaceId: number = 1, agreedToTerms: boolean = false) => {
     try {
       dispatch(setLoading(true));
-      await authService.register({ email, password, username });
+      await authService.register({ email, password, username, studyPaceId, agreedToTerms });
       // Clear password from memory
       password = '';
       return true;
@@ -65,9 +87,27 @@ export const useAuth = () => {
     }
   }, [dispatch]);
 
-  const logoutUser = useCallback(() => {
-    dispatch(logout());
-  }, [dispatch]);
+  const logoutUser = useCallback(async () => {
+    try {
+      // Sync quiz time data to backend before logout
+      if (token && dailyQuizTimes.length > 0) {
+        try {
+          await syncQuizTimeData(token, {
+            dailyQuizTimes,
+            totalQuizMinutes
+          });
+          console.log('Quiz time data synced successfully');
+        } catch (syncError) {
+          console.warn('Failed to sync quiz time data:', syncError);
+          // Continue with logout even if sync fails
+        }
+      }
+    } catch (error) {
+      console.warn('Error during logout sync:', error);
+    } finally {
+      dispatch(logout());
+    }
+  }, [dispatch, token, dailyQuizTimes, totalQuizMinutes]);
 
   const isAuthenticated = !!token;
 

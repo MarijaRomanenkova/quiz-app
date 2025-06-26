@@ -57,7 +57,7 @@ export const SplashScreen = () => {
         const isAuthenticated = false;
         
         if (isAuthenticated) {
-          navigation.replace('Home', { userProfile: undefined });
+          navigation.replace('Home');
         } else {
           navigation.replace('Login');
         }

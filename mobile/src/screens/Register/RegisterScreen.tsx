@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { useDispatch } from 'react-redux';
-import { setUserProfile } from '../../store/userSlice';
+import { setUser } from '../../store/userSlice';
 import { theme } from '../../theme';
 import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceSelector';
 import { Button } from '../../components/Button/Button';

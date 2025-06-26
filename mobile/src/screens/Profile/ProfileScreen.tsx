@@ -111,9 +111,9 @@ export const ProfileScreen = () => {
 
       dispatch(
         updateUserPreferences({
-          studyPaceId,
-          marketingEmails,
-          shareDevices,
+      studyPaceId,
+      marketingEmails,
+      shareDevices,
         })
       );
 
