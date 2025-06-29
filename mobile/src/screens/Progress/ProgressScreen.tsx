@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   },
   chartTitle: {
     fontSize: 14,
-    fontFamily: 'OpenSans-Regular',
+    fontFamily: 'Baloo2-Regular',
     color: theme.colors.outline,
     marginBottom: 4,
   },
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   },
   chartSubtext: {
     fontSize: 14,
-    fontFamily: 'OpenSans-Regular',
+    fontFamily: 'Baloo2-Regular',
     color: theme.colors.outline,
   },
   levelSection: {
@@ -274,5 +274,16 @@ const styles = StyleSheet.create({
   },
   wideButton: {
     width: '100%',
+  },
+  categoryTitle: {
+    color: theme.colors.surface,
+    fontSize: 18,
+    fontFamily: 'Baloo2-Regular',
+    marginBottom: 8,
+  },
+  categoryProgress: {
+    color: theme.colors.surface,
+    fontSize: 16,
+    fontFamily: 'Baloo2-Regular',
   },
 }); 

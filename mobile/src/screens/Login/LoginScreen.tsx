@@ -283,7 +283,10 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     color: theme.colors.surface,
-    fontSize: 14,
+    fontSize: 16,
+    fontFamily: 'Baloo2-Bold',
+    textAlign: 'center',
+    marginTop: 16,
   },
   recoverLink: {
     color: theme.colors.surface,
@@ -300,5 +303,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 12,
+  },
+  registerText: {
+    color: theme.colors.surface,
+    fontSize: 16,
+    fontFamily: 'Baloo2-Bold',
+    textAlign: 'center',
+    marginTop: 16,
   },
 }); 

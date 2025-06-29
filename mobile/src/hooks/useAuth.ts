@@ -188,7 +188,7 @@ export const useAuth = () => {
   }, [dispatch, token, dailyQuizTimes, totalQuizMinutes]);
 
   /** Whether the user is currently authenticated */
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!(token && user);
 
   return {
     /** Current user data, null if not authenticated */

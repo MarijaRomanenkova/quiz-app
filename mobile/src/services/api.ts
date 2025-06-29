@@ -227,9 +227,10 @@ export const fetchReadingTexts = async (topicId?: string, token?: string): Promi
  * dispatch(fetchCategoriesThunk());
  * ```
  */
-export const fetchCategoriesThunk = createAsyncThunk('categories/fetchCategories', async () => {
-  const response = await fetchCategories();
-  return response;
+export const fetchCategoriesThunk = createAsyncThunk('categories/fetchCategories', async (_, { getState }) => {
+  const state = getState() as any;
+  const token = state.auth.token;
+  return fetchCategories(token);
 });
 
 /**

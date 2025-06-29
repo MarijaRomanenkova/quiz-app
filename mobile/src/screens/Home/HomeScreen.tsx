@@ -78,6 +78,12 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   console.log('HomeScreen - token length:', token ? token.length : 0);
   console.log('HomeScreen - categories length:', categories.length);
   console.log('HomeScreen - categories:', categories);
+  console.log('HomeScreen - isLoading:', isLoading);
+  console.log('HomeScreen - error:', error);
+  console.log('HomeScreen - user type:', typeof user);
+  console.log('HomeScreen - token type:', typeof token);
+  console.log('HomeScreen - user === null:', user === null);
+  console.log('HomeScreen - token === null:', token === null);
 
   /**
    * Initial data loading for authenticated users
@@ -221,7 +227,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     );
   }
 
-  if (error) {
+  if (error && categories.length === 0) {
     return (
       <View style={styles.container}>
         <Text>Error: {error}</Text>

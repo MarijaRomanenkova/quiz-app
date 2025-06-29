@@ -54,7 +54,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
  */
 export const SplashScreen = () => {
   const navigation = useNavigation<NavigationProp>();
-  const token = useSelector((state: RootState) => state.auth.token);
+  const { token, user } = useSelector((state: RootState) => state.auth);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [dotAnimations] = useState([
     new Animated.Value(0),
@@ -77,7 +77,6 @@ export const SplashScreen = () => {
           'Baloo2-Medium': require('../../../assets/fonts/Baloo2-Medium.ttf'),
           'Baloo2-SemiBold': require('../../../assets/fonts/Baloo2-SemiBold.ttf'),
           'Baloo2-Bold': require('../../../assets/fonts/Baloo2-Bold.ttf'),
-          'Baloo2-ExtraBold': require('../../../assets/fonts/Baloo2-ExtraBold.ttf'),
         });
         setFontsLoaded(true);
       } catch (error) {
@@ -134,7 +133,7 @@ export const SplashScreen = () => {
       try {
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        const isAuthenticated = !!token;
+        const isAuthenticated = !!(token && user);
         
         if (isAuthenticated) {
           navigation.replace('Home');
@@ -148,7 +147,7 @@ export const SplashScreen = () => {
     };
 
     initializeApp();
-  }, [fontsLoaded, navigation, token]);
+  }, [fontsLoaded, navigation, token, user]);
 
   if (!fontsLoaded) {
     return (

@@ -21,61 +21,6 @@ export const theme = {
     onSecondaryContainer: '#000000',
     onTertiaryContainer: '#FFFFFF',
   },
-  fonts: {
-    ...MD3LightTheme.fonts,
-    // Display styles - Baloo 2
-    displayLarge: {
-      ...MD3LightTheme.fonts.displayLarge,
-      fontFamily: 'Baloo2-Bold',
-    },
-    displayMedium: {
-      ...MD3LightTheme.fonts.displayMedium,
-      fontFamily: 'Baloo2-Bold',
-    },
-    displaySmall: {
-      ...MD3LightTheme.fonts.displaySmall,
-      fontFamily: 'Baloo2-SemiBold',
-    },
-    // Headline styles - Baloo 2
-    headlineLarge: {
-      ...MD3LightTheme.fonts.headlineLarge,
-      fontFamily: 'Baloo2-Bold',
-    },
-    headlineMedium: {
-      ...MD3LightTheme.fonts.headlineMedium,
-      fontFamily: 'Baloo2-SemiBold',
-    },
-    headlineSmall: {
-      ...MD3LightTheme.fonts.headlineSmall,
-      fontFamily: 'Baloo2-Regular',
-    },
-    // Title styles - Baloo 2
-    titleLarge: {
-      ...MD3LightTheme.fonts.titleLarge,
-      fontFamily: 'Baloo2-SemiBold',
-    },
-    titleMedium: {
-      ...MD3LightTheme.fonts.titleMedium,
-      fontFamily: 'Baloo2-Regular',
-    },
-    titleSmall: {
-      ...MD3LightTheme.fonts.titleSmall,
-      fontFamily: 'Baloo2-Regular',
-    },
-    // Body styles - Baloo 2 for better readability
-    bodyLarge: {
-      ...MD3LightTheme.fonts.bodyLarge,
-      fontFamily: 'Baloo2-Regular',
-    },
-    bodyMedium: {
-      ...MD3LightTheme.fonts.bodyMedium,
-      fontFamily: 'Baloo2-Regular',
-    },
-    bodySmall: {
-      ...MD3LightTheme.fonts.bodySmall,
-      fontFamily: 'Baloo2-Regular',
-    },
-  },
   buttons: {
     borderRadius: 20,
     paddingVertical: 8,
@@ -138,7 +83,6 @@ export const fonts = {
     medium: 'Baloo2-Medium',
     semiBold: 'Baloo2-SemiBold',
     bold: 'Baloo2-Bold',
-    extraBold: 'Baloo2-ExtraBold',
     // Baloo 2 weights for body text (replacing OpenSans)
     bodyRegular: 'Baloo2-Regular',
     bodyMedium: 'Baloo2-Medium',
