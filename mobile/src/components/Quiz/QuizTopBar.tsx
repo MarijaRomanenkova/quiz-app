@@ -4,6 +4,7 @@ import { Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '../../theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { BackButton } from '../BackButton';
 
 type QuizTopBarProps = {
   currentQuestion: number;
@@ -22,13 +23,12 @@ export const QuizTopBar: React.FC<QuizTopBarProps> = ({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.backButton}
+      <BackButton 
+        variant="light" 
         onPress={() => navigation.goBack()}
-      >
-        <MaterialCommunityIcons name="chevron-left" size={24} color="#583FB0" />
-        <Text variant="titleMedium" style={styles.backText}>Back</Text>
-      </TouchableOpacity>
+        text="Back"
+        style={styles.backButton}
+      />
 
       <View style={styles.questionCounter}>
         <Text variant="titleMedium" style={styles.counterText}>
@@ -49,10 +49,6 @@ const styles = StyleSheet.create({
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  backText: {
-    color: '#583FB0',
-    marginLeft: 4,
   },
   questionCounter: {
     flexDirection: 'row',

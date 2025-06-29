@@ -72,10 +72,6 @@ export const ProgressScreen = () => {
     }
   };
 
-  const handleOkPress = () => {
-    navigation.navigate('Home' as never);
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.screenTitle}>
@@ -159,17 +155,6 @@ export const ProgressScreen = () => {
             </View>
           ))}
         </View>
-      </View>
-
-      {/* OK Button Section - Always at bottom */}
-      <View style={styles.buttonSection}>
-        <Button 
-          onPress={handleOkPress} 
-          variant="primary"
-          style={styles.wideButton}
-        >
-          OK
-        </Button>
       </View>
     </View>
   );

@@ -284,15 +284,16 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     color: theme.colors.surface,
     fontSize: 16,
-    fontFamily: 'Baloo2-Bold',
+    fontFamily: 'Baloo2-Medium',
     textAlign: 'center',
-    marginTop: 16,
   },
   recoverLink: {
     color: theme.colors.surface,
-    fontSize: 14,
+    fontSize: 16,
     marginLeft: 4,
     fontWeight: 'bold',
+    fontFamily: 'Baloo2-Bold',
+    textAlignVertical: 'center',
   },
   loadingContainer: {
     justifyContent: 'center',

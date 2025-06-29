@@ -33,6 +33,7 @@ import { Button } from '../../components/Button/Button';
 import { CustomModal } from '../../components/Modal/CustomModal';
 import { useAuth } from '../../hooks/useAuth';
 import { deleteUserAccount } from '../../services/api';
+import { BackButton } from '../../components/BackButton';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -182,13 +183,8 @@ export const ProfileScreen = () => {
     <Surface style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <IconButton
-          icon="chevron-left"
-          iconColor={theme.colors.surface}
-          size={24}
-          onPress={() => navigation.goBack()}
-        />
-        <Text style={styles.backText}>Back to Learning</Text>
+        <BackButton variant="dark" onPress={() => navigation.goBack()} />
+        <Text style={styles.backText}>Back</Text>
       </View>
 
       {/* Main Content with Flex Spacing */}

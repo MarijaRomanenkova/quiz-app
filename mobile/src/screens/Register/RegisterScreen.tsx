@@ -34,6 +34,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import authService from '../../services/authService';
+import { BackButton } from '../../components/BackButton';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -187,12 +188,7 @@ export const RegisterScreen = () => {
       <ScrollView style={styles.scrollView}>
         {/* Header */}
         <View style={styles.header}>
-          <IconButton
-            icon="chevron-left"
-            iconColor={theme.colors.surface}
-            size={24}
-            onPress={() => navigation.goBack()}
-          />
+          <BackButton variant="dark" onPress={() => navigation.goBack()} />
           <Text variant="titleMedium" style={styles.backText}>Back to Login</Text>
         </View>
 

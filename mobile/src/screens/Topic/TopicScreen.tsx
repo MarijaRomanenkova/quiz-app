@@ -29,6 +29,7 @@ import { Button } from '../../components/Button/Button';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { QuizTopic } from '../../types';
 import { selectUnlockedTopicsForCategory, selectTopicProgress } from '../../store/progressSlice';
+import { BackButton } from '../../components/BackButton';
 
 /**
  * Props interface for the TopicItem component
@@ -164,15 +165,15 @@ export const TopicScreen = () => {
   return (
     <View style={styles.container}>
       {/* Back button */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <MaterialCommunityIcons name="chevron-left" size={32} color={theme.colors.outline} />
-        <Text style={styles.backButtonText}>Back to Categories</Text>
-      </TouchableOpacity>
+      <View style={styles.backButton}>
+        <BackButton 
+          variant="light" 
+          onPress={() => navigation.navigate('Home')} 
+          text="Back"
+        />
+      </View>
 
-      <Text variant="headlineMedium" style={styles.topics}>
+      <Text style={styles.topics}>
         Select a Topic:
       </Text>
       
@@ -195,11 +196,10 @@ export const TopicScreen = () => {
         })}
       </ScrollView>
 
-      <View style={styles.buttonContainer}>
+      <View >
         <Button
           variant="primary"
           onPress={handleQuizPress}
-          style={styles.button}
           disabled={!selectedTopic}
         >
           Start Quiz
@@ -216,23 +216,13 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.secondaryContainer,
   },
   backButton: {
-    position: 'absolute',
-    top: 24,
-    left: 16,
-    zIndex: 10,
-    padding: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 8,
+    marginBottom: 16,
   },
   topics: {
     textAlign: 'center',
+    fontFamily: 'Baloo2-SemiBold',
+    fontSize: 24,
     marginBottom: 24,
-    marginTop: 60,
   },
   scrollView: {
     flex: 1,
@@ -274,11 +264,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: theme.colors.primary,
     marginTop: 4,
-  },
-  buttonContainer: {
-    marginTop: 24,
-  },
-  button: {
-    marginBottom: 16,
   },
 }); 

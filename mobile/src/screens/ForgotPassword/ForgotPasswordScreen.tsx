@@ -17,7 +17,7 @@
 
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Text, Surface, IconButton, Portal } from 'react-native-paper';
+import { Text, Surface, Portal } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
@@ -29,6 +29,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { API_URL } from '../../config';
+import { BackButton } from '../../components/BackButton';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'ForgotPassword'>;
 
@@ -129,12 +130,7 @@ export const ForgotPasswordScreen = () => {
   return (
     <Surface style={styles.container}>
       <View style={styles.header}>
-        <IconButton
-          icon="chevron-left"
-          iconColor={theme.colors.surface}
-          size={24}
-          onPress={() => navigation.goBack()}
-        />
+        <BackButton variant="dark" onPress={() => navigation.goBack()} />
         <Text variant="titleMedium" style={styles.backText}>Back to Login</Text>
       </View>
 
