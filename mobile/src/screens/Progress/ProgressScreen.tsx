@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   chartCard: {
     backgroundColor: theme.colors.surface,
     borderRadius: 10,
-    shadowColor: '#000000',
+    shadowColor: theme.colors.text,
     shadowOpacity: 0.15,
     shadowOffset: {
       width: 0,

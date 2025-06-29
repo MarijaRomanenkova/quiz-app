@@ -39,12 +39,13 @@ export const verificationEmailTemplate = (verificationUrl: string) => `
     }
     .button {
       display: inline-block;
-      background-color: #4313E2;
-      color: white;
+      background-color: #8BF224;
+      color: #000000;
       padding: 12px 24px;
       text-decoration: none;
       border-radius: 4px;
       margin: 20px 0;
+      font-weight: bold;
     }
     .footer {
       margin-top: 30px;

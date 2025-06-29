@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     height: 56,
   },
   percentage: {
-    color: '#583FB0',
+    color: theme.colors.primaryContainer,
     textAlign: 'center',
   },
   progressContainer: {

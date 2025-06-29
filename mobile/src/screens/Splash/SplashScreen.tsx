@@ -126,7 +126,7 @@ export const SplashScreen = () => {
   if (!fontsLoaded) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#FFFFFF" />
+        <ActivityIndicator size="large" color={theme.colors.surface} />
       </View>
     );
   }
@@ -144,7 +144,7 @@ export const SplashScreen = () => {
         </View>
         
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FFFFFF" />
+          <ActivityIndicator size="large" color={theme.colors.surface} />
           <Text style={styles.loadingText}>{loadingText}</Text>
         </View>
       </View>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   title: {
-    color: '#FFFFFF',
+    color: theme.colors.surface,
   },
   footer: {
     alignItems: 'center',
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    color: '#FFFFFF',
+    color: theme.colors.surface,
   },
   logoContainer: {
     alignItems: 'center',
@@ -191,17 +191,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logoTextFresh: {
-    color: '#FFFFFF',
+    color: theme.colors.surface,
     fontSize: 24,
     fontFamily: 'Baloo2-Regular',
   },
   logoTextQuiz: {
-    color: '#FFFFFF',
+    color: theme.colors.surface,
     fontSize: 48,
     fontFamily: 'Baloo2-Bold',
   },
   logoTextApp: {
-    color: '#FFFFFF',
+    color: theme.colors.surface,
     fontSize: 24,
     fontFamily: 'Baloo2-Regular',
   },

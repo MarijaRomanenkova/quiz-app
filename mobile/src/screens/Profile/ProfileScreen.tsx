@@ -269,7 +269,7 @@ export const ProfileScreen = () => {
         <View style={styles.header}>
           <IconButton
             icon="chevron-left"
-            iconColor="#FFFFFF"
+            iconColor={theme.colors.surface}
             size={24}
             onPress={() => navigation.goBack()}
           />
@@ -360,7 +360,7 @@ export const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgba(67, 19, 226, 0.7)',
+    backgroundColor: theme.colors.background,
     padding: 24,
   },
   scrollView: {
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   backText: {
-    color: '#FFFFFF',
+    color: theme.colors.surface,
     fontSize: 16,
     fontFamily: 'Baloo2-Regular',
   },
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   userName: {
-    color: '#FFFFFF',
+    color: theme.colors.surface,
     fontSize: 32,
     fontFamily: 'Baloo2-Bold',
     marginBottom: 24,
@@ -392,13 +392,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   infoLabel: {
-    color: '#FFFFFF',
+    color: theme.colors.surface,
     fontSize: 16,
     fontFamily: 'Baloo2-Regular',
     width: 80,
   },
   infoValue: {
-    color: '#FFFFFF',
+    color: theme.colors.surface,
     fontSize: 16,
     fontFamily: 'Baloo2-Regular',
     flex: 1,
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   sectionTitle: {
-    color: '#FFFFFF',
+    color: theme.colors.surface,
     fontSize: 20,
     fontFamily: 'Baloo2-Medium',
     textAlign: 'center',
@@ -423,13 +423,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   toggleLabel: {
-    color: '#FFFFFF',
+    color: theme.colors.surface,
     fontSize: 16,
     fontFamily: 'Baloo2-Regular',
     flex: 1,
   },
   termsLink: {
-    color: '#FFFFFF',
+    color: theme.colors.surface,
     fontSize: 16,
     fontFamily: 'Baloo2-Bold',
     textDecorationLine: 'underline',
