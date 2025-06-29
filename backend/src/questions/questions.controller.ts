@@ -38,7 +38,8 @@ export class QuestionsController {
   /**
    * Get questions for a specific topic
    * 
-   * Retrieves questions for the specified topic, filtered by the authenticated user's level.
+   * Retrieves questions for the specified topic. The topic is already filtered
+   * by user level, so we only need to fetch questions by topicId.
    * 
    * @param req - Express request object with authenticated user
    * @param topicId - ID of the topic to get questions for

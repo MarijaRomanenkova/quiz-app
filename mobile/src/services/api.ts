@@ -406,32 +406,32 @@ export const deleteUserAccount = async (token: string): Promise<any> => {
  * Synchronizes quiz time statistics with the backend
  * 
  * Sends local quiz time tracking data to the backend for
- * persistence and analytics. Includes daily breakdown and totals.
+ * persistence and analytics. Called on logout to sync Redux state.
  * 
- * @param {string} token - Authentication token
- * @param {Object} quizTimeData - Quiz time statistics to sync
+ * @param {Object} quizTimeData - Quiz time statistics from Redux state
  * @param {Array<{date: string, minutes: number, lastUpdated: string}>} quizTimeData.dailyQuizTimes - Daily quiz time records
  * @param {number} quizTimeData.totalQuizMinutes - Total quiz time in minutes
+ * @param {string} [token] - Authentication token
  * @returns {Promise<any>} Sync confirmation
  * @throws {Error} When the request fails
  * 
  * @example
  * ```tsx
- * await syncQuizTimeData(token, {
+ * await syncQuizTimeData({
  *   dailyQuizTimes: [{ date: '2024-01-01', minutes: 30, lastUpdated: '2024-01-01T10:00:00Z' }],
  *   totalQuizMinutes: 120
- * });
+ * }, token);
  * ```
  */
 export const syncQuizTimeData = async (
   quizTimeData: {
     totalQuizMinutes: number;
-    dailyQuizMinutes: Record<string, number>;
+    dailyQuizTimes: Array<{date: string, minutes: number, lastUpdated: string}>;
   },
   token?: string
 ): Promise<any> => {
   try {
-    const response = await fetch(`${API_URL}/auth/sync-quiz-time`, {
+    const response = await fetch(`${API_URL}/auth/quiz-time`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -456,18 +456,22 @@ export const syncQuizTimeData = async (
  * Fetches quiz time statistics from the backend
  * 
  * Retrieves stored quiz time tracking data including daily
- * breakdown and total accumulated time. Requires authentication.
+ * breakdown and total accumulated time. Called on login to load into Redux.
  * 
- * @param {string} token - Authentication token
+ * @param {string} [token] - Authentication token
  * @returns {Promise<{dailyQuizTimes: Array<{date: string, minutes: number, lastUpdated: string}>, totalQuizMinutes: number}>} Quiz time statistics
  * @throws {Error} When the request fails
  * 
  * @example
  * ```tsx
  * const quizTimeData = await fetchQuizTimeData(token);
+ * // Returns: { dailyQuizTimes: [...], totalQuizMinutes: 120 }
  * ```
  */
-export const fetchQuizTimeData = async (token?: string): Promise<any> => {
+export const fetchQuizTimeData = async (token?: string): Promise<{
+  dailyQuizTimes: Array<{date: string, minutes: number, lastUpdated: string}>;
+  totalQuizMinutes: number;
+}> => {
   try {
     const response = await fetch(`${API_URL}/auth/quiz-time`, {
       method: 'GET',

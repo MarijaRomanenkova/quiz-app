@@ -29,13 +29,13 @@ export class QuestionsService {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Get all questions for a specific topic filtered by user's level
+   * Get all questions for a specific topic
    * 
-   * Retrieves questions for the specified topic, automatically filtered by the user's
-   * learning level (A1.1, A1.2, etc.). Questions are returned with all necessary
-   * fields for quiz functionality including options, correct answers, and media URLs.
+   * Retrieves questions for the specified topic. The topic is already filtered
+   * by user level at the topics level, so we only need to fetch questions by topicId.
+   * The userId is used for authentication purposes only.
    * 
-   * @param userId - Unique identifier of the authenticated user
+   * @param userId - Unique identifier of the authenticated user (for auth purposes)
    * @param topicId - ID of the topic to get questions for (e.g., 'articles', 'present-tense')
    * @returns Promise containing questions array and pagination metadata
    * 
@@ -64,13 +64,8 @@ export class QuestionsService {
   async findAll(userId: string, topicId: string) {
     this.logger.log(`Fetching questions for user: ${userId}, topicId: ${topicId}`);
     
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { levelId: true }
-    });
-
-    this.logger.log(`User level: ${user?.levelId}`);
-
+    // Questions are fetched by topicId only - level filtering is done at topics level
+    // userId is used for authentication purposes only
     const questions = await this.prisma.question.findMany({
       where: { 
         topicId: topicId
@@ -88,7 +83,6 @@ export class QuestionsService {
     });
 
     this.logger.log(`Found ${questions.length} questions for topic ${topicId}`);
-    this.logger.log('Questions:', questions);
 
     return {
       questions,

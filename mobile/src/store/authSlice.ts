@@ -1,4 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { fetchQuizTimeData, syncQuizTimeData } from '../services/api';
+import { loadQuizTimeData } from './statisticsSlice';
+import authService from '../services/authService';
+import type { RootState, AppDispatch } from './index';
 
 /**
  * Interface representing the user data structure in the authentication state
@@ -47,6 +51,70 @@ const initialState: AuthState = {
   isLoading: false,
   error: null,
 };
+
+/**
+ * Async thunk for user login with quiz time data loading
+ * 
+ * Authenticates the user and loads their quiz time data from the backend
+ * into the Redux state for persistence.
+ * 
+ * @param credentials - User login credentials
+ * @returns Promise resolving to authentication response
+ */
+export const loginWithQuizTime = createAsyncThunk(
+  'auth/loginWithQuizTime',
+  async (credentials: { email: string; password: string }, { dispatch }) => {
+    // Perform login
+    const response = await authService.login(credentials);
+    
+    // Load quiz time data from backend
+    try {
+      const quizTimeData = await fetchQuizTimeData(response.access_token);
+      dispatch(loadQuizTimeData(quizTimeData));
+    } catch (error) {
+      console.warn('Failed to load quiz time data:', error);
+      // Don't fail login if quiz time loading fails
+    }
+    
+    return response;
+  }
+);
+
+/**
+ * Async thunk for user logout with quiz time data syncing
+ * 
+ * Syncs the current quiz time data to the backend before clearing
+ * the authentication state.
+ * 
+ * @param _ - Unused parameter (thunk requirement)
+ * @returns Promise resolving to logout confirmation
+ */
+export const logoutWithQuizTimeSync = createAsyncThunk(
+  'auth/logoutWithQuizTimeSync',
+  async (_, { getState, dispatch }) => {
+    const state = getState() as RootState;
+    const { token } = state.auth;
+    const { totalQuizMinutes, dailyQuizTimes } = state.statistics;
+    
+    // Sync quiz time data to backend if user is authenticated
+    if (token && (totalQuizMinutes > 0 || dailyQuizTimes.length > 0)) {
+      try {
+        await syncQuizTimeData({
+          totalQuizMinutes,
+          dailyQuizTimes
+        }, token);
+      } catch (error) {
+        console.warn('Failed to sync quiz time data:', error);
+        // Don't fail logout if sync fails
+      }
+    }
+    
+    // Clear authentication state
+    dispatch(logout());
+    
+    return { message: 'Logged out successfully' };
+  }
+);
 
 /**
  * Redux slice for managing authentication state
@@ -120,6 +188,43 @@ export const authSlice = createSlice({
         state.user = { ...state.user, ...action.payload };
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      // Handle loginWithQuizTime
+      .addCase(loginWithQuizTime.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginWithQuizTime.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.token = action.payload.access_token;
+        // Handle missing user properties with defaults
+        state.user = {
+          ...action.payload.user,
+          studyPaceId: 1, // Default value
+          agreedToTerms: false, // Default value
+          marketingEmails: false, // Default value
+          shareDevices: false, // Default value
+        };
+        state.error = null;
+      })
+      .addCase(loginWithQuizTime.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Login failed';
+      })
+      // Handle logoutWithQuizTimeSync
+      .addCase(logoutWithQuizTimeSync.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(logoutWithQuizTimeSync.fulfilled, (state) => {
+        state.isLoading = false;
+        // logout action is dispatched in the thunk
+      })
+      .addCase(logoutWithQuizTimeSync.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Logout failed';
+      });
   },
 });
 

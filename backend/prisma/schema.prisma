@@ -37,6 +37,8 @@ model Statistics {
   correctAnswers Int      @default(0)
   totalQuestions Int      @default(0)
   averageScore   Float    @default(0)
+  totalQuizMinutes Int    @default(0)
+  dailyQuizTimes Json?    // Array of DailyQuizTime objects: [{date: "2024-01-15", minutes: 30, lastUpdated: "2024-01-15T10:30:00Z"}]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   user           User     @relation(fields: [userId], references: [id])

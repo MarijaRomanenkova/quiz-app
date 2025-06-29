@@ -144,6 +144,58 @@ export class AuthController {
     return this.authService.deleteUserAccount(req.user.id);
   }
 
+  /**
+   * Load quiz time data for the authenticated user
+   * 
+   * Retrieves the user's quiz time statistics from the database
+   * to sync with the mobile app's Redux state on login.
+   * 
+   * @param req - Request object containing authenticated user
+   * @returns Promise containing quiz time data
+   * 
+   * @example
+   * ```typescript
+   * const quizTimeData = await authController.loadQuizTimeData(req);
+   * // Returns: { totalQuizMinutes: 120, dailyQuizTimes: [...] }
+   * ```
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get('quiz-time')
+  async loadQuizTimeData(@Request() req: { user: UserPayload }) {
+    return this.authService.loadQuizTimeData(req.user.id);
+  }
+
+  /**
+   * Sync quiz time data for the authenticated user
+   * 
+   * Updates the user's quiz time statistics in the database
+   * with data from the mobile app's Redux state on logout.
+   * 
+   * @param req - Request object containing authenticated user
+   * @param quizTimeData - Quiz time data from Redux state
+   * @returns Promise indicating successful sync
+   * 
+   * @example
+   * ```typescript
+   * const result = await authController.syncQuizTimeData(req, {
+   *   totalQuizMinutes: 120,
+   *   dailyQuizTimes: [{ date: "2024-01-15", minutes: 30, lastUpdated: "..." }]
+   * });
+   * // Returns: { message: 'Quiz time data synced successfully' }
+   * ```
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('quiz-time')
+  async syncQuizTimeData(
+    @Request() req: { user: UserPayload },
+    @Body() quizTimeData: {
+      totalQuizMinutes: number;
+      dailyQuizTimes: any[];
+    }
+  ) {
+    return this.authService.syncQuizTimeData(req.user.id, quizTimeData);
+  }
+
   @Post('forgot-password')
   async forgotPassword(@Body('email') email: string): Promise<{ message: string }> {
     await this.authService.forgotPassword(email);

@@ -71,9 +71,11 @@ export const ResultsScreen = () => {
   );
   
   // Get all topics for the category to show total count
-  const allCategoryTopics = useSelector((state: RootState) => 
-    categoryId ? state.topic.topics.filter(topic => topic.categoryId === categoryId) : []
-  );
+  const topics = useSelector((state: RootState) => state.topic.topics);
+  const allCategoryTopics = useMemo(() => {
+    if (!categoryId) return [];
+    return topics.filter(topic => topic.categoryId === categoryId);
+  }, [categoryId, topics]);
 
   // Memoize the hasNewUnlocks calculation
   const hasNewUnlocks = useMemo(() => {

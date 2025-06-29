@@ -75,6 +75,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   console.log('HomeScreen - user:', user);
   console.log('HomeScreen - token:', token ? 'Present' : 'Missing');
+  console.log('HomeScreen - token length:', token ? token.length : 0);
   console.log('HomeScreen - categories length:', categories.length);
   console.log('HomeScreen - categories:', categories);
 
@@ -86,16 +87,17 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
    */
   useEffect(() => {
     // Only fetch data once when user is authenticated and data is not loaded
-    if (user && categories.length === 0) {
+    if (user && token && categories.length === 0) {
       console.log('HomeScreen - Initial data fetch for authenticated user...');
       // Fetch all data in sequence: categories, topics, questions, then reading texts
       dispatch(fetchCategoriesThunk());
       dispatch(fetchTopicsThunk()).then(() => {
-        // Fetch questions first
+        // Fetch questions for all topics
         console.log('HomeScreen - Topics loaded, now fetching questions...');
         dispatch(fetchAllQuestionsThunk()).unwrap()
           .then((questionsData) => {
             console.log('HomeScreen - Questions loaded successfully:', Object.keys(questionsData).length, 'topics');
+            console.log('HomeScreen - Questions data keys:', Object.keys(questionsData));
             // Fetch reading texts after questions are loaded
             console.log('HomeScreen - Now fetching reading texts...');
             return dispatch(fetchAllReadingTextsThunk()).unwrap();
@@ -108,7 +110,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
           });
       });
     }
-  }, [dispatch, user, categories.length]);
+  }, [dispatch, user, token, categories.length]);
 
   /**
    * Manual data loading fallback
@@ -117,7 +119,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
    * loading sequence fails or is incomplete.
    */
   useEffect(() => {
-    if (user && categories.length > 0 && topics.length > 0) {
+    if (user && token && categories.length > 0 && topics.length > 0) {
       console.log('HomeScreen - Current questions state:', questionsState);
       
       // Check if questions are loaded in byTopicId
@@ -153,7 +155,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
         }
       }
     }
-  }, [dispatch, user, categories.length, topics.length, questionsState.byTopicId]);
+  }, [dispatch, user, token, categories.length, topics.length, questionsState.byTopicId]);
 
   /**
    * Progress tracking initialization

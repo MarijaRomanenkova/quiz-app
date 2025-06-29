@@ -364,7 +364,7 @@ export class AuthService {
 
   async deleteUserAccount(userId: string) {
     const user = await this.prisma.findUser({ id: userId });
-    
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -374,8 +374,82 @@ export class AuthService {
       where: { id: userId },
     });
 
+    return { message: 'Account deleted successfully' };
+  }
+
+  /**
+   * Load quiz time data for a user (called on login)
+   * 
+   * Retrieves the user's quiz time statistics from the database
+   * to sync with the mobile app's Redux state.
+   * 
+   * @param userId - User ID to load quiz time data for
+   * @returns Promise containing quiz time data
+   */
+  async loadQuizTimeData(userId: string) {
+    const statistics = await this.prisma.statistics.findUnique({
+      where: { userId }
+    });
+    
+    if (!statistics) {
+      // Return default values if no statistics exist
+      return {
+        totalQuizMinutes: 0,
+        dailyQuizTimes: []
+      };
+    }
+
     return {
-      message: 'Account deleted successfully',
+      totalQuizMinutes: statistics.totalQuizMinutes || 0,
+      dailyQuizTimes: statistics.dailyQuizTimes || []
     };
+  }
+
+  /**
+   * Sync quiz time data for a user (called on logout)
+   * 
+   * Updates the user's quiz time statistics in the database
+   * with data from the mobile app's Redux state.
+   * 
+   * @param userId - User ID to sync quiz time data for
+   * @param quizTimeData - Quiz time data from Redux state
+   * @returns Promise indicating successful sync
+   */
+  async syncQuizTimeData(userId: string, quizTimeData: {
+    totalQuizMinutes: number;
+    dailyQuizTimes: any[];
+  }) {
+    const { totalQuizMinutes, dailyQuizTimes } = quizTimeData;
+
+    // Check if statistics record exists
+    const existingStats = await this.prisma.statistics.findUnique({
+      where: { userId }
+    });
+
+    if (existingStats) {
+      // Update existing statistics
+      await this.prisma.statistics.update({
+        where: { userId },
+        data: {
+          totalQuizMinutes,
+          dailyQuizTimes
+        }
+      });
+    } else {
+      // Create new statistics record
+      await this.prisma.statistics.create({
+        data: {
+          userId,
+          totalQuizMinutes,
+          dailyQuizTimes,
+          totalQuizzes: 0,
+          correctAnswers: 0,
+          totalQuestions: 0,
+          averageScore: 0
+        }
+      });
+    }
+
+    return { message: 'Quiz time data synced successfully' };
   }
 }

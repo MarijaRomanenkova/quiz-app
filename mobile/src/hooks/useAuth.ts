@@ -172,10 +172,10 @@ export const useAuth = () => {
       // Sync quiz time data to backend before logout
       if (token && dailyQuizTimes.length > 0) {
         try {
-          await syncQuizTimeData(token, {
+          await syncQuizTimeData({
             dailyQuizTimes,
             totalQuizMinutes
-          });
+          }, token);
         } catch (error) {
           console.warn('Failed to sync quiz time data:', error);
         }
