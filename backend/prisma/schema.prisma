@@ -18,12 +18,12 @@ model User {
   resetToken               String?         @unique
   resetTokenExpiry         DateTime?
   levelId                  String
-  studyPaceId              Int             @default(1)
-  agreedToTerms            Boolean         @default(false)
-  marketingEmails          Boolean         @default(false)
-  shareDevices             Boolean         @default(false)
   createdAt                DateTime        @default(now())
   updatedAt                DateTime        @updatedAt
+  marketingEmails          Boolean         @default(false)
+  shareDevices             Boolean         @default(false)
+  studyPaceId              Int             @default(1)
+  agreedToTerms            Boolean         @default(false)
   quizResults              QuizResult[]
   statistics               Statistics?
   level                    Level           @relation(fields: [levelId], references: [levelId])
@@ -31,17 +31,17 @@ model User {
 }
 
 model Statistics {
-  id             String   @id @default(uuid())
-  userId         String   @unique
-  totalQuizzes   Int      @default(0)
-  correctAnswers Int      @default(0)
-  totalQuestions Int      @default(0)
-  averageScore   Float    @default(0)
-  totalQuizMinutes Int    @default(0)
-  dailyQuizTimes Json?    // Array of DailyQuizTime objects: [{date: "2024-01-15", minutes: 30, lastUpdated: "2024-01-15T10:30:00Z"}]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  user           User     @relation(fields: [userId], references: [id])
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  totalQuizzes     Int      @default(0)
+  correctAnswers   Int      @default(0)
+  totalQuestions   Int      @default(0)
+  averageScore     Float    @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  dailyQuizTimes   Json?
+  totalQuizMinutes Int      @default(0)
+  user             User     @relation(fields: [userId], references: [id])
 }
 
 model Level {

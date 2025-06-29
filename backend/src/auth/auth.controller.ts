@@ -23,11 +23,7 @@ import { JwtAuthGuard } from './guards/jwt.guard';
 import { verificationSuccessTemplate } from '../templates/email/verification-success.template';
 import { ConfigService } from '@nestjs/config';
 import { resetPasswordSuccessTemplate } from '../templates/email/reset-password-success.template';
-
-interface UserPayload {
-  id: string;
-  email: string;
-}
+import { RequestUser } from '../types/user.types';
 
 /**
  * Authentication controller that handles user registration and login
@@ -125,14 +121,14 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@Request() req: { user: UserPayload }) {
+  async getProfile(@Request() req: { user: RequestUser }) {
     return this.authService.getUserProfile(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Put('profile')
   async updateProfile(
-    @Request() req: { user: UserPayload },
+    @Request() req: { user: RequestUser },
     @Body() updateProfileDto: UpdateProfileDto,
   ) {
     return this.authService.updateUserProfile(req.user.id, updateProfileDto);
@@ -140,7 +136,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('account')
-  async deleteAccount(@Request() req: { user: UserPayload }) {
+  async deleteAccount(@Request() req: { user: RequestUser }) {
     return this.authService.deleteUserAccount(req.user.id);
   }
 
@@ -161,7 +157,7 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Get('quiz-time')
-  async loadQuizTimeData(@Request() req: { user: UserPayload }) {
+  async loadQuizTimeData(@Request() req: { user: RequestUser }) {
     return this.authService.loadQuizTimeData(req.user.id);
   }
 
@@ -187,7 +183,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('quiz-time')
   async syncQuizTimeData(
-    @Request() req: { user: UserPayload },
+    @Request() req: { user: RequestUser },
     @Body() quizTimeData: {
       totalQuizMinutes: number;
       dailyQuizTimes: any[];

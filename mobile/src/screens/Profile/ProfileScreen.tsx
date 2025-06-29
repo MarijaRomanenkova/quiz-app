@@ -32,7 +32,7 @@ import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceS
 import { Button } from '../../components/Button/Button';
 import { CustomModal } from '../../components/Modal/CustomModal';
 import { useAuth } from '../../hooks/useAuth';
-import { updateUserProfile as updateUserProfileAPI, deleteUserAccount } from '../../services/api';
+import { deleteUserAccount } from '../../services/api';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -67,61 +67,49 @@ export const ProfileScreen = () => {
   const { logout } = useAuth();
   const user = useSelector((state: RootState) => state.auth.user);
   const { token } = useSelector((state: RootState) => state.auth);
-  const [studyPaceId, setStudyPaceId] = useState(1);
-  const [marketingEmails, setMarketingEmails] = useState(false);
-  const [shareDevices, setShareDevices] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
   
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
 
-  /**
-   * Initializes profile data from user state
-   * 
-   * Loads user preferences and settings from Redux state
-   * when the component mounts or user data changes.
-   */
-  useEffect(() => {
-    if (user) {
-      setStudyPaceId(user.studyPaceId);
-      setMarketingEmails(user.marketingEmails);
-      setShareDevices(user.shareDevices);
-      setAgreedToTerms(user.agreedToTerms);
-    }
-  }, [user]);
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>User not found</Text>
+      </View>
+    );
+  }
 
   /**
    * Handles study pace selection changes
    * 
-   * Updates the local study pace state when user selects
+   * Updates the Redux state when user selects
    * a different pace option.
    * 
    * @param {number} paceId - The selected study pace ID
    */
   const handleStudyPaceChange = (paceId: number) => {
-    setStudyPaceId(paceId);
+    dispatch(updateUserPreferences({ studyPaceId: paceId }));
   };
 
   /**
    * Handles marketing emails preference changes
    * 
-   * Updates the marketing emails toggle state.
+   * Updates the Redux state for marketing emails toggle.
    * 
    * @param {boolean} value - The new marketing emails preference
    */
   const handleMarketingEmailsChange = (value: boolean) => {
-    setMarketingEmails(value);
+    dispatch(updateUserPreferences({ marketingEmails: value }));
   };
 
   /**
    * Handles device sharing preference changes
    * 
-   * Updates the device sharing toggle state.
+   * Updates the Redux state for device sharing toggle.
    * 
    * @param {boolean} value - The new device sharing preference
    */
   const handleShareDevicesChange = (value: boolean) => {
-    setShareDevices(value);
+    dispatch(updateUserPreferences({ shareDevices: value }));
   };
 
   /**
@@ -136,7 +124,7 @@ export const ProfileScreen = () => {
     if (value === false) {
       setShowTermsModal(true);
     } else {
-      setAgreedToTerms(true);
+      dispatch(updateUserPreferences({ agreedToTerms: true }));
     }
   };
 
@@ -182,44 +170,6 @@ export const ProfileScreen = () => {
   };
 
   /**
-   * Handles profile data saving
-   * 
-   * Saves user preferences to the backend and updates Redux state
-   * with the new profile data. Shows success/error feedback.
-   */
-  const handleSave = async () => {
-    if (!user) return;
-
-    setIsSaving(true);
-    try {
-      if (!token) {
-        throw new Error('No authentication token available');
-      }
-
-      const response = await updateUserProfileAPI({
-        studyPaceId,
-        marketingEmails,
-        shareDevices,
-      }, token);
-
-      dispatch(
-        updateUserPreferences({
-          studyPaceId,
-          marketingEmails,
-          shareDevices,
-        })
-      );
-
-      Alert.alert('Success', 'Profile updated successfully!');
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      Alert.alert('Error', 'Failed to update profile. Please try again.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  /**
    * Handles user logout
    * 
    * Logs out the user and clears authentication state.
@@ -228,45 +178,21 @@ export const ProfileScreen = () => {
     logout();
   };
 
-  /**
-   * Checks if profile has unsaved changes
-   * 
-   * Compares current form state with user data to determine
-   * if there are unsaved changes that need to be persisted.
-   * 
-   * @returns {boolean} True if there are unsaved changes
-   */
-  const hasChanges = () => {
-    if (!user) return false;
-    return (
-      studyPaceId !== user.studyPaceId ||
-      marketingEmails !== user.marketingEmails ||
-      shareDevices !== user.shareDevices
-    );
-  };
-
-  if (!user) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>User not found</Text>
-      </View>
-    );
-  }
-
   return (
     <Surface style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        {/* Header */}
-        <View style={styles.header}>
-          <IconButton
-            icon="chevron-left"
-            iconColor={theme.colors.surface}
-            size={24}
-            onPress={() => navigation.goBack()}
-          />
-          <Text style={styles.backText}>Back to Learning</Text>
-        </View>
+      {/* Header */}
+      <View style={styles.header}>
+        <IconButton
+          icon="chevron-left"
+          iconColor={theme.colors.surface}
+          size={24}
+          onPress={() => navigation.goBack()}
+        />
+        <Text style={styles.backText}>Back to Learning</Text>
+      </View>
 
+      {/* Main Content with Flex Spacing */}
+      <View style={styles.mainContent}>
         {/* User Info */}
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{user.username}</Text>
@@ -283,10 +209,12 @@ export const ProfileScreen = () => {
         {/* Study Pace */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Study Pace</Text>
-          <StudyPaceSelector 
-            currentPaceId={studyPaceId} 
-            onPaceChange={handleStudyPaceChange}
-          />
+          <View style={styles.studyPaceContainer}>
+            <StudyPaceSelector 
+              currentPaceId={user.studyPaceId} 
+              onPaceChange={handleStudyPaceChange}
+            />
+          </View>
         </View>
 
         {/* Toggles */}
@@ -301,38 +229,41 @@ export const ProfileScreen = () => {
                 Terms and Conditions
               </Text>
             </Text>
-            <Switch value={agreedToTerms} onValueChange={handleTermsChange} />
+            <Switch value={user.agreedToTerms} onValueChange={handleTermsChange} />
           </View>
           <View style={styles.toggleRow}>
             <Text style={styles.toggleLabel}>Agree to Marketing Emails</Text>
-            <Switch value={marketingEmails} onValueChange={handleMarketingEmailsChange} />
+            <Switch value={user.marketingEmails} onValueChange={handleMarketingEmailsChange} />
           </View>
           <View style={styles.toggleRow}>
             <Text style={styles.toggleLabel}>Share Among Devices</Text>
-            <Switch value={shareDevices} onValueChange={handleShareDevicesChange} />
+            <Switch value={user.shareDevices} onValueChange={handleShareDevicesChange} />
           </View>
         </View>
+      </View>
 
-        {/* Save Button */}
+      {/* Buttons Container at Bottom */}
+      <View style={styles.buttonsContainer}>
+        {/* Delete Account Button */}
         <Button
           mode="contained"
-          onPress={handleSave}
-          variant="success"
-          disabled={!hasChanges() || isSaving}
+          onPress={() => setShowTermsModal(true)}
+          variant="secondary"
+          style={styles.deleteButton}
         >
-          Save
+          Delete Account
         </Button>
 
         {/* Logout Button */}
         <Button
           mode="contained"
           onPress={handleLogout}
-          variant="secondary"
+          variant="success"
           style={styles.logoutButton}
         >
           Log Out
         </Button>
-      </ScrollView>
+      </View>
 
       <CustomModal
         visible={showTermsModal}
@@ -354,28 +285,29 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     padding: 24,
   },
-  scrollView: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingVertical: 16,
   },
   backText: {
     color: theme.colors.surface,
     fontSize: 16,
     fontFamily: 'Baloo2-Regular',
   },
+  mainContent: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
   userInfo: {
-    padding: 24,
+    paddingVertical: 16,
     alignItems: 'center',
   },
   userName: {
     color: theme.colors.surface,
     fontSize: 32,
     fontFamily: 'Baloo2-Bold',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   infoRow: {
     flexDirection: 'row',
@@ -395,7 +327,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    padding: 24,
+    paddingVertical: 16,
   },
   sectionTitle: {
     color: theme.colors.surface,
@@ -405,7 +337,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   toggles: {
-    padding: 24,
+    paddingVertical: 24,
   },
   toggleRow: {
     flexDirection: 'row',
@@ -425,14 +357,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Baloo2-Bold',
     textDecorationLine: 'underline',
   },
+  buttonsContainer: {
+    paddingBottom: 16,
+  },
+  deleteButton: {
+    marginBottom: 16,
+  },
   logoutButton: {
-    marginTop: 16,
-    marginBottom: 40  
+    marginBottom: 0,
   },
   errorText: {
     fontSize: 16,
     color: theme.colors.error,
     textAlign: 'center',
     marginTop: 50,
+  },
+  studyPaceContainer: {
+    width: '100%',
   },
 });

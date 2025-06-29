@@ -19,4 +19,9 @@ export interface UserPayload {
   email: string;
 }
 
+export interface RequestUser {
+  id: string;
+  email: string;
+}
+
 export type UserWithVerification = User;

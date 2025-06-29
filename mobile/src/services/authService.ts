@@ -44,6 +44,14 @@ interface AuthResponse {
     emailVerified: boolean;
     /** Current level/grade of the user */
     levelId: string;
+    /** User's preferred study pace setting */
+    studyPaceId: number;
+    /** Whether the user has agreed to terms and conditions */
+    agreedToTerms: boolean;
+    /** Whether the user has opted in to marketing emails */
+    marketingEmails: boolean;
+    /** Whether the user has enabled device sharing */
+    shareDevices: boolean;
   };
 }
 

@@ -15,12 +15,7 @@ import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { verificationEmailTemplate } from '../templates/email/verification.template';
 import { passwordResetTemplate } from '../templates/email/password-reset.template';
-import { Prisma, User } from '@prisma/client';
-
-interface UserPayload {
-  sub: string;
-  email: string;
-}
+import { UserPayload } from '../types/user.types';
 
 /**
  * Authentication service that handles user authentication and authorization
@@ -158,7 +153,16 @@ export class AuthService {
    */
   async login(loginDto: LoginDto): Promise<{
     access_token: string;
-    user: { id: string; email: string; username: string; levelId: string };
+    user: { 
+      id: string; 
+      email: string; 
+      username: string; 
+      levelId: string;
+      studyPaceId: number;
+      agreedToTerms: boolean;
+      marketingEmails: boolean;
+      shareDevices: boolean;
+    };
   }> {
     const { email, password } = loginDto;
 
@@ -188,6 +192,10 @@ export class AuthService {
         email: user.email,
         username: user.username,
         levelId: user.levelId,
+        studyPaceId: user.studyPaceId,
+        agreedToTerms: user.agreedToTerms,
+        marketingEmails: user.marketingEmails,
+        shareDevices: user.shareDevices,
       },
     };
   }

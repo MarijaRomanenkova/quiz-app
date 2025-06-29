@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchQuizTimeData, syncQuizTimeData } from '../services/api';
+import { fetchQuizTimeData, syncQuizTimeData, updateUserProfile } from '../services/api';
 import { loadQuizTimeData } from './statisticsSlice';
 import authService from '../services/authService';
 import type { RootState, AppDispatch } from './index';
@@ -83,7 +83,7 @@ export const loginWithQuizTime = createAsyncThunk(
 /**
  * Async thunk for user logout with quiz time data syncing
  * 
- * Syncs the current quiz time data to the backend before clearing
+ * Syncs the current quiz time data and user preferences to the backend before clearing
  * the authentication state.
  * 
  * @param _ - Unused parameter (thunk requirement)
@@ -93,7 +93,7 @@ export const logoutWithQuizTimeSync = createAsyncThunk(
   'auth/logoutWithQuizTimeSync',
   async (_, { getState, dispatch }) => {
     const state = getState() as RootState;
-    const { token } = state.auth;
+    const { token, user } = state.auth;
     const { totalQuizMinutes, dailyQuizTimes } = state.statistics;
     
     // Sync quiz time data to backend if user is authenticated
@@ -105,6 +105,20 @@ export const logoutWithQuizTimeSync = createAsyncThunk(
         }, token);
       } catch (error) {
         console.warn('Failed to sync quiz time data:', error);
+        // Don't fail logout if sync fails
+      }
+    }
+    
+    // Sync user preferences to backend if user is authenticated
+    if (token && user) {
+      try {
+        await updateUserProfile({
+          studyPaceId: user.studyPaceId,
+          marketingEmails: user.marketingEmails,
+          shareDevices: user.shareDevices,
+        }, token);
+      } catch (error) {
+        console.warn('Failed to sync user preferences:', error);
         // Don't fail logout if sync fails
       }
     }
@@ -182,6 +196,7 @@ export const authSlice = createSlice({
         studyPaceId?: number;
         marketingEmails?: boolean;
         shareDevices?: boolean;
+        agreedToTerms?: boolean;
       }>
     ) => {
       if (state.user) {
@@ -199,14 +214,8 @@ export const authSlice = createSlice({
       .addCase(loginWithQuizTime.fulfilled, (state, action) => {
         state.isLoading = false;
         state.token = action.payload.access_token;
-        // Handle missing user properties with defaults
-        state.user = {
-          ...action.payload.user,
-          studyPaceId: 1, // Default value
-          agreedToTerms: false, // Default value
-          marketingEmails: false, // Default value
-          shareDevices: false, // Default value
-        };
+        // Use complete user data from backend response
+        state.user = action.payload.user;
         state.error = null;
       })
       .addCase(loginWithQuizTime.rejected, (state, action) => {
