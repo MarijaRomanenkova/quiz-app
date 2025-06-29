@@ -1,3 +1,22 @@
+/**
+ * @fileoverview Register Screen component for the mobile application
+ * 
+ * This component provides a comprehensive user registration interface where
+ * new users can create accounts with detailed information and preferences.
+ * It features extensive form validation, study pace selection, and terms
+ * agreement management.
+ * 
+ * The component includes:
+ * - Complete user registration form with validation
+ * - Password strength requirements and confirmation
+ * - Study pace selection for personalized learning
+ * - Terms and conditions agreement
+ * - Email verification workflow
+ * - Error handling for existing accounts
+ * 
+ * @module screens/Register
+ */
+
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Text, TextInput, Surface, IconButton, Switch, Portal } from 'react-native-paper';
@@ -18,6 +37,17 @@ import authService from '../../services/authService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
+/**
+ * Zod schema for registration form validation
+ * 
+ * Defines comprehensive validation rules for all registration fields:
+ * - Name must be at least 2 characters
+ * - Email must be valid format
+ * - Password must meet strength requirements
+ * - Password confirmation must match
+ * - Terms agreement is required
+ * - Study pace must be selected
+ */
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
@@ -39,6 +69,32 @@ const registerSchema = z.object({
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+/**
+ * Register Screen component for new user account creation
+ * 
+ * Provides a comprehensive registration interface with extensive form
+ * validation, study preferences, and account setup. Handles the complete
+ * user onboarding process with proper error handling and success flows.
+ * 
+ * Key features:
+ * - Complete user registration form with real-time validation
+ * - Password strength requirements with visual feedback
+ * - Password confirmation matching validation
+ * - Study pace selection for personalized learning experience
+ * - Terms and conditions agreement with navigation
+ * - Email verification workflow after successful registration
+ * - Error handling for existing email addresses
+ * - Form validation using Zod schema with custom refinements
+ * - Integration with authentication service for account creation
+ * 
+ * @returns {JSX.Element} The registration screen with comprehensive form
+ * 
+ * @example
+ * ```tsx
+ * // Navigation to registration screen
+ * navigation.navigate('Register');
+ * ```
+ */
 export const RegisterScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const dispatch = useDispatch();
@@ -59,10 +115,25 @@ export const RegisterScreen = () => {
     },
   });
 
+  /**
+   * Handles navigation to terms and conditions screen
+   * 
+   * Navigates to the terms screen for user review of
+   * terms and conditions before registration.
+   */
   const handleTermsPress = () => {
     navigation.navigate('Terms');
   };
 
+  /**
+   * Handles form submission for user registration
+   * 
+   * Validates form data and attempts to create a new user account
+   * through the authentication service. Handles various error cases
+   * including existing email addresses and shows appropriate modals.
+   * 
+   * @param {RegisterFormData} data - The validated registration form data
+   */
   const onSubmit = async (data: RegisterFormData) => {
     console.log('Registration attempt with data:', {
       email: data.email,
@@ -102,11 +173,23 @@ export const RegisterScreen = () => {
     }
   };
 
+  /**
+   * Handles navigation to password recovery
+   * 
+   * Closes the email exists modal and navigates to the
+   * forgot password screen for existing users.
+   */
   const handleRecoverPassword = () => {
     setShowEmailExistsModal(false);
     navigation.navigate('ForgotPassword');
   };
 
+  /**
+   * Handles successful registration modal dismissal
+   * 
+   * Closes the success modal and navigates to the login
+   * screen for the user to sign in with their new account.
+   */
   const handleSuccessModalDismiss = () => {
     setShowSuccessModal(false);
     navigation.navigate('Login');

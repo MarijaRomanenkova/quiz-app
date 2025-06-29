@@ -1,3 +1,17 @@
+/**
+ * @fileoverview Audio Player component for the mobile application
+ * 
+ * This component provides a circular audio player interface with play/pause
+ * functionality and visual progress indication. It uses Expo's Audio API
+ * for sound playback and displays progress as a circular progress bar.
+ * 
+ * The component supports external control through a ref interface, allowing
+ * parent components to stop playback programmatically. It automatically
+ * handles audio loading, playback status updates, and cleanup.
+ * 
+ * @module components/AudioPlayer
+ */
+
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -5,14 +19,59 @@ import { Audio } from 'expo-av';
 import { theme } from '../../theme';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
 
+/**
+ * Props interface for the AudioPlayer component
+ * 
+ * @interface AudioPlayerProps
+ * @property {string} audioUrl - The URL of the audio file to play
+ */
 interface AudioPlayerProps {
   audioUrl: string;
 }
 
+/**
+ * Ref interface for external control of the AudioPlayer
+ * 
+ * @interface AudioPlayerRef
+ * @property {() => void} stop - Function to stop the current audio playback
+ */
 export interface AudioPlayerRef {
   stop: () => void;
 }
 
+/**
+ * Audio Player component with circular progress indicator
+ * 
+ * Provides a visually appealing audio player with play/pause functionality
+ * and a circular progress bar that shows playback progress. The component
+ * uses Expo's Audio API for reliable cross-platform audio playback.
+ * 
+ * The player displays a circular progress indicator with a play/pause button
+ * in the center. Progress is updated in real-time as the audio plays.
+ * 
+ * @param {AudioPlayerProps} props - The audio player props
+ * @param {string} props.audioUrl - The URL of the audio file to play
+ * @param {React.Ref<AudioPlayerRef>} ref - Ref for external control
+ * @returns {JSX.Element} A circular audio player with progress indicator
+ * 
+ * @example
+ * ```tsx
+ * const audioPlayerRef = useRef<AudioPlayerRef>(null);
+ * 
+ * <AudioPlayer
+ *   ref={audioPlayerRef}
+ *   audioUrl="https://example.com/audio.mp3"
+ * />
+ * 
+ * // Stop playback from parent component
+ * audioPlayerRef.current?.stop();
+ * ```
+ * 
+ * @example
+ * ```tsx
+ * <AudioPlayer audioUrl={question.audioUrl} />
+ * ```
+ */
 export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audioUrl }, ref) => {
   const [sound, setSound] = React.useState<Audio.Sound>();
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -32,6 +91,12 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audio
     }
   }));
 
+  /**
+   * Plays the audio file from the provided URL
+   * 
+   * Loads the audio file, sets up playback status monitoring,
+   * and starts playback. Handles errors gracefully.
+   */
   const playSound = async () => {
     if (sound) {
       await sound.unloadAsync();
@@ -60,6 +125,11 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audio
     }
   };
 
+  /**
+   * Stops the current audio playback
+   * 
+   * Stops the sound and resets the playing state and progress.
+   */
   const stopSound = async () => {
     if (sound) {
       await sound.stopAsync();

@@ -5,5 +5,23 @@
   "exclude": ["**/node_modules/**"],
   "excludePrivate": true,
   "excludeProtected": true,
-  "excludeExternals": true
+  "excludeExternals": true,
+  "excludeNotDocumented": true,
+  "excludeInternal": true,
+  "skipErrorChecking": true,
+  "disableSources": true,
+  "theme": "default",
+  "name": "Mobile Quiz App Documentation",
+  "readme": "none",
+  "includeVersion": true,
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "Components",
+    "Screens", 
+    "Store",
+    "Services",
+    "Hooks",
+    "Types",
+    "Configuration"
+  ]
 } 

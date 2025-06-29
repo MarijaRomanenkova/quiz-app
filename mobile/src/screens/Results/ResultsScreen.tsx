@@ -1,3 +1,20 @@
+/**
+ * @fileoverview Results Screen component for the mobile application
+ * 
+ * This component displays quiz results after completing a quiz, showing the
+ * user's score, progress updates, and providing navigation options. It integrates
+ * with progress tracking to show completion status and unlock notifications.
+ * 
+ * The component features:
+ * - Score display with visual circle indicator
+ * - Progress tracking and completion status
+ * - New topic unlock notifications
+ * - Wrong question repetition options
+ * - Multiple navigation paths (continue, repeat, explore)
+ * 
+ * @module screens/Results
+ */
+
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -15,6 +32,29 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 type ResultsScreenRouteProp = RouteProp<RootStackParamList, 'Results'>;
 type ResultsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+/**
+ * Results Screen component for quiz completion and progress display
+ * 
+ * Displays comprehensive quiz results including score, progress updates,
+ * and navigation options. Integrates with progress tracking to show
+ * completion status and unlock new topics based on performance.
+ * 
+ * Key features:
+ * - Visual score display with circular progress indicator
+ * - Category progress tracking and completion status
+ * - New topic unlock notifications with star indicators
+ * - Wrong question repetition for improvement
+ * - Multiple navigation paths (home, category, repeat)
+ * - Personalized congratulatory messages
+ * 
+ * @returns {JSX.Element} The results screen with score and navigation options
+ * 
+ * @example
+ * ```tsx
+ * // Navigation to results screen (typically automatic after quiz completion)
+ * navigation.navigate('Results', { quizId: 'topic1' });
+ * ```
+ */
 export const ResultsScreen = () => {
   const navigation = useNavigation<ResultsScreenNavigationProp>();
   const route = useRoute<ResultsScreenRouteProp>();
@@ -40,7 +80,12 @@ export const ResultsScreen = () => {
     return categoryProgress && categoryProgress.completedTopics >= 3;
   }, [categoryProgress]);
 
-  // Determine category ID from the quiz result
+  /**
+   * Determines category ID from quiz results
+   * 
+   * Extracts the category ID from wrong questions or quiz ID to
+   * display appropriate progress information and unlock notifications.
+   */
   useEffect(() => {
     if (quizResult && route.params.quizId) {
       // Get category from the first question in wrong questions or from the quiz ID
@@ -68,6 +113,12 @@ export const ResultsScreen = () => {
     return null;
   }
 
+  /**
+   * Handles wrong question repetition
+   * 
+   * Navigates to the quiz screen with the repeat flag to allow
+   * users to practice questions they answered incorrectly.
+   */
   const handleRepeatWrongQuestions = () => {
     navigation.navigate('Quiz', { 
       quizId: route.params.quizId,
@@ -75,6 +126,12 @@ export const ResultsScreen = () => {
     } as any);
   };
 
+  /**
+   * Handles navigation to category topics
+   * 
+   * Navigates to the topic selection screen for the current category
+   * to allow users to explore newly unlocked topics.
+   */
   const handleGoToCategory = () => {
     if (categoryId) {
       navigation.navigate('Topic', { categoryId });

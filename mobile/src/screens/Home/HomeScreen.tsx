@@ -1,3 +1,20 @@
+/**
+ * @fileoverview Home Screen component for the mobile application
+ * 
+ * This component serves as the main dashboard where users can select learning
+ * categories and navigate to topics. It handles data initialization, category
+ * selection, and progress tracking setup. The screen displays available
+ * categories with radio button selection and provides navigation to topic screens.
+ * 
+ * The component manages several data loading operations:
+ * - Categories and topics from the backend
+ * - Questions and reading texts for all topics
+ * - Progress tracking initialization
+ * - Authentication state validation
+ * 
+ * @module screens/Home
+ */
+
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, RadioButton } from 'react-native-paper';
@@ -14,10 +31,40 @@ import { initializeCategoryProgress } from '../../store/progressSlice';
 import type { AppDispatch } from '../../store';
 import { Button } from '../../components/Button/Button';
 
+/**
+ * Props interface for the HomeScreen component
+ * 
+ * @interface HomeScreenProps
+ * @property {NativeStackNavigationProp<RootStackParamList, 'Home'>} navigation - Navigation prop for screen transitions
+ */
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
 };
 
+/**
+ * Home Screen component for category selection and data management
+ * 
+ * Provides the main interface for users to select learning categories
+ * and access topics. The component handles comprehensive data loading
+ * and initialization for the learning experience.
+ * 
+ * Key features:
+ * - Category selection with radio buttons
+ * - Progressive data loading (categories → topics → questions → reading texts)
+ * - Progress tracking initialization
+ * - Authentication validation
+ * - Error handling and loading states
+ * - Navigation to topic screens
+ * 
+ * @param {HomeScreenProps} props - The home screen props
+ * @param {NativeStackNavigationProp<RootStackParamList, 'Home'>} props.navigation - Navigation prop for screen transitions
+ * @returns {JSX.Element} The home screen with category selection interface
+ * 
+ * @example
+ * ```tsx
+ * <HomeScreen navigation={navigation} />
+ * ```
+ */
 export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { categories, selectedCategoryId, isLoading, error } = useSelector((state: RootState) => state.category);
@@ -31,6 +78,12 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   console.log('HomeScreen - categories length:', categories.length);
   console.log('HomeScreen - categories:', categories);
 
+  /**
+   * Initial data loading for authenticated users
+   * 
+   * Fetches categories, topics, questions, and reading texts in sequence
+   * when the user is authenticated and data hasn't been loaded yet.
+   */
   useEffect(() => {
     // Only fetch data once when user is authenticated and data is not loaded
     if (user && categories.length === 0) {
@@ -57,7 +110,12 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     }
   }, [dispatch, user, categories.length]);
 
-  // Test: Manually trigger questions fetch if not loaded
+  /**
+   * Manual data loading fallback
+   * 
+   * Ensures questions and reading texts are loaded even if the initial
+   * loading sequence fails or is incomplete.
+   */
   useEffect(() => {
     if (user && categories.length > 0 && topics.length > 0) {
       console.log('HomeScreen - Current questions state:', questionsState);
@@ -97,7 +155,13 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     }
   }, [dispatch, user, categories.length, topics.length, questionsState.byTopicId]);
 
-  // Initialize progress tracking after both categories and topics are loaded
+  /**
+   * Progress tracking initialization
+   * 
+   * Sets up progress tracking for each category after categories and
+   * topics are loaded. Determines initial unlocked topics based on
+   * category type.
+   */
   useEffect(() => {
     if (categories.length > 0 && topics.length > 0) {
       console.log('HomeScreen - Initializing progress tracking...');
@@ -114,10 +178,24 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     }
   }, [dispatch, categories.length, topics.length]);
 
+  /**
+   * Handles category selection
+   * 
+   * Updates the selected category in Redux state when user
+   * selects a different category option.
+   * 
+   * @param {string} categoryId - The ID of the selected category
+   */
   const handleCategorySelect = (categoryId: string) => {
     dispatch(setSelectedCategory(categoryId));
   };
 
+  /**
+   * Handles navigation to topic screen
+   * 
+   * Navigates to the topic selection screen for the currently
+   * selected category.
+   */
   const handleContinue = () => {
     if (selectedCategoryId) {
       navigation.navigate('Topic', { categoryId: selectedCategoryId });

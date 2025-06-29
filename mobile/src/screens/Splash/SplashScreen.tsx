@@ -1,3 +1,20 @@
+/**
+ * @fileoverview Splash Screen component for the mobile application
+ * 
+ * This component serves as the initial loading screen that appears when the app starts.
+ * It handles font loading, data initialization, and navigation routing based on
+ * authentication status. The screen displays a branded loading interface with
+ * progress indicators and status messages.
+ * 
+ * The component performs several initialization tasks:
+ * - Loads custom fonts (Baloo2 family)
+ * - Fetches categories and topics from the backend
+ * - Determines navigation flow based on authentication
+ * - Provides visual feedback during the loading process
+ * 
+ * @module screens/Splash
+ */
+
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -14,12 +31,41 @@ import { AppDispatch } from '../../store';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
+/**
+ * Splash Screen component for app initialization
+ * 
+ * Displays a branded loading screen while the app initializes. Handles
+ * font loading, data fetching, and navigation routing. The component
+ * shows progress through different loading states with appropriate
+ * status messages.
+ * 
+ * Key features:
+ * - Custom font loading with error handling
+ * - Progressive data initialization (categories, topics)
+ * - Authentication-based navigation routing
+ * - Visual loading indicators and status messages
+ * - Branded logo and app name display
+ * 
+ * @returns {JSX.Element} The splash screen with loading interface
+ * 
+ * @example
+ * ```tsx
+ * // Navigation to splash screen (typically automatic on app start)
+ * navigation.navigate('Splash');
+ * ```
+ */
 export const SplashScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const dispatch = useDispatch<AppDispatch>();
   const [loadingText, setLoadingText] = useState('Initializing...');
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
+  /**
+   * Loads custom fonts required by the application
+   * 
+   * Loads the Baloo2 font family with different weights for consistent
+   * typography across the app. Handles loading errors gracefully.
+   */
   useEffect(() => {
     const loadFonts = async () => {
       try {
@@ -39,6 +85,13 @@ export const SplashScreen = () => {
     loadFonts();
   }, []);
 
+  /**
+   * Initializes app data and determines navigation flow
+   * 
+   * Fetches essential data (categories and topics) from the backend
+   * and navigates to the appropriate screen based on authentication
+   * status. Provides progressive loading feedback to the user.
+   */
   useEffect(() => {
     if (!fontsLoaded) return;
 

@@ -13,6 +13,9 @@ import { RootState } from '../store';
  */
 // interfaces moved to types/index.ts
 
+/**
+ * Initial state for the statistics slice
+ */
 const initialState: StatisticsState = {
   attempts: [],
   totalAttempts: 0,
@@ -21,14 +24,20 @@ const initialState: StatisticsState = {
   currentSessionStart: null,
 };
 
+/**
+ * Redux slice for managing quiz statistics and learning analytics
+ * 
+ * This slice handles quiz attempts, daily quiz time tracking, session management,
+ * and provides selectors for processed statistics data used in progress screens.
+ */
 export const statisticsSlice = createSlice({
   name: 'statistics',
   initialState,
   reducers: {
     /**
      * Adds a new quiz attempt to the statistics
-     * @param {StatisticsState} state - Current state
-     * @param {PayloadAction<QuizAttempt>} action - Quiz attempt data
+     * @param state - Current statistics state
+     * @param action - Quiz attempt data to add
      */
     addAttempt: (state, action: PayloadAction<QuizAttempt>) => {
       state.attempts.push(action.payload);
@@ -36,14 +45,18 @@ export const statisticsSlice = createSlice({
     },
 
     /**
-     * Start a new quiz session timer
+     * Starts a new quiz session timer
+     * Records the current timestamp to track session duration
+     * @param state - Current statistics state
      */
     startQuizSession: (state) => {
       state.currentSessionStart = new Date().toISOString();
     },
 
     /**
-     * End the current quiz session and save the time
+     * Ends the current quiz session and saves the time to daily statistics
+     * Calculates session duration and updates daily quiz time tracking
+     * @param state - Current statistics state
      */
     endQuizSession: (state) => {
       if (state.currentSessionStart) {
@@ -75,7 +88,9 @@ export const statisticsSlice = createSlice({
     },
 
     /**
-     * Add minutes to today's quiz time (for manual time tracking)
+     * Adds minutes to today's quiz time (for manual time tracking)
+     * @param state - Current statistics state
+     * @param action - Number of minutes to add
      */
     addQuizMinutes: (state, action: PayloadAction<number>) => {
       const minutes = action.payload;
@@ -99,7 +114,9 @@ export const statisticsSlice = createSlice({
     },
 
     /**
-     * Set quiz time for a specific date (for data import/sync)
+     * Sets quiz time for a specific date (for data import/sync)
+     * @param state - Current statistics state
+     * @param action - Object containing date and minutes
      */
     setDailyQuizTime: (state, action: PayloadAction<{ date: string; minutes: number }>) => {
       const { date, minutes } = action.payload;
@@ -123,7 +140,8 @@ export const statisticsSlice = createSlice({
     },
 
     /**
-     * Reset all quiz time data
+     * Resets all quiz time data
+     * @param state - Current statistics state
      */
     resetQuizTime: (state) => {
       state.dailyQuizTimes = [];
@@ -132,7 +150,9 @@ export const statisticsSlice = createSlice({
     },
 
     /**
-     * Load quiz time data from backend (on login)
+     * Loads quiz time data from backend (on login)
+     * @param state - Current statistics state
+     * @param action - Object containing daily quiz times and total minutes
      */
     loadQuizTimeData: (state, action: PayloadAction<{ dailyQuizTimes: DailyQuizTime[]; totalQuizMinutes: number }>) => {
       state.dailyQuizTimes = action.payload.dailyQuizTimes;
@@ -151,7 +171,12 @@ export const {
   loadQuizTimeData,
 } = statisticsSlice.actions;
 
-// Selectors
+/**
+ * Selector to get quiz time for a specific date
+ * @param state - Root state containing statistics
+ * @param date - Date string in YYYY-MM-DD format
+ * @returns Number of minutes spent on quizzes for the given date
+ */
 export const selectDailyQuizTime = (state: { statistics: StatisticsState }, date: string) => {
   if (!state.statistics || !state.statistics.dailyQuizTimes) {
     return 0;
@@ -160,6 +185,13 @@ export const selectDailyQuizTime = (state: { statistics: StatisticsState }, date
   return entry ? entry.minutes : 0;
 };
 
+/**
+ * Selector to get quiz time for a date range
+ * @param state - Root state containing statistics
+ * @param startDate - Start date string in YYYY-MM-DD format
+ * @param endDate - End date string in YYYY-MM-DD format
+ * @returns Array of daily quiz time entries within the date range
+ */
 export const selectWeeklyQuizTime = (state: { statistics: StatisticsState }, startDate: string, endDate: string) => {
   if (!state.statistics || !state.statistics.dailyQuizTimes) {
     return [];
@@ -169,15 +201,29 @@ export const selectWeeklyQuizTime = (state: { statistics: StatisticsState }, sta
   );
 };
 
+/**
+ * Selector to get total quiz minutes across all time
+ * @param state - Root state containing statistics
+ * @returns Total number of minutes spent on quizzes
+ */
 export const selectTotalQuizMinutes = (state: { statistics: StatisticsState }) => {
   return state.statistics?.totalQuizMinutes || 0;
 };
 
+/**
+ * Selector to check if a quiz session is currently active
+ * @param state - Root state containing statistics
+ * @returns Boolean indicating if a quiz session is in progress
+ */
 export const selectIsQuizSessionActive = (state: { statistics: StatisticsState }) => {
   return state.statistics?.currentSessionStart !== null;
 };
 
-// Utility functions for data processing
+/**
+ * Utility function to get current week's quiz data
+ * @param dailyQuizTimes - Array of daily quiz time entries
+ * @returns Array of quiz time data for the current week (Monday to Sunday)
+ */
 const getCurrentWeekData = (dailyQuizTimes: DailyQuizTime[]) => {
   const today = new Date();
   const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
@@ -206,6 +252,11 @@ const getCurrentWeekData = (dailyQuizTimes: DailyQuizTime[]) => {
   return weekData;
 };
 
+/**
+ * Utility function to get last 5 weeks' quiz data
+ * @param dailyQuizTimes - Array of daily quiz time entries
+ * @returns Array of weekly quiz time data for the last 5 weeks
+ */
 const getLastFiveWeeksData = (dailyQuizTimes: DailyQuizTime[]) => {
   const today = new Date();
   const weekData = [];
@@ -238,6 +289,11 @@ const getLastFiveWeeksData = (dailyQuizTimes: DailyQuizTime[]) => {
   return weekData;
 };
 
+/**
+ * Utility function to get current month's total quiz time
+ * @param dailyQuizTimes - Array of daily quiz time entries
+ * @returns Total minutes spent on quizzes in the current month
+ */
 const getCurrentMonthTotal = (dailyQuizTimes: DailyQuizTime[]) => {
   const today = new Date();
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -251,28 +307,47 @@ const getCurrentMonthTotal = (dailyQuizTimes: DailyQuizTime[]) => {
   return monthEntries.reduce((sum, entry) => sum + entry.minutes, 0);
 };
 
-// Selectors for processed data
+/**
+ * Selector for current week's quiz data
+ * @returns Array of quiz time data for the current week (Monday to Sunday)
+ */
 export const selectCurrentWeekData = createSelector(
   [(state: RootState) => state.statistics?.dailyQuizTimes],
   (dailyQuizTimes) => getCurrentWeekData(dailyQuizTimes || [])
 );
 
+/**
+ * Selector for last 5 weeks' quiz data
+ * @returns Array of weekly quiz time data for the last 5 weeks
+ */
 export const selectLastFiveWeeksData = createSelector(
   [(state: RootState) => state.statistics?.dailyQuizTimes],
   (dailyQuizTimes) => getLastFiveWeeksData(dailyQuizTimes || [])
 );
 
+/**
+ * Selector for current month's total quiz time
+ * @returns Total minutes spent on quizzes in the current month
+ */
 export const selectCurrentMonthTotal = createSelector(
   [(state: RootState) => state.statistics?.dailyQuizTimes],
   (dailyQuizTimes) => getCurrentMonthTotal(dailyQuizTimes || [])
 );
 
+/**
+ * Selector for current week's total quiz time
+ * @returns Total minutes spent on quizzes in the current week
+ */
 export const selectCurrentWeekTotal = createSelector(
   [selectCurrentWeekData],
   (weekData) => weekData.reduce((sum, item) => sum + item.minutes, 0)
 );
 
-// Level progress utilities and selectors
+/**
+ * Utility function to calculate level progress
+ * @param state - Root state
+ * @returns Object containing level progress information
+ */
 const getLevelProgress = (state: RootState) => {
   const topics = state.topic.topics;
   const topicProgress = state.progress.topicProgress;
@@ -305,7 +380,11 @@ const getLevelProgress = (state: RootState) => {
   };
 };
 
-// Study pace goal calculation
+/**
+ * Utility function to calculate study pace goal
+ * @param studyPaceId - User's study pace ID (1=Relaxed, 2=Moderate, 3=Intensive)
+ * @returns Weekly goal in minutes based on study pace
+ */
 const getStudyPaceGoal = (studyPaceId: number): number => {
   // Total level completion time: 40 hours = 2400 minutes
   const TOTAL_LEVEL_MINUTES = 2400;
@@ -321,7 +400,10 @@ const getStudyPaceGoal = (studyPaceId: number): number => {
   return Math.round(TOTAL_LEVEL_MINUTES / weeks);
 };
 
-// Selector for level progress
+/**
+ * Selector for level progress information
+ * @returns Object containing level progress details
+ */
 export const selectLevelProgress = createSelector(
   [(state: RootState) => state.topic.topics,
    (state: RootState) => state.progress.topicProgress,
@@ -358,13 +440,19 @@ export const selectLevelProgress = createSelector(
   }
 );
 
-// Selector for level completion percentage
+/**
+ * Selector for level completion percentage
+ * @returns Percentage of level completion (0-100)
+ */
 export const selectLevelCompletionPercentage = createSelector(
   [selectLevelProgress],
   (levelProgress) => levelProgress.percentage
 );
 
-// Selector for level info (level name, completed/total)
+/**
+ * Selector for level information
+ * @returns Object containing level name and topic counts
+ */
 export const selectLevelInfo = createSelector(
   [selectLevelProgress],
   (progress) => ({
@@ -374,7 +462,10 @@ export const selectLevelInfo = createSelector(
   })
 );
 
-// Selectors for study pace goals
+/**
+ * Selector for weekly goal progress
+ * @returns Object containing weekly goal information and progress
+ */
 export const selectWeeklyGoalProgress = createSelector(
   [(state: RootState) => state.auth.user,
    (state: RootState) => state.statistics?.dailyQuizTimes],
@@ -403,6 +494,10 @@ export const selectWeeklyGoalProgress = createSelector(
   }
 );
 
+/**
+ * Selector for monthly goal progress
+ * @returns Object containing monthly goal information and progress
+ */
 export const selectMonthlyGoalProgress = createSelector(
   [(state: RootState) => state.auth.user,
    (state: RootState) => state.statistics?.dailyQuizTimes],

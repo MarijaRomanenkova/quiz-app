@@ -7,11 +7,55 @@ import { loadQuizTimeData } from '../store/statisticsSlice';
 import authService from '../services/authService';
 import { fetchUserProfile, fetchQuizTimeData, syncQuizTimeData } from '../services/api';
 
+/**
+ * Custom hook for managing user authentication state and operations
+ * 
+ * This hook provides a centralized way to handle user authentication including
+ * login, registration, logout, and access to current authentication state.
+ * It also handles syncing user profile data and quiz time statistics.
+ * 
+ * @returns Object containing authentication state and methods
+ * 
+ * @example
+ * ```typescript
+ * const { user, isAuthenticated, login, logout, isLoading } = useAuth();
+ * 
+ * const handleLogin = async () => {
+ *   const success = await login('user@example.com', 'password123');
+ *   if (success) {
+ *     console.log('Login successful');
+ *   }
+ * };
+ * ```
+ */
 export const useAuth = () => {
   const dispatch = useDispatch();
   const { token, user, isLoading, error } = useSelector((state: RootState) => state.auth);
   const { dailyQuizTimes, totalQuizMinutes } = useSelector((state: RootState) => state.statistics);
 
+  /**
+   * Authenticates a user with email and password
+   * 
+   * This function handles the complete login flow:
+   * 1. Authenticates with the backend
+   * 2. Stores credentials in Redux state
+   * 3. Fetches and updates user profile data
+   * 4. Loads quiz time statistics
+   * 
+   * @param email - User's email address
+   * @param password - User's password
+   * @returns Promise resolving to boolean indicating success
+   * 
+   * @example
+   * ```typescript
+   * const success = await login('user@example.com', 'password123');
+   * if (success) {
+   *   // Navigate to main app
+   * } else {
+   *   // Show error message
+   * }
+   * ```
+   */
   const login = useCallback(async (email: string, password: string) => {
     try {
       dispatch(setLoading(true));
@@ -72,6 +116,27 @@ export const useAuth = () => {
     }
   }, [dispatch]);
 
+  /**
+   * Registers a new user account
+   * 
+   * @param email - User's email address
+   * @param password - User's password
+   * @param username - User's display name
+   * @param studyPaceId - User's preferred study pace (default: 1)
+   * @param agreedToTerms - Whether user agreed to terms (default: false)
+   * @returns Promise resolving to boolean indicating success
+   * 
+   * @example
+   * ```typescript
+   * const success = await register(
+   *   'newuser@example.com',
+   *   'password123',
+   *   'newuser',
+   *   2, // study pace
+   *   true // agreed to terms
+   * );
+   * ```
+   */
   const register = useCallback(async (email: string, password: string, username: string, studyPaceId: number = 1, agreedToTerms: boolean = false) => {
     try {
       dispatch(setLoading(true));
@@ -87,6 +152,21 @@ export const useAuth = () => {
     }
   }, [dispatch]);
 
+  /**
+   * Logs out the current user
+   * 
+   * This function handles the complete logout flow:
+   * 1. Syncs quiz time data to backend (if available)
+   * 2. Clears all authentication data from Redux state
+   * 
+   * @returns Promise that resolves when logout is complete
+   * 
+   * @example
+   * ```typescript
+   * await logout();
+   * // User is now logged out and should be redirected to login screen
+   * ```
+   */
   const logoutUser = useCallback(async () => {
     try {
       // Sync quiz time data to backend before logout
@@ -109,16 +189,25 @@ export const useAuth = () => {
     }
   }, [dispatch, token, dailyQuizTimes, totalQuizMinutes]);
 
+  /** Whether the user is currently authenticated */
   const isAuthenticated = !!token;
 
   return {
+    /** Current user data, null if not authenticated */
     user,
+    /** JWT token for API authentication, null if not authenticated */
     token,
+    /** Whether an authentication operation is in progress */
     isLoading,
+    /** Error message from the last authentication operation */
     error,
+    /** Whether the user is currently authenticated */
     isAuthenticated,
+    /** Function to authenticate a user */
     login,
+    /** Function to register a new user */
     register,
+    /** Function to log out the current user */
     logout: logoutUser,
   };
 }; 

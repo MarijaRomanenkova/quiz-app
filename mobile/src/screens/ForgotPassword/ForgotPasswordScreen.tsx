@@ -1,3 +1,20 @@
+/**
+ * @fileoverview Forgot Password Screen component for the mobile application
+ * 
+ * This component provides a password recovery interface where users can
+ * request a password reset email. It features email validation and
+ * integration with the backend password recovery system.
+ * 
+ * The component includes:
+ * - Email input with validation
+ * - Password recovery request submission
+ * - Loading states during API calls
+ * - Success confirmation modal
+ * - Navigation back to login
+ * 
+ * @module screens/ForgotPassword
+ */
+
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, Surface, IconButton, Portal } from 'react-native-paper';
@@ -15,12 +32,42 @@ import { API_URL } from '../../config';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'ForgotPassword'>;
 
+/**
+ * Zod schema for forgot password form validation
+ * 
+ * Defines validation rules for the email field:
+ * - Email must be a valid email format
+ */
 const forgotPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
 });
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
+/**
+ * Forgot Password Screen component for password recovery
+ * 
+ * Provides a simple and secure interface for users to request
+ * password reset emails. Integrates with the backend to send
+ * recovery instructions to the provided email address.
+ * 
+ * Key features:
+ * - Email input with real-time validation
+ * - Password recovery request submission
+ * - Loading states during API communication
+ * - Success confirmation with modal
+ * - Error handling for failed requests
+ * - Navigation back to login screen
+ * - Form validation using Zod schema
+ * 
+ * @returns {JSX.Element} The password recovery screen with email form
+ * 
+ * @example
+ * ```tsx
+ * // Navigation to forgot password screen
+ * navigation.navigate('ForgotPassword');
+ * ```
+ */
 export const ForgotPasswordScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -33,6 +80,15 @@ export const ForgotPasswordScreen = () => {
     },
   });
 
+  /**
+   * Handles password recovery form submission
+   * 
+   * Sends a password recovery request to the backend API
+   * with the provided email address. Shows loading state
+   * during the request and success modal on completion.
+   * 
+   * @param {ForgotPasswordFormData} data - The validated form data
+   */
   const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsLoading(true);
     try {
@@ -59,6 +115,12 @@ export const ForgotPasswordScreen = () => {
     }
   };
 
+  /**
+   * Handles success modal dismissal
+   * 
+   * Closes the success modal and navigates back to the
+   * login screen after successful password recovery request.
+   */
   const handleSuccessModalDismiss = () => {
     setShowSuccessModal(false);
     navigation.navigate('Login');

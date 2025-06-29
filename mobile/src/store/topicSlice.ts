@@ -3,13 +3,23 @@ import { Topic } from '../types';
 import { fetchTopics } from '../services/api';
 import { RootState } from './index';
 
+/**
+ * Interface representing the topic slice state
+ */
 interface TopicState {
+  /** Array of available topics */
   topics: Topic[];
+  /** ID of the currently selected topic */
   selectedTopicId: string | null;
+  /** Loading state for topic operations */
   isLoading: boolean;
+  /** Error message from topic operations */
   error: string | null;
 }
 
+/**
+ * Initial state for the topic slice
+ */
 const initialState: TopicState = {
   topics: [],
   selectedTopicId: null,
@@ -17,6 +27,16 @@ const initialState: TopicState = {
   error: null,
 };
 
+/**
+ * Async thunk to fetch topics from the backend
+ * 
+ * @returns Promise resolving to array of topics
+ * 
+ * @example
+ * ```typescript
+ * dispatch(fetchTopicsThunk());
+ * ```
+ */
 export const fetchTopicsThunk = createAsyncThunk(
   'topics/fetchTopics',
   async (_, { getState }) => {
@@ -26,13 +46,29 @@ export const fetchTopicsThunk = createAsyncThunk(
   }
 );
 
+/**
+ * Redux slice for managing topics and topic selection
+ * 
+ * This slice handles topic data fetching, topic selection state,
+ * and provides selectors for sorted topic data.
+ */
 export const topicSlice = createSlice({
   name: 'topic',
   initialState,
   reducers: {
+    /**
+     * Sets the currently selected topic
+     * @param state - Current topic state
+     * @param action - Topic ID to select
+     */
     setSelectedTopic: (state, action: PayloadAction<string>) => {
       state.selectedTopicId = action.payload;
     },
+    
+    /**
+     * Clears the current topic selection
+     * @param state - Current topic state
+     */
     clearTopicSelection: (state) => {
       state.selectedTopicId = null;
     },
@@ -58,7 +94,10 @@ export const { setSelectedTopic, clearTopicSelection } = topicSlice.actions;
 
 export default topicSlice.reducer;
 
-// Selector to get topics sorted by topicOrder, categoryId, and topicId
+/**
+ * Selector to get topics sorted by topicOrder, categoryId, and topicId
+ * @returns Array of topics sorted by order, category, and ID
+ */
 export const selectSortedTopics = createSelector(
   (state: RootState) => state.topic.topics,
   (topics) =>

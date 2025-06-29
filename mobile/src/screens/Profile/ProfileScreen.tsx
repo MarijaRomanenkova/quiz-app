@@ -1,3 +1,22 @@
+/**
+ * @fileoverview Profile Screen component for the mobile application
+ * 
+ * This component provides a comprehensive user profile management interface
+ * where users can view and modify their account settings, study preferences,
+ * and privacy options. It handles user preferences, study pace selection,
+ * and account deletion with proper confirmation dialogs.
+ * 
+ * The component features:
+ * - User information display (username, email, level)
+ * - Study pace selection with visual interface
+ * - Privacy and marketing preference toggles
+ * - Terms and conditions agreement management
+ * - Account deletion with confirmation modal
+ * - Profile data synchronization with backend
+ * 
+ * @module screens/Profile
+ */
+
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Text, Surface, IconButton, Switch } from 'react-native-paper';
@@ -16,6 +35,31 @@ import { updateUserProfile as updateUserProfileAPI, deleteUserAccount } from '..
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 
+/**
+ * Profile Screen component for user account management
+ * 
+ * Provides a comprehensive interface for users to manage their profile
+ * settings, study preferences, and account information. Integrates with
+ * the backend to persist changes and handles account deletion with
+ * proper confirmation workflows.
+ * 
+ * Key features:
+ * - User information display and editing
+ * - Study pace selection with visual interface
+ * - Privacy and marketing preference management
+ * - Terms and conditions agreement tracking
+ * - Account deletion with confirmation modal
+ * - Real-time change detection and save functionality
+ * - Backend synchronization for all preferences
+ * 
+ * @returns {JSX.Element} The profile management screen with all user settings
+ * 
+ * @example
+ * ```tsx
+ * // Navigation to profile screen
+ * navigation.navigate('Profile');
+ * ```
+ */
 export const ProfileScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const dispatch = useDispatch();
@@ -29,6 +73,12 @@ export const ProfileScreen = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  /**
+   * Initializes profile data from user state
+   * 
+   * Loads user preferences and settings from Redux state
+   * when the component mounts or user data changes.
+   */
   useEffect(() => {
     if (user) {
       setStudyPaceId(user.studyPaceId);
@@ -38,18 +88,48 @@ export const ProfileScreen = () => {
     }
   }, [user]);
 
+  /**
+   * Handles study pace selection changes
+   * 
+   * Updates the local study pace state when user selects
+   * a different pace option.
+   * 
+   * @param {number} paceId - The selected study pace ID
+   */
   const handleStudyPaceChange = (paceId: number) => {
     setStudyPaceId(paceId);
   };
 
+  /**
+   * Handles marketing emails preference changes
+   * 
+   * Updates the marketing emails toggle state.
+   * 
+   * @param {boolean} value - The new marketing emails preference
+   */
   const handleMarketingEmailsChange = (value: boolean) => {
     setMarketingEmails(value);
   };
 
+  /**
+   * Handles device sharing preference changes
+   * 
+   * Updates the device sharing toggle state.
+   * 
+   * @param {boolean} value - The new device sharing preference
+   */
   const handleShareDevicesChange = (value: boolean) => {
     setShareDevices(value);
   };
 
+  /**
+   * Handles terms and conditions agreement changes
+   * 
+   * Shows confirmation modal when user tries to disagree with terms,
+   * as this triggers account deletion workflow.
+   * 
+   * @param {boolean} value - The new terms agreement value
+   */
   const handleTermsChange = (value: boolean) => {
     if (value === false) {
       setShowTermsModal(true);
@@ -58,10 +138,21 @@ export const ProfileScreen = () => {
     }
   };
 
+  /**
+   * Handles terms modal cancellation
+   * 
+   * Closes the terms disagreement modal without taking action.
+   */
   const handleTermsModalCancel = () => {
     setShowTermsModal(false);
   };
 
+  /**
+   * Handles account deletion from terms disagreement
+   * 
+   * Deletes the user account from the backend and logs out
+   * when user confirms disagreement with terms.
+   */
   const handleTermsModalDelete = async () => {
     try {
       const { token } = useSelector((state: RootState) => state.auth);
@@ -81,10 +172,21 @@ export const ProfileScreen = () => {
     }
   };
 
+  /**
+   * Handles navigation to terms screen
+   * 
+   * Navigates to the terms and conditions screen for user review.
+   */
   const handleTermsPress = () => {
     navigation.navigate('Terms');
   };
 
+  /**
+   * Handles profile data saving
+   * 
+   * Saves user preferences to the backend and updates Redux state
+   * with the new profile data. Shows success/error feedback.
+   */
   const handleSave = async () => {
     if (!user) return;
 
@@ -126,10 +228,23 @@ export const ProfileScreen = () => {
     }
   };
 
+  /**
+   * Handles user logout
+   * 
+   * Logs out the user and clears authentication state.
+   */
   const handleLogout = () => {
     logout();
   };
 
+  /**
+   * Checks if profile has unsaved changes
+   * 
+   * Compares current form state with user data to determine
+   * if there are unsaved changes that need to be persisted.
+   * 
+   * @returns {boolean} True if there are unsaved changes
+   */
   const hasChanges = () => {
     if (!user) return false;
     return (
@@ -246,6 +361,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'rgba(67, 19, 226, 0.7)',
+    padding: 24,
   },
   scrollView: {
     flex: 1,

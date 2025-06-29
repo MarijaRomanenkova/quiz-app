@@ -1,8 +1,34 @@
+/**
+ * @fileoverview Custom Input component for the mobile application
+ * 
+ * This component provides a consistent text input interface across the app
+ * with proper theming, error handling, and accessibility features. It wraps
+ * react-native-paper's TextInput component with custom styling and validation.
+ * 
+ * The component supports various input types including text, email, numeric,
+ * and secure text entry, with optional right-side content and error messages.
+ * 
+ * @module components/Input
+ */
+
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TextInput, Text } from 'react-native-paper';
 import { theme } from '../../theme';
 
+/**
+ * Props interface for the Input component
+ * 
+ * @interface InputProps
+ * @property {string} label - The label text displayed above the input
+ * @property {string} value - The current value of the input field
+ * @property {(text: string) => void} onChangeText - Function called when input text changes
+ * @property {string} [placeholder] - Placeholder text shown when input is empty
+ * @property {string} [error] - Error message to display below the input
+ * @property {boolean} [secureTextEntry] - Whether to hide the input text (for passwords)
+ * @property {'default' | 'email-address' | 'numeric' | 'phone-pad'} [keyboardType='default'] - Type of keyboard to show
+ * @property {React.ReactNode} [right] - Content to display on the right side of the input
+ */
 export interface InputProps {
   label: string;
   value: string;
@@ -14,6 +40,47 @@ export interface InputProps {
   right?: React.ReactNode;
 }
 
+/**
+ * Custom Input component with consistent styling and error handling
+ * 
+ * Provides a themed text input with label, error display, and various
+ * input types. The component uses the app's theme colors and provides
+ * proper accessibility features through react-native-paper.
+ * 
+ * @param {InputProps} props - The input props
+ * @param {string} props.label - The label text displayed above the input
+ * @param {string} props.value - The current value of the input field
+ * @param {(text: string) => void} props.onChangeText - Function called when input text changes
+ * @param {string} [props.placeholder] - Placeholder text shown when input is empty
+ * @param {string} [props.error] - Error message to display below the input
+ * @param {boolean} [props.secureTextEntry] - Whether to hide the input text (for passwords)
+ * @param {'default' | 'email-address' | 'numeric' | 'phone-pad'} [props.keyboardType='default'] - Type of keyboard to show
+ * @param {React.ReactNode} [props.right] - Content to display on the right side of the input
+ * @returns {JSX.Element} A styled input component with label and error handling
+ * 
+ * @example
+ * ```tsx
+ * <Input
+ *   label="Email"
+ *   value={email}
+ *   onChangeText={setEmail}
+ *   placeholder="Enter your email"
+ *   keyboardType="email-address"
+ *   error={emailError}
+ * />
+ * ```
+ * 
+ * @example
+ * ```tsx
+ * <Input
+ *   label="Password"
+ *   value={password}
+ *   onChangeText={setPassword}
+ *   secureTextEntry
+ *   right={<TextInput.Icon icon="eye" />}
+ * />
+ * ```
+ */
 export const Input = ({
   label,
   value,

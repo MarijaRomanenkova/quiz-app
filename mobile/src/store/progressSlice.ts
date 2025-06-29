@@ -3,29 +3,55 @@ import { RootState } from './index';
 import { fetchQuestions } from '../services/api';
 import { Topic } from '../types';
 
+/**
+ * Interface representing progress data for a specific topic
+ */
 interface TopicProgress {
+  /** Unique identifier for the topic */
   topicId: string;
+  /** Category this topic belongs to */
   categoryId: string;
+  /** Whether the topic has been completed */
   completed: boolean;
+  /** Best score achieved on this topic (0-100) */
   score: number;
+  /** Number of attempts made on this topic */
   attempts: number;
+  /** ISO timestamp of the last attempt */
   lastAttemptDate?: string;
 }
 
+/**
+ * Interface representing progress data for a category
+ */
 interface CategoryProgress {
+  /** Unique identifier for the category */
   categoryId: string;
+  /** Number of completed topics in this category */
   completedTopics: number;
+  /** Total number of topics in this category */
   totalTopics: number;
-  unlockedTopics: number; // How many topics are currently unlocked for this category
+  /** Number of topics currently unlocked for this category */
+  unlockedTopics: number;
 }
 
+/**
+ * Interface representing the complete progress state
+ */
 interface ProgressState {
+  /** Progress data for individual topics, keyed by topicId */
   topicProgress: Record<string, TopicProgress>;
+  /** Progress data for categories, keyed by categoryId */
   categoryProgress: Record<string, CategoryProgress>;
+  /** Loading state for progress operations */
   isLoading: boolean;
+  /** Error message from progress operations */
   error: string | null;
 }
 
+/**
+ * Initial state for the progress slice
+ */
 const initialState: ProgressState = {
   topicProgress: {},
   categoryProgress: {},
@@ -33,7 +59,21 @@ const initialState: ProgressState = {
   error: null,
 };
 
-// Thunk to load more questions when progress threshold is met
+/**
+ * Async thunk to load more questions when progress threshold is met
+ * 
+ * This thunk automatically unlocks new topics and loads their questions
+ * when a user completes enough topics in a category.
+ * 
+ * @param categoryId - Category ID to check for unlocking new topics
+ * @returns Promise resolving to unlock result or null if no unlock needed
+ * 
+ * @example
+ * ```typescript
+ * // Dispatch when a topic is completed
+ * dispatch(loadMoreQuestionsThunk('listening'));
+ * ```
+ */
 export const loadMoreQuestionsThunk = createAsyncThunk(
   'progress/loadMoreQuestions',
   async (categoryId: string, { getState, dispatch }) => {
@@ -96,11 +136,22 @@ export const loadMoreQuestionsThunk = createAsyncThunk(
   }
 );
 
+/**
+ * Redux slice for managing learning progress and topic unlocking
+ * 
+ * This slice handles topic completion tracking, category progress,
+ * automatic topic unlocking based on completion thresholds, and
+ * provides selectors for progress data used throughout the app.
+ */
 export const progressSlice = createSlice({
   name: 'progress',
   initialState,
   reducers: {
-    // Initialize progress for a category
+    /**
+     * Initializes progress tracking for a category
+     * @param state - Current progress state
+     * @param action - Category initialization data
+     */
     initializeCategoryProgress: (state, action: PayloadAction<{
       categoryId: string;
       totalTopics: number;
@@ -116,7 +167,11 @@ export const progressSlice = createSlice({
       };
     },
     
-    // Mark a topic as completed
+    /**
+     * Marks a topic as completed and updates progress
+     * @param state - Current progress state
+     * @param action - Topic completion data
+     */
     completeTopic: (state, action: PayloadAction<{
       topicId: string;
       categoryId: string;
@@ -140,7 +195,11 @@ export const progressSlice = createSlice({
       }
     },
     
-    // Update topic attempt (without completion)
+    /**
+     * Updates topic attempt data without marking as completed
+     * @param state - Current progress state
+     * @param action - Topic attempt data
+     */
     updateTopicAttempt: (state, action: PayloadAction<{
       topicId: string;
       categoryId: string;
@@ -159,7 +218,11 @@ export const progressSlice = createSlice({
       };
     },
     
-    // Update unlocked topics count for a category
+    /**
+     * Updates the number of unlocked topics for a category
+     * @param state - Current progress state
+     * @param action - Category unlock data
+     */
     updateUnlockedTopics: (state, action: PayloadAction<{
       categoryId: string;
       unlockedCount: number;
@@ -191,13 +254,28 @@ export const progressSlice = createSlice({
   },
 });
 
-// Selectors
+/**
+ * Selector to get progress data for a specific topic
+ * @param state - Root state
+ * @param topicId - Topic ID to get progress for
+ * @returns Topic progress data or undefined if not found
+ */
 export const selectTopicProgress = (state: RootState, topicId: string) => 
   state.progress.topicProgress[topicId];
 
+/**
+ * Selector to get progress data for a specific category
+ * @param state - Root state
+ * @param categoryId - Category ID to get progress for
+ * @returns Category progress data or undefined if not found
+ */
 export const selectCategoryProgress = (state: RootState, categoryId: string) => 
   state.progress.categoryProgress[categoryId];
 
+/**
+ * Selector to get unlocked topics for a category
+ * @returns Array of unlocked topics for the specified category
+ */
 export const selectUnlockedTopicsForCategory = createSelector(
   [(state: RootState) => state.topic.topics, 
    (state: RootState) => state.progress.categoryProgress,
@@ -213,6 +291,10 @@ export const selectUnlockedTopicsForCategory = createSelector(
   }
 );
 
+/**
+ * Selector to check if a specific topic is unlocked
+ * @returns Boolean indicating if the topic is unlocked
+ */
 export const selectIsTopicUnlocked = createSelector(
   [(state: RootState) => state.progress.categoryProgress,
    (state: RootState) => state.topic.topics,
@@ -233,7 +315,10 @@ export const selectIsTopicUnlocked = createSelector(
   }
 );
 
-// Selector for all category progress with percentages
+/**
+ * Selector to get all category progress with calculated percentages
+ * @returns Array of category progress objects with completion percentages
+ */
 export const selectAllCategoryProgress = createSelector(
   [(state: RootState) => state.progress.categoryProgress],
   (categoryProgress) => {

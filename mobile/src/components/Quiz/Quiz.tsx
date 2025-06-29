@@ -1,3 +1,18 @@
+/**
+ * @fileoverview Main Quiz component for the mobile application
+ * 
+ * This component provides the core quiz functionality, handling question display,
+ * answer selection, progress tracking, and navigation. It manages the complete
+ * quiz lifecycle from start to finish, including reading text display for
+ * comprehension questions and audio playback for audio questions.
+ * 
+ * The component integrates with Redux for state management, handles both regular
+ * and reading comprehension questions, tracks user progress, and manages quiz
+ * statistics. It supports both normal quiz mode and repeat mode for wrong questions.
+ * 
+ * @module components/Quiz
+ */
+
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
@@ -36,11 +51,48 @@ import { useToken } from '../../hooks/useToken';
 type QuizScreenRouteProp = RouteProp<RootStackParamList, 'Quiz'>;
 type QuizScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+/**
+ * Props interface for the Quiz component
+ * 
+ * @interface QuizProps
+ * @property {string} quizId - The unique identifier for the quiz/topic
+ * @property {boolean} [isRepeating=false] - Whether this is a repeat quiz for wrong questions
+ */
 type QuizProps = {
   quizId: string;
   isRepeating?: boolean;
 };
 
+/**
+ * Main Quiz component that handles the complete quiz experience
+ * 
+ * Manages the quiz lifecycle including question loading, answer selection,
+ * progress tracking, and result calculation. The component supports both
+ * regular questions and reading comprehension questions with audio support.
+ * 
+ * Key features:
+ * - Displays questions with images, text, and audio
+ * - Handles reading text display for comprehension questions
+ * - Tracks user progress and statistics
+ * - Manages quiz state through Redux
+ * - Supports repeat mode for wrong questions
+ * - Integrates with progress tracking and topic completion
+ * 
+ * @param {QuizProps} props - The quiz props
+ * @param {string} props.quizId - The unique identifier for the quiz/topic
+ * @param {boolean} [props.isRepeating=false] - Whether this is a repeat quiz for wrong questions
+ * @returns {JSX.Element} The complete quiz interface with questions and navigation
+ * 
+ * @example
+ * ```tsx
+ * <Quiz quizId="topic-123" />
+ * ```
+ * 
+ * @example
+ * ```tsx
+ * <Quiz quizId="topic-456" isRepeating={true} />
+ * ```
+ */
 const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) => {
   const dispatch = useDispatch<AppDispatch>();
   const route = useRoute<QuizScreenRouteProp>();

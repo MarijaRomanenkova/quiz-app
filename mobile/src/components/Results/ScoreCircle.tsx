@@ -1,14 +1,56 @@
+/**
+ * @fileoverview Score Circle component for the mobile application
+ * 
+ * This component displays quiz results using a circular progress indicator
+ * that shows the user's score as a fraction and visual progress. It's designed
+ * to provide an engaging visual representation of quiz performance.
+ * 
+ * The component uses an SVG circle to create a progress ring that fills
+ * based on the score percentage, with the score displayed in the center.
+ * 
+ * @module components/Results/ScoreCircle
+ */
+
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
 import { theme } from '../../theme';
 
+/**
+ * Props interface for the ScoreCircle component
+ * 
+ * @interface ScoreCircleProps
+ * @property {number} score - The number of correct answers
+ * @property {number} total - The total number of questions
+ */
 interface ScoreCircleProps {
   score: number;
   total: number;
 }
 
+/**
+ * Score Circle component with circular progress indicator
+ * 
+ * Displays quiz results using a circular progress bar that visually
+ * represents the score as a percentage. The score is shown as a fraction
+ * in the center of the circle.
+ * 
+ * @param {ScoreCircleProps} props - The score circle props
+ * @param {number} props.score - The number of correct answers
+ * @param {number} props.total - The total number of questions
+ * @returns {JSX.Element} A circular score indicator with progress visualization
+ * 
+ * @example
+ * ```tsx
+ * <ScoreCircle score={8} total={10} />
+ * ```
+ * 
+ * @example
+ * ```tsx
+ * <ScoreCircle score={15} total={20} />
+ * ```
+ */
 export const ScoreCircle: React.FC<ScoreCircleProps> = ({ score, total }) => {
   const radius = 120;
   const circumference = 2 * Math.PI * radius;

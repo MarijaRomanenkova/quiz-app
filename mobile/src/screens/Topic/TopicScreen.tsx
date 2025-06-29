@@ -1,3 +1,21 @@
+/**
+ * @fileoverview Topic Screen component for the mobile application
+ * 
+ * This component displays available topics within a selected category and allows
+ * users to choose a topic to start a quiz. It shows topic progress, completion
+ * status, and scores for completed topics. The screen integrates with progress
+ * tracking to display only unlocked topics and provides navigation to quiz screens.
+ * 
+ * The component features:
+ * - Topic selection with visual feedback
+ * - Progress tracking integration
+ * - Completion status indicators
+ * - Score display for completed topics
+ * - Navigation back to categories
+ * 
+ * @module screens/Topic
+ */
+
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -12,6 +30,16 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { QuizTopic } from '../../types';
 import { selectUnlockedTopicsForCategory, selectTopicProgress } from '../../store/progressSlice';
 
+/**
+ * Props interface for the TopicItem component
+ * 
+ * @interface TopicItemProps
+ * @property {QuizTopic} topic - The topic data to display
+ * @property {boolean} isSelected - Whether this topic is currently selected
+ * @property {(topicId: string) => void} onSelect - Function called when topic is selected
+ * @property {boolean} isCompleted - Whether this topic has been completed
+ * @property {number} score - The score achieved for this topic (0-100)
+ */
 type TopicItemProps = {
   topic: QuizTopic;
   isSelected: boolean;
@@ -20,6 +48,21 @@ type TopicItemProps = {
   score: number;
 };
 
+/**
+ * Individual topic item component
+ * 
+ * Displays a single topic with selection state, completion status,
+ * and score information. Provides visual feedback for different states
+ * and handles touch interactions.
+ * 
+ * @param {TopicItemProps} props - The topic item props
+ * @param {QuizTopic} props.topic - The topic data to display
+ * @param {boolean} props.isSelected - Whether this topic is currently selected
+ * @param {(topicId: string) => void} props.onSelect - Function called when topic is selected
+ * @param {boolean} props.isCompleted - Whether this topic has been completed
+ * @param {number} props.score - The score achieved for this topic
+ * @returns {JSX.Element} A touchable topic item with status indicators
+ */
 const TopicItem = ({ topic, isSelected, onSelect, isCompleted, score }: TopicItemProps) => (
   <TouchableOpacity 
     style={[
@@ -59,6 +102,29 @@ const TopicItem = ({ topic, isSelected, onSelect, isCompleted, score }: TopicIte
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Topic'>;
 type TopicScreenRouteProp = RouteProp<RootStackParamList, 'Topic'>;
 
+/**
+ * Topic Screen component for topic selection and quiz navigation
+ * 
+ * Displays available topics within a category and allows users to
+ * select a topic to start a quiz. Integrates with progress tracking
+ * to show completion status and scores.
+ * 
+ * Key features:
+ * - Displays unlocked topics for the selected category
+ * - Shows completion status and scores for topics
+ * - Visual selection feedback with checkmarks
+ * - Progress-based topic unlocking
+ * - Navigation to quiz screens
+ * - Back navigation to categories
+ * 
+ * @returns {JSX.Element} The topic selection screen with progress indicators
+ * 
+ * @example
+ * ```tsx
+ * // Navigation to topic screen
+ * navigation.navigate('Topic', { categoryId: 'grammar' });
+ * ```
+ */
 export const TopicScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<TopicScreenRouteProp>();
@@ -76,11 +142,24 @@ export const TopicScreen = () => {
 
   const [selectedTopic, setSelectedTopic] = useState<string>('');
 
+  /**
+   * Handles topic selection
+   * 
+   * Updates the selected topic state when user taps on a topic item.
+   * 
+   * @param {string} topicId - The ID of the selected topic
+   */
   const handleTopicSelect = (topicId: string) => {
     console.log('Selected topic ID:', topicId);
     setSelectedTopic(topicId);
   };
 
+  /**
+   * Handles quiz navigation
+   * 
+   * Navigates to the quiz screen with the selected topic ID
+   * when the user presses the "Start Quiz" button.
+   */
   const handleQuizPress = () => {
     if (selectedTopic) {
       console.log('Starting quiz with topic:', selectedTopic);
