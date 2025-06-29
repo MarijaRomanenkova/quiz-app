@@ -138,15 +138,14 @@ export const Button = ({
 const styles = StyleSheet.create({
   button: {
     borderRadius: 20,
-    marginVertical: 8,
-    height: 56, // Fixed height for all buttons
+    height: 56, // Back to original height
   },
   content: {
-    paddingVertical: 8,
+    paddingVertical: 4, // Back to original padding
   },
   label: {
     fontSize: 24,
-    fontFamily: theme.fonts.titleLarge.fontFamily,
-    fontWeight: 'bold',
+    fontFamily: 'Baloo2-SemiBold',
+    lineHeight: 24,
   },
 }); 

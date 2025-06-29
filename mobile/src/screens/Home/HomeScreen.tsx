@@ -290,13 +290,16 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    marginBottom: 24,
+    marginVertical: 24,
+    fontFamily: 'Baloo2-SemiBold',
+    fontSize: 24,
   },
   radioContainer: {
     flex: 1,
+    marginTop: 16,
   },
   radioItem: {
-    marginBottom: 8,
+    marginBottom: 12,
     backgroundColor: theme.colors.surface,
     borderRadius: 20,
     borderWidth: 1,
