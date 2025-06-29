@@ -68,9 +68,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       return null;
     }
     
-    // Return the UserPayload structure expected by controllers
+    // Return the user object with id property for controllers
     return {
-      sub: user.id,
+      id: user.id,
       email: user.email,
     };
   }

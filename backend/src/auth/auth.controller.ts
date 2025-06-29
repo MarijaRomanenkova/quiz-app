@@ -25,7 +25,7 @@ import { ConfigService } from '@nestjs/config';
 import { resetPasswordSuccessTemplate } from '../templates/email/reset-password-success.template';
 
 interface UserPayload {
-  sub: string;
+  id: string;
   email: string;
 }
 
@@ -126,7 +126,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: { user: UserPayload }) {
-    return this.authService.getUserProfile(req.user.sub);
+    return this.authService.getUserProfile(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -135,13 +135,13 @@ export class AuthController {
     @Request() req: { user: UserPayload },
     @Body() updateProfileDto: UpdateProfileDto,
   ) {
-    return this.authService.updateUserProfile(req.user.sub, updateProfileDto);
+    return this.authService.updateUserProfile(req.user.id, updateProfileDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('account')
   async deleteAccount(@Request() req: { user: UserPayload }) {
-    return this.authService.deleteUserAccount(req.user.sub);
+    return this.authService.deleteUserAccount(req.user.id);
   }
 
   @Post('forgot-password')

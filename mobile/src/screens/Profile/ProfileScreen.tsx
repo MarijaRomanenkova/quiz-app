@@ -196,11 +196,11 @@ export const ProfileScreen = () => {
         throw new Error('No authentication token available');
       }
 
-      const response = await updateUserProfileAPI(token, {
+      const response = await updateUserProfileAPI({
         studyPaceId,
         marketingEmails,
         shareDevices,
-      });
+      }, token);
 
       dispatch(
         updateUserPreferences({
