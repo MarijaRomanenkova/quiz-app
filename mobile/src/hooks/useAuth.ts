@@ -176,10 +176,8 @@ export const useAuth = () => {
             dailyQuizTimes,
             totalQuizMinutes
           });
-          console.log('Quiz time data synced successfully');
-        } catch (syncError) {
-          console.warn('Failed to sync quiz time data:', syncError);
-          // Continue with logout even if sync fails
+        } catch (error) {
+          console.warn('Failed to sync quiz time data:', error);
         }
       }
     } catch (error) {

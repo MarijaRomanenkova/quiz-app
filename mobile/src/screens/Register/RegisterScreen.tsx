@@ -102,6 +102,8 @@ export const RegisterScreen = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showEmailExistsModal, setShowEmailExistsModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -128,22 +130,13 @@ export const RegisterScreen = () => {
   /**
    * Handles form submission for user registration
    * 
-   * Validates form data and attempts to create a new user account
-   * through the authentication service. Handles various error cases
-   * including existing email addresses and shows appropriate modals.
+   * Validates form data and attempts to register the user with the backend.
+   * Shows appropriate success or error messages based on the result.
    * 
    * @param {RegisterFormData} data - The validated registration form data
    */
   const onSubmit = async (data: RegisterFormData) => {
-    console.log('Registration attempt with data:', {
-      email: data.email,
-      name: data.name,
-      studyPaceId: data.studyPaceId,
-      agreedToTerms: data.agreedToTerms,
-    });
-    
     try {
-      console.log('Making API call to register user...');
       await authService.register({
         email: data.email,
         username: data.name,
@@ -154,12 +147,6 @@ export const RegisterScreen = () => {
 
       setShowSuccessModal(true);
     } catch (error: unknown) {
-      console.error('Registration error:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        email: data.email,
-        timestamp: new Date().toISOString(),
-      });
-      
       if (error instanceof Error && error.message === 'User with this email already exists') {
         setShowEmailExistsModal(true);
         return;

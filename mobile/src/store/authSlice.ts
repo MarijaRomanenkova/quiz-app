@@ -102,9 +102,27 @@ export const authSlice = createSlice({
       state.user = null;
       state.error = null;
     },
+    
+    /**
+     * Updates user preferences in the authentication state
+     * @param state - Current authentication state
+     * @param action - User preferences to update
+     */
+    updateUserPreferences: (
+      state,
+      action: PayloadAction<{
+        studyPaceId?: number;
+        marketingEmails?: boolean;
+        shareDevices?: boolean;
+      }>
+    ) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
   },
 });
 
-export const { setCredentials, setLoading, setError, logout } = authSlice.actions;
+export const { setCredentials, setLoading, setError, logout, updateUserPreferences } = authSlice.actions;
 
 export default authSlice.reducer; 

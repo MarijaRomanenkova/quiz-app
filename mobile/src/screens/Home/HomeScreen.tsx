@@ -73,42 +73,39 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const questionsState = useSelector((state: RootState) => state.questions);
   const readingTextsState = useSelector((state: RootState) => state.readingTexts);
 
-  console.log('HomeScreen - user:', user);
-  console.log('HomeScreen - token:', token ? 'Present' : 'Missing');
-  console.log('HomeScreen - categories length:', categories.length);
-  console.log('HomeScreen - categories:', categories);
-
   /**
-   * Initial data loading for authenticated users
+   * Fetch initial data for authenticated users
    * 
-   * Fetches categories, topics, questions, and reading texts in sequence
-   * when the user is authenticated and data hasn't been loaded yet.
+   * Fetches topics, questions, and reading texts in sequence when the user
+   * is authenticated and data hasn't been loaded yet.
    */
   useEffect(() => {
-    // Only fetch data once when user is authenticated and data is not loaded
-    if (user && categories.length === 0) {
-      console.log('HomeScreen - Initial data fetch for authenticated user...');
-      // Fetch all data in sequence: categories, topics, questions, then reading texts
-      dispatch(fetchCategoriesThunk());
-      dispatch(fetchTopicsThunk()).then(() => {
-        // Fetch questions first
-        console.log('HomeScreen - Topics loaded, now fetching questions...');
-        dispatch(fetchAllQuestionsThunk()).unwrap()
-          .then((questionsData) => {
-            console.log('HomeScreen - Questions loaded successfully:', Object.keys(questionsData).length, 'topics');
-            // Fetch reading texts after questions are loaded
-            console.log('HomeScreen - Now fetching reading texts...');
-            return dispatch(fetchAllReadingTextsThunk()).unwrap();
-          })
-          .then((readingTextsData) => {
-            console.log('HomeScreen - Reading texts loaded successfully:', Object.keys(readingTextsData.byId).length, 'texts');
-          })
-          .catch((error) => {
-            console.error('HomeScreen - Data fetch failed:', error);
-          });
-      });
+    if (user && token) {
+      const loadInitialData = async () => {
+        try {
+          // Fetch topics first
+          await dispatch(fetchTopicsThunk());
+          
+          // Fetch questions for all topics
+          await dispatch(fetchAllQuestionsThunk());
+          
+          // Fetch reading texts
+          await dispatch(fetchAllReadingTextsThunk());
+          
+          // Initialize progress tracking
+          dispatch(initializeCategoryProgress({
+            categoryId: 'listening',
+            totalTopics: 3,
+            initialUnlocked: 3
+          }));
+        } catch (error) {
+          console.error('Failed to load initial data:', error);
+        }
+      };
+
+      loadInitialData();
     }
-  }, [dispatch, user, categories.length]);
+  }, [user, token, dispatch]);
 
   /**
    * Manual data loading fallback
@@ -117,66 +114,26 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
    * loading sequence fails or is incomplete.
    */
   useEffect(() => {
-    if (user && categories.length > 0 && topics.length > 0) {
-      console.log('HomeScreen - Current questions state:', questionsState);
-      
-      // Check if questions are loaded in byTopicId
-      const hasQuestions = questionsState.byTopicId && Object.keys(questionsState.byTopicId).length > 0;
-      
-      if (!hasQuestions) {
-        console.log('HomeScreen - No questions loaded, manually triggering fetch...');
-        dispatch(fetchAllQuestionsThunk()).unwrap()
-          .then((questionsData) => {
-            console.log('HomeScreen - Manual questions fetch successful:', Object.keys(questionsData).length, 'topics');
-            // Also trigger reading texts fetch
-            return dispatch(fetchAllReadingTextsThunk()).unwrap();
-          })
-          .then((readingTextsData) => {
-            console.log('HomeScreen - Manual reading texts fetch successful:', Object.keys(readingTextsData.byId).length, 'texts');
-          })
-          .catch((error) => {
-            console.error('HomeScreen - Manual fetch failed:', error);
-          });
-      } else {
-        console.log('HomeScreen - Questions already loaded in byTopicId:', Object.keys(questionsState.byTopicId));
-        // Check if reading texts are loaded
-        const hasReadingTexts = readingTextsState.byId && Object.keys(readingTextsState.byId).length > 0;
-        if (!hasReadingTexts) {
-          console.log('HomeScreen - No reading texts loaded, manually triggering fetch...');
-          dispatch(fetchAllReadingTextsThunk()).unwrap()
-            .then((readingTextsData) => {
-              console.log('HomeScreen - Manual reading texts fetch successful:', Object.keys(readingTextsData.byId).length, 'texts');
-            })
-            .catch((error) => {
-              console.error('HomeScreen - Manual reading texts fetch failed:', error);
-            });
+    if (user && token && topics.length > 0) {
+      const loadMissingData = async () => {
+        try {
+          // Check if questions are loaded
+          if (Object.keys(questionsState.byTopicId).length === 0) {
+            await dispatch(fetchAllQuestionsThunk());
+          }
+          
+          // Check if reading texts are loaded
+          if (Object.keys(readingTextsState.byId).length === 0) {
+            await dispatch(fetchAllReadingTextsThunk());
+          }
+        } catch (error) {
+          console.error('Failed to load missing data:', error);
         }
-      }
-    }
-  }, [dispatch, user, categories.length, topics.length, questionsState.byTopicId]);
+      };
 
-  /**
-   * Progress tracking initialization
-   * 
-   * Sets up progress tracking for each category after categories and
-   * topics are loaded. Determines initial unlocked topics based on
-   * category type.
-   */
-  useEffect(() => {
-    if (categories.length > 0 && topics.length > 0) {
-      console.log('HomeScreen - Initializing progress tracking...');
-      categories.forEach(category => {
-        const categoryTopics = topics.filter(topic => topic.categoryId === category.categoryId);
-        const initialUnlocked = category.categoryId === 'listening' || category.categoryId === 'words' ? 3 : categoryTopics.length;
-        
-        dispatch(initializeCategoryProgress({
-          categoryId: category.categoryId,
-          totalTopics: categoryTopics.length,
-          initialUnlocked
-        }));
-      });
+      loadMissingData();
     }
-  }, [dispatch, categories.length, topics.length]);
+  }, [dispatch, user, token, topics.length, questionsState.byTopicId, readingTextsState.byId]);
 
   /**
    * Handles category selection

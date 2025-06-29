@@ -121,7 +121,6 @@ const authService = {
    */
   async register(data: RegisterData): Promise<{ message: string }> {
     try {
-      console.log('Attempting registration with:', { ...data, password: '[REDACTED]' });
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: {
@@ -132,12 +131,10 @@ const authService = {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Failed to parse error response' }));
-        console.error('Registration failed:', errorData);
         throw new Error(errorData.message || 'Registration failed');
       }
       
       const result = await response.json();
-      console.log('Registration successful:', result);
       return result;
     } catch (error) {
       console.error('Registration error:', error);

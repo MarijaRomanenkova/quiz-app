@@ -131,38 +131,32 @@ export const TopicScreen = () => {
   const { categoryId } = route.params;
   const dispatch = useDispatch();
 
-  console.log('TopicScreen - categoryId:', categoryId);
-
-  // Get unlocked topics for the selected category from progress tracking
+  // Get unlocked topics for this category
   const unlockedTopics = useSelector((state: RootState) => 
     selectUnlockedTopicsForCategory(state, categoryId)
   );
 
-  console.log('TopicScreen - unlocked topics for category:', unlockedTopics);
-
   const [selectedTopic, setSelectedTopic] = useState<string>('');
 
   /**
-   * Handles topic selection
+   * Handles topic selection from the list
    * 
-   * Updates the selected topic state when user taps on a topic item.
+   * Updates the selected topic state when a user taps on a topic card.
    * 
    * @param {string} topicId - The ID of the selected topic
    */
   const handleTopicSelect = (topicId: string) => {
-    console.log('Selected topic ID:', topicId);
     setSelectedTopic(topicId);
   };
 
   /**
-   * Handles quiz navigation
+   * Handles starting a quiz for the selected topic
    * 
-   * Navigates to the quiz screen with the selected topic ID
-   * when the user presses the "Start Quiz" button.
+   * Navigates to the Quiz screen with the selected topic ID.
+   * Only works if a topic is currently selected.
    */
   const handleQuizPress = () => {
     if (selectedTopic) {
-      console.log('Starting quiz with topic:', selectedTopic);
       navigation.navigate('Quiz', { quizId: selectedTopic });
     }
   };

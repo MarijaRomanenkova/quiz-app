@@ -159,25 +159,19 @@ export const fetchQuestions = async (topicId: string, cursor?: string, token?: s
  */
 export const fetchTopics = async (token?: string): Promise<Topic[]> => {
   try {
-    console.log('Fetching topics from:', `${API_URL}/topics`);
-    console.log('Using token:', token ? 'Yes' : 'No');
-    
     const response = await fetch(`${API_URL}/topics`, {
-      headers: token ? {
-        'Authorization': `Bearer ${token}`
-      } : {}
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
     });
-    console.log('Topics response status:', response.status);
-    console.log('Topics response headers:', response.headers);
-    
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Topics response error:', errorText);
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
-    console.log('Topics data:', data);
     return data;
   } catch (error) {
     console.error('Error fetching topics:', error);
@@ -254,40 +248,41 @@ export const fetchCategoriesThunk = createAsyncThunk('categories/fetchCategories
  * const { categories, topics, questions } = await fetchInitialData(token);
  * ```
  */
-export const fetchInitialData = async (token?: string): Promise<{
-  categories: Category[];
-  topics: Topic[];
-  questions: Record<string, Question[]>;
-}> => {
+export const fetchInitialData = async (token?: string) => {
   try {
-    console.log('Fetching initial data...');
+    // Fetch topics first
+    const topics = await fetchTopics(token);
     
-    // Fetch categories, topics, and questions in parallel
-    const [categories, topics] = await Promise.all([
-      fetchCategories(token),
-      fetchTopics(token)
-    ]);
-
-    // For now, we'll fetch questions for each topic (this can be optimized later)
-    const questions: Record<string, Question[]> = {};
-    
+    // Fetch questions for all topics
+    const questionsData: Record<string, Question[]> = {};
     for (const topic of topics) {
       try {
         const response = await fetchQuestions(topic.topicId, undefined, token);
-        questions[topic.topicId] = response.questions;
+        questionsData[topic.topicId] = response.questions;
       } catch (error) {
         console.warn(`Failed to fetch questions for topic ${topic.topicId}:`, error);
-        questions[topic.topicId] = [];
+        questionsData[topic.topicId] = [];
       }
     }
-
-    console.log('Initial data fetched successfully:', {
-      categoriesCount: categories.length,
-      topicsCount: topics.length,
-      questionsCount: Object.keys(questions).length
-    });
-
-    return { categories, topics, questions };
+    
+    // Fetch reading texts for topics that have them
+    const readingTextsData: Record<string, any> = {};
+    for (const topic of topics) {
+      try {
+        const response = await fetchReadingTexts(topic.topicId, token);
+        response.forEach(text => {
+          readingTextsData[text.id] = text;
+        });
+      } catch (error) {
+        console.warn(`Failed to fetch reading texts for topic ${topic.topicId}:`, error);
+      }
+    }
+    
+    return {
+      topics,
+      questionsData,
+      readingTextsData,
+    };
   } catch (error) {
     console.error('Error fetching initial data:', error);
     throw error;
@@ -335,7 +330,6 @@ export const fetchUserProfile = async (token: string): Promise<any> => {
  * @param {number} [profileData.studyPaceId] - Study pace preference
  * @param {boolean} [profileData.marketingEmails] - Marketing email consent
  * @param {boolean} [profileData.shareDevices] - Device sharing preference
- * @param {boolean} [profileData.pushNotifications] - Push notification preference
  * @returns {Promise<any>} Updated profile data
  * @throws {Error} When the request fails
  * 
@@ -347,28 +341,32 @@ export const fetchUserProfile = async (token: string): Promise<any> => {
  * });
  * ```
  */
-export const updateUserProfile = async (token: string, profileData: {
-  studyPaceId?: number;
-  marketingEmails?: boolean;
-  shareDevices?: boolean;
-  pushNotifications?: boolean;
-}): Promise<any> => {
+export const updateUserProfile = async (
+  profileData: {
+    studyPaceId: number;
+    marketingEmails: boolean;
+    shareDevices: boolean;
+  },
+  token?: string
+): Promise<any> => {
   try {
-    console.log('API: updateUserProfile called with:', { token: token ? 'present' : 'missing', profileData });
     const response = await fetch(`${API_URL}/auth/profile`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
       },
-      body: JSON.stringify(profileData)
+      body: JSON.stringify(profileData),
     });
-    console.log('API: updateUserProfile response status:', response.status);
-    const result = await handleResponse(response);
-    console.log('API: updateUserProfile result:', result);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
     return result;
   } catch (error) {
-    console.error('API: Error updating user profile:', error);
+    console.error('Error updating user profile:', error);
     throw error;
   }
 };
@@ -425,30 +423,31 @@ export const deleteUserAccount = async (token: string): Promise<any> => {
  * });
  * ```
  */
-export const syncQuizTimeData = async (token: string, quizTimeData: {
-  dailyQuizTimes: Array<{
-    date: string;
-    minutes: number;
-    lastUpdated: string;
-  }>;
-  totalQuizMinutes: number;
-}): Promise<any> => {
+export const syncQuizTimeData = async (
+  quizTimeData: {
+    totalQuizMinutes: number;
+    dailyQuizMinutes: Record<string, number>;
+  },
+  token?: string
+): Promise<any> => {
   try {
-    console.log('API: Syncing quiz time data:', quizTimeData);
-    const response = await fetch(`${API_URL}/statistics/quiz-time`, {
+    const response = await fetch(`${API_URL}/auth/sync-quiz-time`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
       },
-      body: JSON.stringify(quizTimeData)
+      body: JSON.stringify(quizTimeData),
     });
-    console.log('API: Quiz time sync response status:', response.status);
-    const result = await handleResponse(response);
-    console.log('API: Quiz time sync result:', result);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
     return result;
   } catch (error) {
-    console.error('API: Error syncing quiz time data:', error);
+    console.error('Error syncing quiz time data:', error);
     throw error;
   }
 };
@@ -468,28 +467,24 @@ export const syncQuizTimeData = async (token: string, quizTimeData: {
  * const quizTimeData = await fetchQuizTimeData(token);
  * ```
  */
-export const fetchQuizTimeData = async (token: string): Promise<{
-  dailyQuizTimes: Array<{
-    date: string;
-    minutes: number;
-    lastUpdated: string;
-  }>;
-  totalQuizMinutes: number;
-}> => {
+export const fetchQuizTimeData = async (token?: string): Promise<any> => {
   try {
-    console.log('API: Fetching quiz time data');
-    const response = await fetch(`${API_URL}/statistics/quiz-time`, {
+    const response = await fetch(`${API_URL}/auth/quiz-time`, {
+      method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
     });
-    console.log('API: Fetch quiz time response status:', response.status);
-    const result = await handleResponse(response);
-    console.log('API: Fetch quiz time result:', result);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
     return result;
   } catch (error) {
-    console.error('API: Error fetching quiz time data:', error);
+    console.error('Error fetching quiz time data:', error);
     throw error;
   }
 };

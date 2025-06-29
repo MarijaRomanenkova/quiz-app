@@ -39,19 +39,15 @@ const initialState: QuestionsState = {
  * ```
  */
 export const fetchAllQuestionsThunk = createAsyncThunk(
-  'questions/fetchAllQuestions',
+  'questions/fetchAll',
   async (_, { getState }) => {
     const state = getState() as RootState;
     const token = state.auth.token || undefined;
     const topics = state.topic.topics;
     
-    console.log('fetchAllQuestionsThunk - Starting with token:', token ? 'Present' : 'Missing');
-    console.log('fetchAllQuestionsThunk - Topics count:', topics.length);
-    console.log('fetchAllQuestionsThunk - Topics:', topics);
+    const questionsByTopic: Record<string, any[]> = {};
     
-    const questionsByTopic: Record<string, Question[]> = {};
-    
-    // Group topics by category
+    // Group topics by category for efficient fetching
     const topicsByCategory: Record<string, typeof topics> = {};
     topics.forEach(topic => {
       if (!topicsByCategory[topic.categoryId]) {
@@ -60,43 +56,37 @@ export const fetchAllQuestionsThunk = createAsyncThunk(
       topicsByCategory[topic.categoryId].push(topic);
     });
     
-    console.log('fetchAllQuestionsThunk - Topics by category:', Object.keys(topicsByCategory));
-    
-    // Sort topics within each category by topicOrder
-    Object.keys(topicsByCategory).forEach(categoryId => {
-      topicsByCategory[categoryId].sort((a, b) => a.topicOrder - b.topicOrder);
-    });
-    
-    // Fetch questions based on category rules
+    // Fetch questions for each category
     for (const [categoryId, categoryTopics] of Object.entries(topicsByCategory)) {
-      let topicsToFetch = categoryTopics;
+      // For each category, fetch questions for the first 3 topics initially
+      const topicsToFetch = categoryTopics.slice(0, 3);
       
-      // Apply filtering rules
-      if (categoryId === 'listening' || categoryId === 'words') {
-        // Only fetch first 3 topics for listening and words
-        topicsToFetch = categoryTopics.slice(0, 3);
-        console.log(`fetchAllQuestionsThunk - Fetching first 3 topics for ${categoryId}:`, topicsToFetch.map(t => t.topicId));
+      // If there are more than 3 topics, fetch all of them
+      if (categoryTopics.length > 3) {
+        const allTopics = categoryTopics;
+        for (const topic of allTopics) {
+          try {
+            const response = await fetchQuestions(topic.topicId, undefined, token);
+            questionsByTopic[topic.topicId] = response.questions;
+          } catch (error) {
+            console.warn(`Failed to fetch questions for topic ${topic.topicId}:`, error);
+            questionsByTopic[topic.topicId] = [];
+          }
+        }
       } else {
-        // Fetch all topics for grammar and reading
-        console.log(`fetchAllQuestionsThunk - Fetching all topics for ${categoryId}:`, topicsToFetch.map(t => t.topicId));
-      }
-      
-      // Fetch questions for selected topics
-      for (const topic of topicsToFetch) {
-        try {
-          console.log(`fetchAllQuestionsThunk - Fetching questions for topic: ${topic.topicId}`);
-          const response = await fetchQuestions(topic.topicId, undefined, token);
-          questionsByTopic[topic.topicId] = response.questions;
-          console.log(`fetchAllQuestionsThunk - Fetched ${response.questions.length} questions for topic ${topic.topicId}`);
-        } catch (error) {
-          console.warn(`fetchAllQuestionsThunk - Failed to fetch questions for topic ${topic.topicId}:`, error);
-          questionsByTopic[topic.topicId] = [];
+        // Fetch questions for the first 3 topics
+        for (const topic of topicsToFetch) {
+          try {
+            const response = await fetchQuestions(topic.topicId, undefined, token);
+            questionsByTopic[topic.topicId] = response.questions;
+          } catch (error) {
+            console.warn(`Failed to fetch questions for topic ${topic.topicId}:`, error);
+            questionsByTopic[topic.topicId] = [];
+          }
         }
       }
     }
     
-    console.log('fetchAllQuestionsThunk - Questions fetch completed. Total topics with questions:', Object.keys(questionsByTopic).length);
-    console.log('fetchAllQuestionsThunk - Questions by topic:', questionsByTopic);
     return questionsByTopic;
   }
 );

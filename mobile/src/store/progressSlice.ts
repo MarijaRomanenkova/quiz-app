@@ -102,9 +102,6 @@ export const loadMoreQuestionsThunk = createAsyncThunk(
       const newUnlockedCount = Math.min(currentUnlocked + 2, categoryTopics.length);
       const topicsToUnlock = categoryTopics.slice(currentUnlocked, newUnlockedCount);
       
-      console.log(`Unlocking ${topicsToUnlock.length} more topics for ${categoryId}:`, 
-        topicsToUnlock.map(t => t.topicId));
-      
       // Fetch questions for newly unlocked topics
       const questionsByTopic: Record<string, any[]> = {};
       
@@ -112,7 +109,6 @@ export const loadMoreQuestionsThunk = createAsyncThunk(
         try {
           const response = await fetchQuestions(topic.topicId, undefined, token);
           questionsByTopic[topic.topicId] = response.questions;
-          console.log(`Loaded ${response.questions.length} questions for ${topic.topicId}`);
         } catch (error) {
           console.warn(`Failed to load questions for ${topic.topicId}:`, error);
           questionsByTopic[topic.topicId] = [];

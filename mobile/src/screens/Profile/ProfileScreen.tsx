@@ -25,7 +25,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { setUser, updateUserPreferences } from '../../store/userSlice';
+import { setUser } from '../../store/userSlice';
+import { updateUserPreferences } from '../../store/authSlice';
 import { theme } from '../../theme';
 import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceSelector';
 import { Button } from '../../components/Button/Button';
@@ -65,6 +66,7 @@ export const ProfileScreen = () => {
   const dispatch = useDispatch();
   const { logout } = useAuth();
   const user = useSelector((state: RootState) => state.auth.user);
+  const { token } = useSelector((state: RootState) => state.auth);
   const [studyPaceId, setStudyPaceId] = useState(1);
   const [marketingEmails, setMarketingEmails] = useState(false);
   const [shareDevices, setShareDevices] = useState(false);
@@ -155,8 +157,6 @@ export const ProfileScreen = () => {
    */
   const handleTermsModalDelete = async () => {
     try {
-      const { token } = useSelector((state: RootState) => state.auth);
-      
       if (token) {
         await deleteUserAccount(token);
       }
@@ -192,13 +192,6 @@ export const ProfileScreen = () => {
 
     setIsSaving(true);
     try {
-      console.log('Saving profile with data:', {
-        studyPaceId,
-        marketingEmails,
-        shareDevices,
-      });
-
-      const { token } = useSelector((state: RootState) => state.auth);
       if (!token) {
         throw new Error('No authentication token available');
       }
@@ -209,13 +202,11 @@ export const ProfileScreen = () => {
         shareDevices,
       });
 
-      console.log('Profile update response:', response);
-
       dispatch(
         updateUserPreferences({
-      studyPaceId,
-      marketingEmails,
-      shareDevices,
+          studyPaceId,
+          marketingEmails,
+          shareDevices,
         })
       );
 

@@ -13,7 +13,7 @@
  * @module components/Quiz
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
@@ -100,7 +100,6 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   const quizId = propQuizId || route.params?.quizId;
   const wrongQuestions = useSelector(selectWrongQuestions);
   const activeQuiz = useSelector(selectActiveQuiz);
-  const questions = useSelector((state: RootState) => selectQuestionsForTopic(state, quizId));
   const questionsState = useSelector((state: RootState) => state.questions);
   const readingTextsState = useSelector((state: RootState) => state.readingTexts);
   const startTime = useRef(Date.now());
@@ -108,22 +107,42 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   const { token } = useToken();
   const [readingText, setReadingTextState] = React.useState<any>(null);
 
-  console.log('Quiz - quizId:', quizId);
-  console.log('Quiz - questions from Redux:', questions.length);
-  console.log('Quiz - questions state:', questionsState);
-  console.log('Quiz - all questions by topic:', questionsState.byTopicId);
-  console.log('Quiz - activeQuiz:', activeQuiz);
+  // Get questions for the current quiz
+  const questions = useMemo(() => {
+    if (!quizId || !questionsState.byTopicId[quizId]) {
+      return [];
+    }
+    return questionsState.byTopicId[quizId];
+  }, [quizId, questionsState.byTopicId]);
+
+  // Determine which questions to use
+  const questionsToUse = useMemo(() => {
+    if (route.params?.isRepeating && wrongQuestions.length > 0) {
+      return wrongQuestions;
+    }
+    return questions;
+  }, [route.params?.isRepeating, wrongQuestions, questions]);
+
+  // Check if this is a reading topic
+  const isReadingTopic = useMemo(() => {
+    return questionsToUse.some(q => q.readingTextId);
+  }, [questionsToUse]);
+
+  // Get reading texts if needed
+  const readingTextsLoaded = useSelector((state: RootState) => 
+    Object.keys(state.readingTexts.byId).length > 0
+  );
 
   const handleReadingText = (questions: Question[]) => {
     if (!activeQuiz) return;
     
     const currentQuestion = questions[activeQuiz.currentQuestion];
     if (currentQuestion?.readingTextId) {
-      // For reading questions, show the reading text first
-      dispatch(setReadingText({
-        textId: currentQuestion.readingTextId,
-        show: true
-      }));
+      const text = readingTextsState.byId[currentQuestion.readingTextId];
+      if (text) {
+        setReadingTextState(text);
+        dispatch(setReadingText({ textId: currentQuestion.readingTextId, show: true }));
+      }
     }
   };
 
@@ -320,18 +339,36 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
 
   // Check if reading texts are needed and loaded
   const needsReadingTexts = questions[0]?.readingTextId;
-  const readingTextsLoaded = Object.keys(readingTextsState.byId).length > 0;
   
   if (needsReadingTexts && !readingTextsLoaded) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={styles.container}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text>Loading reading materials...</Text>
+        <Text style={styles.loadingText}>Loading reading materials...</Text>
       </View>
     );
   }
 
+  // Handle reading text display
+  if (route.params?.isRepeating && wrongQuestions?.length) {
+    handleReadingText(wrongQuestions);
+  } else if (isReadingTopic && questionsToUse.length > 0) {
+    handleReadingText(questionsToUse);
+  }
+
   const question = questions[activeQuiz.currentQuestion];
+  if (!question) {
+    return (
+      <View style={styles.container}>
+        <Text>No questions available</Text>
+      </View>
+    );
+  }
+
+  // Get reading text for current question if it exists
+  const currentReadingText = question.readingTextId 
+    ? readingTextsState.byId[question.readingTextId] 
+    : null;
 
   return (
     <View style={styles.container}>
@@ -495,6 +532,13 @@ const styles = StyleSheet.create({
     zIndex: 1,
     width: 100,
     height: 100,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000000',
+    textAlign: 'center',
   },
 });
 

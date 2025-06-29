@@ -42,61 +42,43 @@ const initialState: ReadingTextsState = {
  * ```
  */
 export const fetchAllReadingTextsThunk = createAsyncThunk(
-  'readingTexts/fetchAllReadingTexts',
-  async (_, { getState }) => {
+  'readingTexts/fetchAll',
+  async (_, { getState, dispatch }) => {
     const state = getState() as RootState;
     const token = state.auth.token || undefined;
     const questionsState = state.questions;
     
-    console.log('fetchAllReadingTextsThunk - Starting with token:', token ? 'Present' : 'Missing');
-    console.log('fetchAllReadingTextsThunk - Questions by topic count:', Object.keys(questionsState.byTopicId).length);
-    console.log('fetchAllReadingTextsThunk - Questions state:', questionsState);
+    // Get all questions from Redux state
+    const allQuestions = Object.values(questionsState.byTopicId).flat();
+    
+    // Filter questions that have reading texts
+    const questionsWithReadingTexts = allQuestions.filter(q => q.readingTextId);
+    
+    // Get unique reading text IDs
+    const readingTextIds = [...new Set(questionsWithReadingTexts.map(q => q.readingTextId))];
+    
+    // Group questions by topic to fetch reading texts efficiently
+    const topicsWithReadingQuestions = new Set(
+      questionsWithReadingTexts.map(q => q.topicId)
+    );
     
     const readingTextsById: Record<string, ReadingText> = {};
-    const readingTextsByTopic: Record<string, ReadingText[]> = {};
     
-    // Get all questions from Redux
-    const allQuestions = Object.values(questionsState.byTopicId).flat();
-    console.log('fetchAllReadingTextsThunk - All questions:', allQuestions.length);
-    console.log('fetchAllReadingTextsThunk - Sample questions:', allQuestions.slice(0, 3));
-    
-    const questionsWithReadingTexts = allQuestions.filter(q => q.readingTextId);
-    console.log('fetchAllReadingTextsThunk - Questions with reading texts:', questionsWithReadingTexts.length);
-    console.log('fetchAllReadingTextsThunk - Questions with reading texts:', questionsWithReadingTexts);
-    
-    // Get unique reading text IDs from questions
-    const readingTextIds = [...new Set(questionsWithReadingTexts.map(q => q.readingTextId!))];
-    console.log('fetchAllReadingTextsThunk - Unique reading text IDs:', readingTextIds);
-    
-    // Get unique topic IDs from questions that have reading texts
-    const topicsWithReadingQuestions = [...new Set(questionsWithReadingTexts.map(q => q.topicId))];
-    console.log('fetchAllReadingTextsThunk - Topics with reading questions:', topicsWithReadingQuestions);
-    
+    // Fetch reading texts for each topic that has reading questions
     for (const topicId of topicsWithReadingQuestions) {
       try {
-        console.log(`fetchAllReadingTextsThunk - Fetching reading texts for topic: ${topicId}`);
         const response = await fetchReadingTexts(topicId, token);
-        console.log(`fetchAllReadingTextsThunk - Response for ${topicId}:`, response);
         
-        // Store by ID and by topic
+        // Add reading texts to our collection
         response.forEach(text => {
           readingTextsById[text.id] = text;
-          if (!readingTextsByTopic[topicId]) {
-            readingTextsByTopic[topicId] = [];
-          }
-          readingTextsByTopic[topicId].push(text);
         });
-        
-        console.log(`fetchAllReadingTextsThunk - Fetched ${response.length} reading texts for topic ${topicId}`);
       } catch (error) {
-        console.warn(`fetchAllReadingTextsThunk - Failed to fetch reading texts for topic ${topicId}:`, error);
-        readingTextsByTopic[topicId] = [];
+        console.warn(`Failed to fetch reading texts for topic ${topicId}:`, error);
       }
     }
     
-    console.log('fetchAllReadingTextsThunk - Reading texts fetch completed. Total texts:', Object.keys(readingTextsById).length);
-    console.log('fetchAllReadingTextsThunk - Final reading texts by ID:', readingTextsById);
-    return { byId: readingTextsById, byTopicId: readingTextsByTopic };
+    return readingTextsById;
   }
 );
 
@@ -156,8 +138,7 @@ export const readingTextsSlice = createSlice({
       })
       .addCase(fetchAllReadingTextsThunk.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.byId = action.payload.byId;
-        state.byTopicId = action.payload.byTopicId;
+        state.byId = action.payload;
       })
       .addCase(fetchAllReadingTextsThunk.rejected, (state, action) => {
         state.isLoading = false;
