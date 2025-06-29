@@ -16,7 +16,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
@@ -24,10 +24,8 @@ import { Text, ActivityIndicator } from 'react-native-paper';
 import { theme } from '../../theme';
 import { Logo } from '../../components/Logo';
 import * as Font from 'expo-font';
-import { useDispatch } from 'react-redux';
-import { fetchCategoriesThunk } from '../../store/categorySlice';
-import { fetchTopicsThunk } from '../../store/topicSlice';
-import { AppDispatch } from '../../store';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
@@ -56,9 +54,14 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
  */
 export const SplashScreen = () => {
   const navigation = useNavigation<NavigationProp>();
-  const dispatch = useDispatch<AppDispatch>();
-  const [loadingText, setLoadingText] = useState('Initializing...');
+  const token = useSelector((state: RootState) => state.auth.token);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [dotAnimations] = useState([
+    new Animated.Value(0),
+    new Animated.Value(0),
+    new Animated.Value(0),
+  ]);
+  const [loadingText, setLoadingText] = useState('Loading');
 
   /**
    * Loads custom fonts required by the application
@@ -86,28 +89,52 @@ export const SplashScreen = () => {
   }, []);
 
   /**
+   * Animates the loading dots
+   */
+  useEffect(() => {
+    if (!fontsLoaded) return;
+
+    const animateDots = () => {
+      const animations = dotAnimations.map((anim, index) => {
+        return Animated.sequence([
+          Animated.delay(index * 200),
+          Animated.loop(
+            Animated.sequence([
+              Animated.timing(anim, {
+                toValue: 1,
+                duration: 600,
+                useNativeDriver: true,
+              }),
+              Animated.timing(anim, {
+                toValue: 0,
+                duration: 600,
+                useNativeDriver: true,
+              }),
+            ])
+          ),
+        ]);
+      });
+
+      Animated.parallel(animations).start();
+    };
+
+    animateDots();
+  }, [fontsLoaded, dotAnimations]);
+
+  /**
    * Initializes app data and determines navigation flow
    * 
-   * Fetches essential data (categories and topics) from the backend
-   * and navigates to the appropriate screen based on authentication
-   * status. Provides progressive loading feedback to the user.
+   * Checks authentication status and navigates to the appropriate
+   * screen. Provides brief loading feedback to the user.
    */
   useEffect(() => {
     if (!fontsLoaded) return;
 
     const initializeApp = async () => {
       try {
-        setLoadingText('Loading categories...');
-        await dispatch(fetchCategoriesThunk()).unwrap();
-        
-        setLoadingText('Loading topics...');
-        await dispatch(fetchTopicsThunk()).unwrap();
-        
-        setLoadingText('Preparing your learning journey...');
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // TODO: Replace with actual auth check
-        const isAuthenticated = false;
+        const isAuthenticated = !!token;
         
         if (isAuthenticated) {
           navigation.replace('Home');
@@ -121,7 +148,7 @@ export const SplashScreen = () => {
     };
 
     initializeApp();
-  }, [fontsLoaded, dispatch, navigation]);
+  }, [fontsLoaded, navigation, token]);
 
   if (!fontsLoaded) {
     return (
@@ -133,19 +160,48 @@ export const SplashScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logoCircle}>
-            <Logo width={120} height={120} />
-          </View>
-          <Text style={styles.logoTextFresh}>Fresh</Text>
-          <Text style={styles.logoTextQuiz}>Quiz</Text>
-          <Text style={styles.logoTextApp}>App</Text>
+      {/* Top Container - DEUTSCH */}
+      <View style={styles.topContainer}>
+        <Text style={styles.deutschText}>DEUTSCH</Text>
+      </View>
+
+      {/* Middle Container - Logo */}
+      <View style={styles.middleContainer}>
+        <Logo width={200} height={200} />
+      </View>
+
+      {/* Loading Container */}
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading</Text>
+        <View style={styles.dotsContainer}>
+          {dotAnimations.map((anim, index) => (
+            <Animated.View
+              key={index}
+              style={[
+                styles.dot,
+                {
+                  opacity: anim,
+                  transform: [
+                    {
+                      scale: anim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.5, 1],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            />
+          ))}
         </View>
-        
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.surface} />
-          <Text style={styles.loadingText}>{loadingText}</Text>
+      </View>
+
+      {/* Bottom Container - Learn German Text */}
+      <View style={styles.bottomContainer}>
+        <View style={styles.textContainer}>
+          <Text style={styles.learnText}>Learn</Text>
+          <Text style={styles.germanText}>German</Text>
+          <Text style={styles.subtitleText}>Build your language skills</Text>
         </View>
       </View>
     </View>
@@ -157,52 +213,68 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  content: {
+  topContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deutschText: {
+    color: theme.colors.surface,
+    fontSize: 72,
+    fontFamily: 'Baloo2-Bold',
+  },
+  middleContainer: {
+    flex: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bottomContainer: {
+    alignItems: 'center',
+    paddingVertical: 48,
+  },
+  textContainer: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'space-around',
-    padding: 24,
   },
-  title: {
+  learnText: {
     color: theme.colors.surface,
+    fontSize: 32,
+    fontFamily: 'Baloo2-SemiBold',
+    lineHeight: 32,
   },
-  footer: {
-    alignItems: 'center',
-    marginBottom: 40,
+  germanText: {
+    color: theme.colors.surface,
+    fontSize:70,
+    fontFamily: 'Baloo2-SemiBold',
+    lineHeight:70,
+    letterSpacing: 1.2,
+  },
+  subtitleText: {
+    color: theme.colors.surface,
+    fontSize: 28,
+    fontFamily: 'Baloo2-Regular',
+    lineHeight: 32,
   },
   loadingContainer: {
-    marginTop: 40,
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 12,
     color: theme.colors.surface,
+    fontSize: 32,
+    fontFamily: 'Baloo2-SemiBold',
   },
-  logoContainer: {
+  dotsContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: 16,
   },
-  logoCircle: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoTextFresh: {
-    color: theme.colors.surface,
-    fontSize: 24,
-    fontFamily: 'Baloo2-Regular',
-  },
-  logoTextQuiz: {
-    color: theme.colors.surface,
-    fontSize: 48,
-    fontFamily: 'Baloo2-Bold',
-  },
-  logoTextApp: {
-    color: theme.colors.surface,
-    fontSize: 24,
-    fontFamily: 'Baloo2-Regular',
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: theme.colors.surface,
+    marginHorizontal: 4,
   },
 }); 

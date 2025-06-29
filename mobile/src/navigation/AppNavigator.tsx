@@ -14,6 +14,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SplashScreen } from '../screens/Splash';
 import { LoginScreen } from '../screens/Login';
 import { RegisterScreen } from '../screens/Register';
 import { ForgotPasswordScreen } from '../screens/ForgotPassword';
@@ -31,6 +32,7 @@ import { ResultsScreen } from '../screens/Results';
  * route parameters.
  * 
  * @interface RootStackParamList
+ * @property {undefined} Splash - Splash screen (no parameters)
  * @property {undefined} Login - Login screen (no parameters)
  * @property {undefined} Register - Registration screen (no parameters)
  * @property {undefined} ForgotPassword - Password reset screen (no parameters)
@@ -40,6 +42,7 @@ import { ResultsScreen } from '../screens/Results';
  * @property {{ quizId: string }} Results - Results screen with quiz ID for displaying results
  */
 export type RootStackParamList = {
+  Splash: undefined;
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
@@ -93,7 +96,11 @@ export const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator 
+        screenOptions={{ headerShown: false }}
+        initialRouteName="Splash"
+      >
+        <Stack.Screen name="Splash" component={SplashScreen} />
         {!isAuthenticated ? (
           // Auth screens
           <>
