@@ -2,6 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@r
 import { Topic } from '../types';
 import { fetchTopics } from '../services/api';
 import { RootState } from './index';
+import { updateCompletedTopicsCategories } from './progressSlice';
 
 /**
  * Interface representing the topic slice state
@@ -82,6 +83,10 @@ export const topicSlice = createSlice({
       .addCase(fetchTopicsThunk.fulfilled, (state, action) => {
         state.isLoading = false;
         state.topics = action.payload;
+        
+        // Update category IDs for completed topics
+        // We need to dispatch this action, but we can't do it directly in a reducer
+        // So we'll handle this in the component that calls fetchTopicsThunk
       })
       .addCase(fetchTopicsThunk.rejected, (state, action) => {
         state.isLoading = false;

@@ -24,10 +24,8 @@ model User {
   shareDevices             Boolean         @default(false)
   studyPaceId              Int             @default(1)
   agreedToTerms            Boolean         @default(false)
-  quizResults              QuizResult[]
   statistics               Statistics?
   level                    Level           @relation(fields: [levelId], references: [levelId])
-  wrongQuestions           WrongQuestion[]
 }
 
 model Statistics {
@@ -41,6 +39,7 @@ model Statistics {
   updatedAt        DateTime @updatedAt
   dailyQuizTimes   Json?
   totalQuizMinutes Int      @default(0)
+  completedTopics  Json?    // Array of completed topic IDs with scores
   user             User     @relation(fields: [userId], references: [id])
 }
 
@@ -88,8 +87,6 @@ model Question {
   topicId         String
   readingText     ReadingText?    @relation(fields: [readingTextId], references: [id])
   topic           Topic           @relation(fields: [topicId], references: [topicId])
-  quizResults     QuizResult[]
-  wrongQuestions  WrongQuestion[]
 }
 
 model ReadingText {
@@ -99,25 +96,4 @@ model ReadingText {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   questions   Question[]
-}
-
-model QuizResult {
-  id             String   @id @default(uuid())
-  userId         String
-  questionId     String
-  selectedAnswer String?
-  isCorrect      Boolean
-  score          Int
-  createdAt      DateTime @default(now())
-  question       Question @relation(fields: [questionId], references: [questionId])
-  user           User     @relation(fields: [userId], references: [id])
-}
-
-model WrongQuestion {
-  id         String   @id @default(uuid())
-  userId     String
-  questionId String
-  createdAt  DateTime @default(now())
-  question   Question @relation(fields: [questionId], references: [questionId])
-  user       User     @relation(fields: [userId], references: [id])
 }

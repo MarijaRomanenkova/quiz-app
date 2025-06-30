@@ -404,30 +404,34 @@ export const deleteUserAccount = async (token: string): Promise<any> => {
 };
 
 /**
- * Synchronizes quiz time statistics with the backend
+ * Syncs quiz time data and completed topics to the backend
  * 
- * Sends local quiz time tracking data to the backend for
- * persistence and analytics. Called on logout to sync Redux state.
+ * Sends the current quiz time statistics and completed topics data
+ * to the backend for persistence. This is typically called during logout
+ * to ensure data is saved before clearing local state.
  * 
- * @param {Object} quizTimeData - Quiz time statistics from Redux state
- * @param {Array<{date: string, minutes: number, lastUpdated: string}>} quizTimeData.dailyQuizTimes - Daily quiz time records
- * @param {number} quizTimeData.totalQuizMinutes - Total quiz time in minutes
- * @param {string} [token] - Authentication token
- * @returns {Promise<any>} Sync confirmation
+ * @param {Object} statisticsData - Complete statistics data to sync
+ * @param {number} statisticsData.totalQuizMinutes - Total minutes spent on quizzes
+ * @param {Array} statisticsData.dailyQuizTimes - Array of daily quiz time records
+ * @param {Array} statisticsData.completedTopics - Array of completed topic records
+ * @param {string} [token] - Optional authentication token
+ * @returns {Promise<any>} Sync confirmation from backend
  * @throws {Error} When the request fails
  * 
  * @example
  * ```tsx
- * await syncQuizTimeData({
- *   dailyQuizTimes: [{ date: '2024-01-01', minutes: 30, lastUpdated: '2024-01-01T10:00:00Z' }],
- *   totalQuizMinutes: 120
+ * await syncStatisticsData({
+ *   totalQuizMinutes: 120,
+ *   dailyQuizTimes: [{ date: '2024-01-01', minutes: 30 }],
+ *   completedTopics: [{ topicId: 'articles', score: 85, completedAt: '2024-01-01T00:00:00Z' }]
  * }, token);
  * ```
  */
-export const syncQuizTimeData = async (
-  quizTimeData: {
+export const syncStatisticsData = async (
+  statisticsData: {
     totalQuizMinutes: number;
     dailyQuizTimes: Array<{date: string, minutes: number, lastUpdated: string}>;
+    completedTopics: Array<{topicId: string, score: number, completedAt: string}>;
   },
   token?: string
 ): Promise<any> => {
@@ -438,7 +442,7 @@ export const syncQuizTimeData = async (
         'Content-Type': 'application/json',
         ...(token && { Authorization: `Bearer ${token}` }),
       },
-      body: JSON.stringify(quizTimeData),
+      body: JSON.stringify(statisticsData),
     });
 
     if (!response.ok) {
@@ -448,48 +452,58 @@ export const syncQuizTimeData = async (
     const result = await response.json();
     return result;
   } catch (error) {
-    console.error('Error syncing quiz time data:', error);
+    console.error('Error syncing statistics data:', error);
     throw error;
   }
 };
 
 /**
- * Fetches quiz time statistics from the backend
+ * Fetches quiz time data and completed topics from the backend
  * 
- * Retrieves stored quiz time tracking data including daily
- * breakdown and total accumulated time. Called on login to load into Redux.
+ * Retrieves the user's quiz time statistics and completed topics
+ * from the backend for loading into Redux state on login.
  * 
- * @param {string} [token] - Authentication token
- * @returns {Promise<{dailyQuizTimes: Array<{date: string, minutes: number, lastUpdated: string}>, totalQuizMinutes: number}>} Quiz time statistics
+ * @param {string} [token] - Optional authentication token
+ * @returns {Promise<Object>} Quiz time and completed topics data
  * @throws {Error} When the request fails
  * 
  * @example
  * ```tsx
- * const quizTimeData = await fetchQuizTimeData(token);
- * // Returns: { dailyQuizTimes: [...], totalQuizMinutes: 120 }
+ * const data = await fetchStatisticsData(token);
+ * console.log(data.totalQuizMinutes); // Total quiz time
+ * console.log(data.completedTopics.length); // Number of completed topics
  * ```
  */
-export const fetchQuizTimeData = async (token?: string): Promise<{
+export const fetchStatisticsData = async (token?: string): Promise<{
   dailyQuizTimes: Array<{date: string, minutes: number, lastUpdated: string}>;
   totalQuizMinutes: number;
+  completedTopics: Array<{topicId: string, score: number, completedAt: string}>;
 }> => {
   try {
     const response = await fetch(`${API_URL}/auth/quiz-time`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
+      headers: token ? {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      } : {}
     });
-
+    
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
-    const result = await response.json();
-    return result;
+    
+    const data = await response.json();
+    return {
+      dailyQuizTimes: data.dailyQuizTimes || [],
+      totalQuizMinutes: data.totalQuizMinutes || 0,
+      completedTopics: data.completedTopics || []
+    };
   } catch (error) {
-    console.error('Error fetching quiz time data:', error);
-    throw error;
+    console.error('Error fetching statistics data:', error);
+    // Return default values if fetch fails
+    return {
+      dailyQuizTimes: [],
+      totalQuizMinutes: 0,
+      completedTopics: []
+    };
   }
 };

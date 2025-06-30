@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { setCredentials, setLoading, setError, logout } from '../store/authSlice';
 import { updateUserProfile } from '../store/userSlice';
-import { loadQuizTimeData } from '../store/statisticsSlice';
+import { loadStatisticsData } from '../store/statisticsSlice';
+import { loadCompletedTopics } from '../store/progressSlice';
 import authService from '../services/authService';
-import { fetchUserProfile, fetchQuizTimeData, syncQuizTimeData } from '../services/api';
+import { fetchUserProfile, fetchStatisticsData, syncStatisticsData } from '../services/api';
 
 /**
  * Custom hook for managing user authentication state and operations
@@ -32,6 +33,7 @@ export const useAuth = () => {
   const dispatch = useDispatch();
   const { token, user, isLoading, error } = useSelector((state: RootState) => state.auth);
   const { dailyQuizTimes, totalQuizMinutes } = useSelector((state: RootState) => state.statistics);
+  const { topicProgress } = useSelector((state: RootState) => state.progress);
 
   /**
    * Authenticates a user with email and password
@@ -40,7 +42,7 @@ export const useAuth = () => {
    * 1. Authenticates with the backend
    * 2. Stores credentials in Redux state
    * 3. Fetches and updates user profile data
-   * 4. Loads quiz time statistics
+   * 4. Loads statistics data (quiz time and completed topics)
    * 
    * @param email - User's email address
    * @param password - User's password
@@ -96,12 +98,17 @@ export const useAuth = () => {
         // This is not critical - user can still use the app
       }
 
-      // Fetch quiz time data from backend
+      // Fetch statistics data from backend (quiz time and completed topics)
       try {
-        const quizTimeData = await fetchQuizTimeData(response.access_token);
-        dispatch(loadQuizTimeData(quizTimeData));
-      } catch (quizTimeError) {
-        console.warn('Failed to fetch quiz time data:', quizTimeError);
+        const statisticsData = await fetchStatisticsData(response.access_token);
+        dispatch(loadStatisticsData(statisticsData));
+        
+        // Also load completed topics to progress slice
+        if (statisticsData.completedTopics && statisticsData.completedTopics.length > 0) {
+          dispatch(loadCompletedTopics(statisticsData.completedTopics));
+        }
+      } catch (statisticsError) {
+        console.warn('Failed to fetch statistics data:', statisticsError);
         // This is not critical - user can still use the app
       }
       
@@ -156,7 +163,7 @@ export const useAuth = () => {
    * Logs out the current user
    * 
    * This function handles the complete logout flow:
-   * 1. Syncs quiz time data to backend (if available)
+   * 1. Syncs statistics data to backend (if available)
    * 2. Clears all authentication data from Redux state
    * 
    * @returns Promise that resolves when logout is complete
@@ -169,15 +176,25 @@ export const useAuth = () => {
    */
   const logoutUser = useCallback(async () => {
     try {
-      // Sync quiz time data to backend before logout
-      if (token && dailyQuizTimes.length > 0) {
+      // Get completed topics from progress slice
+      const completedTopics = Object.values(topicProgress)
+        .filter(topic => topic.completed)
+        .map(topic => ({
+          topicId: topic.topicId,
+          score: topic.score,
+          completedAt: topic.lastAttemptDate || new Date().toISOString()
+        }));
+
+      // Sync statistics data to backend before logout
+      if (token && (dailyQuizTimes.length > 0 || completedTopics.length > 0)) {
         try {
-          await syncQuizTimeData({
+          await syncStatisticsData({
             dailyQuizTimes,
-            totalQuizMinutes
+            totalQuizMinutes,
+            completedTopics
           }, token);
         } catch (error) {
-          console.warn('Failed to sync quiz time data:', error);
+          console.warn('Failed to sync statistics data:', error);
         }
       }
     } catch (error) {
@@ -185,7 +202,7 @@ export const useAuth = () => {
     } finally {
       dispatch(logout());
     }
-  }, [dispatch, token, dailyQuizTimes, totalQuizMinutes]);
+  }, [dispatch, token, dailyQuizTimes, totalQuizMinutes, topicProgress]);
 
   /** Whether the user is currently authenticated */
   const isAuthenticated = !!(token && user);

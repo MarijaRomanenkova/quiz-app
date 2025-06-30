@@ -27,9 +27,10 @@ import { fetchCategoriesThunk, setSelectedCategory } from '../../store/categoryS
 import { fetchTopicsThunk } from '../../store/topicSlice';
 import { fetchAllQuestionsThunk } from '../../store/questionsSlice';
 import { fetchAllReadingTextsThunk } from '../../store/readingTextsSlice';
-import { initializeCategoryProgress } from '../../store/progressSlice';
+import { initializeCategoryProgress, updateCompletedTopicsCategories } from '../../store/progressSlice';
 import type { AppDispatch } from '../../store';
 import { Button } from '../../components/Button/Button';
+import type { Topic } from '../../types';
 
 /**
  * Props interface for the HomeScreen component
@@ -72,18 +73,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const { user, token } = useSelector((state: RootState) => state.auth);
   const questionsState = useSelector((state: RootState) => state.questions);
   const readingTextsState = useSelector((state: RootState) => state.readingTexts);
-
-  console.log('HomeScreen - user:', user);
-  console.log('HomeScreen - token:', token ? 'Present' : 'Missing');
-  console.log('HomeScreen - token length:', token ? token.length : 0);
-  console.log('HomeScreen - categories length:', categories.length);
-  console.log('HomeScreen - categories:', categories);
-  console.log('HomeScreen - isLoading:', isLoading);
-  console.log('HomeScreen - error:', error);
-  console.log('HomeScreen - user type:', typeof user);
-  console.log('HomeScreen - token type:', typeof token);
-  console.log('HomeScreen - user === null:', user === null);
-  console.log('HomeScreen - token === null:', token === null);
+  const { topicProgress, categoryProgress } = useSelector((state: RootState) => state.progress);
 
   /**
    * Initial data loading for authenticated users
@@ -94,22 +84,26 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   useEffect(() => {
     // Only fetch data once when user is authenticated and data is not loaded
     if (user && token && categories.length === 0) {
-      console.log('HomeScreen - Initial data fetch for authenticated user...');
       // Fetch all data in sequence: categories, topics, questions, then reading texts
       dispatch(fetchCategoriesThunk());
-      dispatch(fetchTopicsThunk()).then(() => {
+      dispatch(fetchTopicsThunk()).then((result) => {
+        // Update category IDs for completed topics after topics are loaded
+        if (result.payload && Array.isArray(result.payload)) {
+          const topicsForUpdate = (result.payload as Topic[]).map(topic => ({
+            topicId: topic.topicId,
+            categoryId: topic.categoryId
+          }));
+          dispatch(updateCompletedTopicsCategories(topicsForUpdate));
+        }
+        
         // Fetch questions for all topics
-        console.log('HomeScreen - Topics loaded, now fetching questions...');
         dispatch(fetchAllQuestionsThunk()).unwrap()
           .then((questionsData) => {
-            console.log('HomeScreen - Questions loaded successfully:', Object.keys(questionsData).length, 'topics');
-            console.log('HomeScreen - Questions data keys:', Object.keys(questionsData));
             // Fetch reading texts after questions are loaded
-            console.log('HomeScreen - Now fetching reading texts...');
             return dispatch(fetchAllReadingTextsThunk()).unwrap();
           })
           .then((readingTextsData) => {
-            console.log('HomeScreen - Reading texts loaded successfully:', Object.keys(readingTextsData || {}).length, 'texts');
+            // Reading texts loaded successfully
           })
           .catch((error) => {
             console.error('HomeScreen - Data fetch failed:', error);
@@ -126,34 +120,28 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
    */
   useEffect(() => {
     if (user && token && categories.length > 0 && topics.length > 0) {
-      console.log('HomeScreen - Current questions state:', questionsState);
-      
       // Check if questions are loaded in byTopicId
       const hasQuestions = questionsState.byTopicId && Object.keys(questionsState.byTopicId).length > 0;
       
       if (!hasQuestions) {
-        console.log('HomeScreen - No questions loaded, manually triggering fetch...');
         dispatch(fetchAllQuestionsThunk()).unwrap()
           .then((questionsData) => {
-            console.log('HomeScreen - Manual questions fetch successful:', Object.keys(questionsData).length, 'topics');
             // Also trigger reading texts fetch
             return dispatch(fetchAllReadingTextsThunk()).unwrap();
           })
           .then((readingTextsData) => {
-            console.log('HomeScreen - Manual reading texts fetch successful:', Object.keys(readingTextsData || {}).length, 'texts');
+            // Manual reading texts fetch successful
           })
           .catch((error) => {
             console.error('HomeScreen - Manual fetch failed:', error);
           });
       } else {
-        console.log('HomeScreen - Questions already loaded in byTopicId:', Object.keys(questionsState.byTopicId));
         // Check if reading texts are loaded
         const hasReadingTexts = readingTextsState.byId && Object.keys(readingTextsState.byId).length > 0;
         if (!hasReadingTexts) {
-          console.log('HomeScreen - No reading texts loaded, manually triggering fetch...');
           dispatch(fetchAllReadingTextsThunk()).unwrap()
             .then((readingTextsData) => {
-              console.log('HomeScreen - Manual reading texts fetch successful:', Object.keys(readingTextsData || {}).length, 'texts');
+              // Manual reading texts fetch successful
             })
             .catch((error) => {
               console.error('HomeScreen - Manual reading texts fetch failed:', error);
@@ -172,7 +160,6 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
    */
   useEffect(() => {
     if (categories.length > 0 && topics.length > 0) {
-      console.log('HomeScreen - Initializing progress tracking...');
       categories.forEach(category => {
         const categoryTopics = topics.filter(topic => topic.categoryId === category.categoryId);
         const initialUnlocked = category.categoryId === 'listening' || category.categoryId === 'words' ? 3 : categoryTopics.length;

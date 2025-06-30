@@ -181,13 +181,23 @@ export const statisticsSlice = createSlice({
     },
 
     /**
-     * Loads quiz time data from backend (on login)
+     * Loads statistics data from backend (on login)
      * @param state - Current statistics state
-     * @param action - Object containing daily quiz times and total minutes
+     * @param action - Object containing daily quiz times, total minutes, and completed topics
      */
-    loadQuizTimeData: (state, action: PayloadAction<{ dailyQuizTimes: DailyQuizTime[]; totalQuizMinutes: number }>) => {
+    loadStatisticsData: (state, action: PayloadAction<{ 
+      dailyQuizTimes: DailyQuizTime[]; 
+      totalQuizMinutes: number;
+      completedTopics?: Array<{topicId: string, score: number, completedAt: string}>;
+    }>) => {
       state.dailyQuizTimes = action.payload.dailyQuizTimes;
       state.totalQuizMinutes = action.payload.totalQuizMinutes;
+      
+      // Dispatch completed topics to progress slice if provided
+      if (action.payload.completedTopics) {
+        // This will be handled by the progress slice
+        return { ...state, completedTopics: action.payload.completedTopics };
+      }
     },
   },
 });
@@ -199,7 +209,7 @@ export const {
   addQuizMinutes,
   setDailyQuizTime,
   resetQuizTime,
-  loadQuizTimeData,
+  loadStatisticsData,
 } = statisticsSlice.actions;
 
 /**

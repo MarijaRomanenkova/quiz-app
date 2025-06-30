@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchQuizTimeData, syncQuizTimeData, updateUserProfile } from '../services/api';
-import { loadQuizTimeData } from './statisticsSlice';
+import { fetchStatisticsData, syncStatisticsData, updateUserProfile } from '../services/api';
+import { loadStatisticsData } from './statisticsSlice';
 import authService from '../services/authService';
 import type { RootState, AppDispatch } from './index';
+import { loadCompletedTopics } from './progressSlice';
 
 /**
  * Interface representing the user data structure in the authentication state
@@ -53,27 +54,32 @@ const initialState: AuthState = {
 };
 
 /**
- * Async thunk for user login with quiz time data loading
+ * Async thunk for user login with statistics data loading
  * 
- * Authenticates the user and loads their quiz time data from the backend
- * into the Redux state for persistence.
+ * Authenticates the user and loads their statistics data (quiz time and completed topics)
+ * from the backend into the Redux state for persistence.
  * 
  * @param credentials - User login credentials
  * @returns Promise resolving to authentication response
  */
-export const loginWithQuizTime = createAsyncThunk(
-  'auth/loginWithQuizTime',
+export const loginWithStatistics = createAsyncThunk(
+  'auth/loginWithStatistics',
   async (credentials: { email: string; password: string }, { dispatch }) => {
     // Perform login
     const response = await authService.login(credentials);
     
-    // Load quiz time data from backend
+    // Load statistics data from backend
     try {
-      const quizTimeData = await fetchQuizTimeData(response.access_token);
-      dispatch(loadQuizTimeData(quizTimeData));
+      const statisticsData = await fetchStatisticsData(response.access_token);
+      dispatch(loadStatisticsData(statisticsData));
+      
+      // Also load completed topics to progress slice
+      if (statisticsData.completedTopics && statisticsData.completedTopics.length > 0) {
+        dispatch(loadCompletedTopics(statisticsData.completedTopics));
+      }
     } catch (error) {
-      console.warn('Failed to load quiz time data:', error);
-      // Don't fail login if quiz time loading fails
+      console.warn('Failed to load statistics data:', error);
+      // Don't fail login if statistics loading fails
     }
     
     return response;
@@ -81,30 +87,41 @@ export const loginWithQuizTime = createAsyncThunk(
 );
 
 /**
- * Async thunk for user logout with quiz time data syncing
+ * Async thunk for user logout with statistics data syncing
  * 
- * Syncs the current quiz time data and user preferences to the backend before clearing
- * the authentication state.
+ * Syncs the current statistics data (quiz time and completed topics) and user preferences
+ * to the backend before clearing the authentication state.
  * 
  * @param _ - Unused parameter (thunk requirement)
  * @returns Promise resolving to logout confirmation
  */
-export const logoutWithQuizTimeSync = createAsyncThunk(
-  'auth/logoutWithQuizTimeSync',
+export const logoutWithStatisticsSync = createAsyncThunk(
+  'auth/logoutWithStatisticsSync',
   async (_, { getState, dispatch }) => {
     const state = getState() as RootState;
     const { token, user } = state.auth;
     const { totalQuizMinutes, dailyQuizTimes } = state.statistics;
+    const { topicProgress } = state.progress;
     
-    // Sync quiz time data to backend if user is authenticated
-    if (token && (totalQuizMinutes > 0 || dailyQuizTimes.length > 0)) {
+    // Convert topic progress to completed topics format
+    const completedTopics = Object.values(topicProgress)
+      .filter(topic => topic.completed)
+      .map(topic => ({
+        topicId: topic.topicId,
+        score: topic.score,
+        completedAt: topic.lastAttemptDate || new Date().toISOString()
+      }));
+    
+    // Sync statistics data to backend if user is authenticated
+    if (token && (totalQuizMinutes > 0 || dailyQuizTimes.length > 0 || completedTopics.length > 0)) {
       try {
-        await syncQuizTimeData({
+        await syncStatisticsData({
           totalQuizMinutes,
-          dailyQuizTimes
+          dailyQuizTimes,
+          completedTopics
         }, token);
       } catch (error) {
-        console.warn('Failed to sync quiz time data:', error);
+        console.warn('Failed to sync statistics data:', error);
         // Don't fail logout if sync fails
       }
     }
@@ -206,31 +223,31 @@ export const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Handle loginWithQuizTime
-      .addCase(loginWithQuizTime.pending, (state) => {
+      // Handle loginWithStatistics
+      .addCase(loginWithStatistics.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(loginWithQuizTime.fulfilled, (state, action) => {
+      .addCase(loginWithStatistics.fulfilled, (state, action) => {
         state.isLoading = false;
         state.token = action.payload.access_token;
         // Use complete user data from backend response
         state.user = action.payload.user;
         state.error = null;
       })
-      .addCase(loginWithQuizTime.rejected, (state, action) => {
+      .addCase(loginWithStatistics.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || 'Login failed';
       })
-      // Handle logoutWithQuizTimeSync
-      .addCase(logoutWithQuizTimeSync.pending, (state) => {
+      // Handle logoutWithStatisticsSync
+      .addCase(logoutWithStatisticsSync.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(logoutWithQuizTimeSync.fulfilled, (state) => {
+      .addCase(logoutWithStatisticsSync.fulfilled, (state) => {
         state.isLoading = false;
         // logout action is dispatched in the thunk
       })
-      .addCase(logoutWithQuizTimeSync.rejected, (state, action) => {
+      .addCase(logoutWithStatisticsSync.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || 'Logout failed';
       });

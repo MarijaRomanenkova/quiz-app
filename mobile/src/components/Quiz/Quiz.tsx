@@ -13,7 +13,7 @@
  * @module components/Quiz
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
@@ -104,21 +104,18 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   const questions = useSelector((state: RootState) => selectQuestionsForTopic(state, quizId));
   const questionsState = useSelector((state: RootState) => state.questions);
   const readingTextsState = useSelector((state: RootState) => state.readingTexts);
+  const topics = useSelector((state: RootState) => state.topic.topics);
   const startTime = useRef(Date.now());
   const audioQuestionRef = useRef<AudioPlayerRef>(null);
   const { token } = useToken();
   const user = useSelector((state: RootState) => state.auth.user);
   const [readingText, setReadingTextState] = React.useState<any>(null);
 
-  console.log('Quiz - quizId:', quizId);
-  console.log('Quiz - questions from Redux:', questions.length);
-  console.log('Quiz - questions state:', questionsState);
-  console.log('Quiz - all questions by topic:', questionsState.byTopicId);
-  console.log('Quiz - available topic IDs in Redux:', Object.keys(questionsState.byTopicId));
-  console.log('Quiz - questions for this topic:', questionsState.byTopicId[quizId]);
-  console.log('Quiz - activeQuiz:', activeQuiz);
-  console.log('Quiz - token:', token ? 'Present' : 'Missing');
-  console.log('Quiz - user:', user);
+  // Get categoryId from topics state since quizId is the same as topicId
+  const categoryId = useMemo(() => {
+    const topic = topics.find(t => t.topicId === quizId);
+    return topic?.categoryId || null;
+  }, [topics, quizId]);
 
   const handleReadingText = (questions: Question[]) => {
     if (!activeQuiz) return;
@@ -136,25 +133,19 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   const loadQuestions = async () => {
     try {
       if (route.params?.isRepeating && wrongQuestions?.length) {
-        console.log('Quiz - Using wrong questions for repeat mode');
         handleReadingText(wrongQuestions);
         return;
       }
 
       // Use questions from Redux (loaded in bulk during app initialization)
       if (questions.length > 0) {
-        console.log('Quiz - Using questions from Redux');
         // Check if this is a reading topic by looking at the first question
         if (questions[0]?.readingTextId) {
-          console.log('Quiz - This is a reading topic, showing reading text first');
           // Check if reading texts are loaded in Redux
           const state = store.getState();
           const readingTextsLoaded = Object.keys(state.readingTexts.byId).length > 0;
-          console.log('Quiz - Reading texts loaded in Redux:', readingTextsLoaded);
-          console.log('Quiz - Available reading text IDs:', Object.keys(state.readingTexts.byId));
           
           if (!readingTextsLoaded) {
-            console.warn('Quiz - Reading texts not loaded yet, waiting...');
             // Wait a bit and try again
             setTimeout(() => {
               loadQuestions();
@@ -178,19 +169,15 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   useEffect(() => {
     if (!quizId) return;
     
-    console.log('Quiz - Starting quiz session for topic:', quizId);
     dispatch(startQuiz());
     // Start the quiz session timer
     dispatch(startQuizSession());
-    console.log('Quiz - Quiz session started, timer initialized');
     loadQuestions();
 
     return () => {
-      console.log('Quiz - Ending quiz session, cleaning up');
       dispatch(endQuiz());
       // End the quiz session timer when component unmounts
       dispatch(endQuizSession());
-      console.log('Quiz - Quiz session ended, timer stopped');
     };
   }, [quizId]);
 
@@ -229,9 +216,6 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
       const finalScore = activeQuiz.score;
       const totalQuestions = questions.length;
       const scorePercentage = Math.round((finalScore / totalQuestions) * 100);
-      
-      // Get the category ID from the first question
-      const categoryId = questions[0]?.categoryId;
       
       dispatch(updateDailyStats({
         timeSpent,
@@ -282,19 +266,9 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
       // Get the current question to find the reading text ID
       const currentQuestion = questions[activeQuiz.currentQuestion];
       if (currentQuestion?.readingTextId) {
-        console.log('Looking for reading text with ID:', currentQuestion.readingTextId);
-        // Use Redux selector to get reading text by ID
-        const state = store.getState();
-        console.log('Current Redux state readingTexts:', state.readingTexts);
-        console.log('Reading texts by ID:', state.readingTexts.byId);
-        console.log('Reading texts by topic:', state.readingTexts.byTopicId);
-        const text = selectReadingTextById(state, currentQuestion.readingTextId);
+        const text = selectReadingTextById(store.getState(), currentQuestion.readingTextId);
         if (text) {
-          console.log('Found reading text from Redux:', text.title);
           setReadingTextState(text);
-        } else {
-          console.warn('No reading text found in Redux for ID:', currentQuestion.readingTextId);
-          console.warn('Available reading text IDs:', Object.keys(state.readingTexts.byId));
         }
       }
     }
@@ -313,11 +287,8 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   // Check if fetchAllQuestionsThunk should be called
   useEffect(() => {
     if (user && token && questions.length === 0) {
-      console.log('Quiz - No questions found, triggering fetchAllQuestionsThunk...');
       dispatch(fetchAllQuestionsThunk()).unwrap()
         .then((questionsData) => {
-          console.log('Quiz - fetchAllQuestionsThunk successful:', Object.keys(questionsData).length, 'topics');
-          console.log('Quiz - Questions data:', questionsData);
         })
         .catch((error) => {
           console.error('Quiz - fetchAllQuestionsThunk failed:', error);

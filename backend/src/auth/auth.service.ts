@@ -386,15 +386,15 @@ export class AuthService {
   }
 
   /**
-   * Load quiz time data for a user (called on login)
+   * Load statistics data for a user (called on login)
    * 
-   * Retrieves the user's quiz time statistics from the database
+   * Retrieves the user's statistics (quiz time and completed topics) from the database
    * to sync with the mobile app's Redux state.
    * 
-   * @param userId - User ID to load quiz time data for
-   * @returns Promise containing quiz time data
+   * @param userId - User ID to load statistics data for
+   * @returns Promise containing statistics data
    */
-  async loadQuizTimeData(userId: string) {
+  async loadStatisticsData(userId: string) {
     const statistics = await this.prisma.statistics.findUnique({
       where: { userId }
     });
@@ -403,31 +403,34 @@ export class AuthService {
       // Return default values if no statistics exist
       return {
         totalQuizMinutes: 0,
-        dailyQuizTimes: []
+        dailyQuizTimes: [],
+        completedTopics: []
       };
     }
 
     return {
       totalQuizMinutes: statistics.totalQuizMinutes || 0,
-      dailyQuizTimes: statistics.dailyQuizTimes || []
+      dailyQuizTimes: statistics.dailyQuizTimes || [],
+      completedTopics: statistics.completedTopics || []
     };
   }
 
   /**
-   * Sync quiz time data for a user (called on logout)
+   * Sync statistics data for a user (called on logout)
    * 
-   * Updates the user's quiz time statistics in the database
+   * Updates the user's statistics (quiz time and completed topics) in the database
    * with data from the mobile app's Redux state.
    * 
-   * @param userId - User ID to sync quiz time data for
-   * @param quizTimeData - Quiz time data from Redux state
+   * @param userId - User ID to sync statistics data for
+   * @param statisticsData - Statistics data from Redux state
    * @returns Promise indicating successful sync
    */
-  async syncQuizTimeData(userId: string, quizTimeData: {
+  async syncStatisticsData(userId: string, statisticsData: {
     totalQuizMinutes: number;
     dailyQuizTimes: any[];
+    completedTopics?: any[];
   }) {
-    const { totalQuizMinutes, dailyQuizTimes } = quizTimeData;
+    const { totalQuizMinutes, dailyQuizTimes, completedTopics = [] } = statisticsData;
 
     // Check if statistics record exists
     const existingStats = await this.prisma.statistics.findUnique({
@@ -440,7 +443,8 @@ export class AuthService {
         where: { userId },
         data: {
           totalQuizMinutes,
-          dailyQuizTimes
+          dailyQuizTimes,
+          completedTopics
         }
       });
     } else {
@@ -450,6 +454,7 @@ export class AuthService {
           userId,
           totalQuizMinutes,
           dailyQuizTimes,
+          completedTopics,
           totalQuizzes: 0,
           correctAnswers: 0,
           totalQuestions: 0,
@@ -458,6 +463,6 @@ export class AuthService {
       });
     }
 
-    return { message: 'Quiz time data synced successfully' };
+    return { message: 'Statistics data synced successfully' };
   }
 }

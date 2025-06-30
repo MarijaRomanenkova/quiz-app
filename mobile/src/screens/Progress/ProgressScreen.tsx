@@ -41,17 +41,7 @@ export const ProgressScreen = () => {
   // Debug: Get raw statistics data
   const statistics = useSelector((state: RootState) => state.statistics);
   const auth = useSelector((state: RootState) => state.auth);
-
-  // Debug logging
-  console.log('ProgressScreen - Debug Info:');
-  console.log('Statistics state:', statistics);
-  console.log('Auth state:', auth);
-  console.log('Current week data:', currentWeekData);
-  console.log('Last 5 weeks data:', lastFiveWeeksData);
-  console.log('Current week total:', currentWeekTotal);
-  console.log('Current month total:', currentMonthTotal);
-  console.log('Weekly goal progress:', weeklyGoalProgress);
-  console.log('Monthly goal progress:', monthlyGoalProgress);
+  const progress = useSelector((state: RootState) => state.progress);
 
   // Format time (minutes to hours and minutes)
   const formatTime = (minutes: number): string => {

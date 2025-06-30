@@ -39,32 +39,28 @@ import { BackButton } from '../../components/BackButton';
  * @property {boolean} isSelected - Whether this topic is currently selected
  * @property {(topicId: string) => void} onSelect - Function called when topic is selected
  * @property {boolean} isCompleted - Whether this topic has been completed
- * @property {number} score - The score achieved for this topic (0-100)
  */
 type TopicItemProps = {
   topic: QuizTopic;
   isSelected: boolean;
   onSelect: (topicId: string) => void;
   isCompleted: boolean;
-  score: number;
 };
 
 /**
  * Individual topic item component
  * 
- * Displays a single topic with selection state, completion status,
- * and score information. Provides visual feedback for different states
- * and handles touch interactions.
+ * Displays a single topic with selection state and completion status.
+ * Provides visual feedback for different states and handles touch interactions.
  * 
  * @param {TopicItemProps} props - The topic item props
  * @param {QuizTopic} props.topic - The topic data to display
  * @param {boolean} props.isSelected - Whether this topic is currently selected
  * @param {(topicId: string) => void} props.onSelect - Function called when topic is selected
  * @param {boolean} props.isCompleted - Whether this topic has been completed
- * @param {number} props.score - The score achieved for this topic
  * @returns {JSX.Element} A touchable topic item with status indicators
  */
-const TopicItem = ({ topic, isSelected, onSelect, isCompleted, score }: TopicItemProps) => (
+const TopicItem = ({ topic, isSelected, onSelect, isCompleted }: TopicItemProps) => (
   <TouchableOpacity 
     style={[
       styles.radioItem,
@@ -79,9 +75,6 @@ const TopicItem = ({ topic, isSelected, onSelect, isCompleted, score }: TopicIte
         isSelected && styles.selectedRadioLabel,
         isCompleted && styles.completedRadioLabel
       ]}>{topic.topicId}</Text>
-      {isCompleted && (
-        <Text style={styles.scoreText}>Score: {score}%</Text>
-      )}
     </View>
     {isSelected && (
       <MaterialCommunityIcons 
@@ -92,9 +85,9 @@ const TopicItem = ({ topic, isSelected, onSelect, isCompleted, score }: TopicIte
     )}
     {isCompleted && !isSelected && (
       <MaterialCommunityIcons 
-        name="check-circle" 
+        name="check" 
         size={24} 
-        color={theme.colors.primary} 
+        color={theme.colors.outline} 
       />
     )}
   </TouchableOpacity>
@@ -190,7 +183,6 @@ export const TopicScreen = () => {
               isSelected={selectedTopic === topic.topicId}
               onSelect={handleTopicSelect}
               isCompleted={progress?.completed || false}
-              score={progress?.score || 0}
             />
           );
         })}
@@ -233,7 +225,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     paddingHorizontal: 16,
-    marginBottom: 8,
+    marginBottom: 12,
     backgroundColor: theme.colors.surface,
     borderRadius: 20,
     borderWidth: 1,
@@ -258,11 +250,6 @@ const styles = StyleSheet.create({
     color: theme.colors.primaryContainer,
   },
   completedRadioLabel: {
-    color: theme.colors.primary,
-  },
-  scoreText: {
-    fontSize: 12,
-    color: theme.colors.primary,
-    marginTop: 4,
+    color: theme.colors.outline,
   },
 }); 

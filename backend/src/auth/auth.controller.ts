@@ -141,55 +141,57 @@ export class AuthController {
   }
 
   /**
-   * Load quiz time data for the authenticated user
+   * Load statistics data for the authenticated user
    * 
-   * Retrieves the user's quiz time statistics from the database
+   * Retrieves the user's statistics (quiz time and completed topics) from the database
    * to sync with the mobile app's Redux state on login.
    * 
    * @param req - Request object containing authenticated user
-   * @returns Promise containing quiz time data
+   * @returns Promise containing statistics data
    * 
    * @example
    * ```typescript
-   * const quizTimeData = await authController.loadQuizTimeData(req);
-   * // Returns: { totalQuizMinutes: 120, dailyQuizTimes: [...] }
+   * const statisticsData = await authController.loadStatisticsData(req);
+   * // Returns: { totalQuizMinutes: 120, dailyQuizTimes: [...], completedTopics: [...] }
    * ```
    */
   @UseGuards(JwtAuthGuard)
   @Get('quiz-time')
-  async loadQuizTimeData(@Request() req: { user: RequestUser }) {
-    return this.authService.loadQuizTimeData(req.user.id);
+  async loadStatisticsData(@Request() req: { user: RequestUser }) {
+    return this.authService.loadStatisticsData(req.user.id);
   }
 
   /**
-   * Sync quiz time data for the authenticated user
+   * Sync statistics data for the authenticated user
    * 
-   * Updates the user's quiz time statistics in the database
+   * Updates the user's statistics (quiz time and completed topics) in the database
    * with data from the mobile app's Redux state on logout.
    * 
    * @param req - Request object containing authenticated user
-   * @param quizTimeData - Quiz time data from Redux state
+   * @param statisticsData - Statistics data from Redux state
    * @returns Promise indicating successful sync
    * 
    * @example
    * ```typescript
-   * const result = await authController.syncQuizTimeData(req, {
+   * const result = await authController.syncStatisticsData(req, {
    *   totalQuizMinutes: 120,
-   *   dailyQuizTimes: [{ date: "2024-01-15", minutes: 30, lastUpdated: "..." }]
+   *   dailyQuizTimes: [{ date: "2024-01-15", minutes: 30, lastUpdated: "..." }],
+   *   completedTopics: [{ topicId: "articles", score: 85, completedAt: "..." }]
    * });
-   * // Returns: { message: 'Quiz time data synced successfully' }
+   * // Returns: { message: 'Statistics data synced successfully' }
    * ```
    */
   @UseGuards(JwtAuthGuard)
   @Post('quiz-time')
-  async syncQuizTimeData(
+  async syncStatisticsData(
     @Request() req: { user: RequestUser },
-    @Body() quizTimeData: {
+    @Body() statisticsData: {
       totalQuizMinutes: number;
       dailyQuizTimes: any[];
+      completedTopics?: any[];
     }
   ) {
-    return this.authService.syncQuizTimeData(req.user.id, quizTimeData);
+    return this.authService.syncStatisticsData(req.user.id, statisticsData);
   }
 
   @Post('forgot-password')

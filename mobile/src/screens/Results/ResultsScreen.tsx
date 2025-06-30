@@ -20,7 +20,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import type { RootStackParamList } from '../../types/navigation';
 import { theme } from '../../theme';
 import { ScoreCircle } from '../../components/Results/ScoreCircle';
@@ -58,6 +58,7 @@ type ResultsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>
 export const ResultsScreen = () => {
   const navigation = useNavigation<ResultsScreenNavigationProp>();
   const route = useRoute<ResultsScreenRouteProp>();
+  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.user);
   const quizResult = useSelector((state: RootState) => state.quizResults.currentResult);
   const wrongQuestions = useSelector((state: RootState) => state.wrongQuestions.wrongQuestions);
@@ -77,37 +78,50 @@ export const ResultsScreen = () => {
     return topics.filter(topic => topic.categoryId === categoryId);
   }, [categoryId, topics]);
 
+  // Get completed topics for this category
+  const { topicProgress } = useSelector((state: RootState) => state.progress);
+  const completedTopicsInCategory = useMemo(() => {
+    if (!categoryId) return [];
+    return Object.values(topicProgress).filter(topic => 
+      topic.categoryId === categoryId && topic.completed
+    );
+  }, [categoryId, topicProgress]);
+
   // Memoize the hasNewUnlocks calculation
   const hasNewUnlocks = useMemo(() => {
     return categoryProgress && categoryProgress.completedTopics >= 3;
   }, [categoryProgress]);
 
-  /**
-   * Determines category ID from quiz results
-   * 
-   * Extracts the category ID from wrong questions or quiz ID to
-   * display appropriate progress information and unlock notifications.
-   */
+  // Determine category ID from quiz result or wrong questions
   useEffect(() => {
-    if (quizResult && route.params.quizId) {
-      // Get category from the first question in wrong questions or from the quiz ID
+    if (!quizResult && !wrongQuestions.length) return;
+
+    let detectedCategory: string | null = null;
+
+    // Try to get category from wrong questions first
+    if (wrongQuestions.length > 0) {
       const firstWrongQuestion = wrongQuestions[0];
-      if (firstWrongQuestion?.categoryId) {
-        setCategoryId(firstWrongQuestion.categoryId);
-      } else {
-        // Fallback: try to determine category from quiz ID
-        // This is a simple mapping - you might want to improve this
-        const quizId = route.params.quizId;
-        if (quizId.includes('grammar') || quizId.includes('articles') || quizId.includes('tense')) {
-          setCategoryId('grammar');
-        } else if (quizId.includes('reading') || quizId.includes('stories')) {
-          setCategoryId('reading');
-        } else if (quizId.includes('listening') || quizId.includes('audio')) {
-          setCategoryId('listening');
-        } else if (quizId.includes('words') || quizId.includes('vocabulary')) {
-          setCategoryId('words');
-        }
+      detectedCategory = firstWrongQuestion.categoryId;
+    }
+
+    // If no category from wrong questions, try to detect from quizId
+    if (!detectedCategory && route.params.quizId) {
+      const quizId = route.params.quizId.toLowerCase();
+      
+      // Simple category detection based on quizId patterns
+      if (quizId.includes('grammar') || quizId.includes('articles') || quizId.includes('tense') || quizId.includes('plurals') || quizId.includes('adjectives') || quizId.includes('prepositions')) {
+        detectedCategory = 'grammar';
+      } else if (quizId.includes('reading') || quizId.includes('text')) {
+        detectedCategory = 'reading';
+      } else if (quizId.includes('listening') || quizId.includes('audio')) {
+        detectedCategory = 'listening';
+      } else if (quizId.includes('words') || quizId.includes('vocabulary')) {
+        detectedCategory = 'words';
       }
+    }
+
+    if (detectedCategory) {
+      setCategoryId(detectedCategory);
     }
   }, [quizResult, route.params.quizId, wrongQuestions]);
 
@@ -157,7 +171,7 @@ export const ResultsScreen = () => {
           {categoryProgress && (
             <View style={styles.progressContainer}>
               <Text variant="titleMedium" style={styles.progressText}>
-                Progress: {categoryProgress.completedTopics} / {allCategoryTopics.length} topics completed
+                Progress: {completedTopicsInCategory.length} / {allCategoryTopics.length} topics completed
               </Text>
               {hasNewUnlocks && (
                 <View style={styles.unlockContainer}>

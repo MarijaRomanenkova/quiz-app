@@ -155,11 +155,19 @@ export const progressSlice = createSlice({
     }>) => {
       const { categoryId, totalTopics, initialUnlocked } = action.payload;
       
+      // Check if category progress already exists
+      const existingProgress = state.categoryProgress[categoryId];
+      
+      // Count existing completed topics for this category
+      const existingCompletedTopics = Object.values(state.topicProgress)
+        .filter(topic => topic.categoryId === categoryId && topic.completed)
+        .length;
+      
       state.categoryProgress[categoryId] = {
         categoryId,
-        completedTopics: 0,
+        completedTopics: existingProgress ? existingProgress.completedTopics : existingCompletedTopics,
         totalTopics,
-        unlockedTopics: initialUnlocked
+        unlockedTopics: existingProgress ? existingProgress.unlockedTopics : initialUnlocked
       };
     },
     
@@ -228,7 +236,54 @@ export const progressSlice = createSlice({
       if (state.categoryProgress[categoryId]) {
         state.categoryProgress[categoryId].unlockedTopics = unlockedCount;
       }
-    }
+    },
+    
+    /**
+     * Loads completed topics from backend (on login)
+     * @param state - Current progress state
+     * @param action - Array of completed topics from backend
+     */
+    loadCompletedTopics: (state, action: PayloadAction<Array<{topicId: string, score: number, completedAt: string}>>) => {
+      const completedTopics = action.payload;
+      
+      // Convert completed topics to topic progress format
+      completedTopics.forEach(completedTopic => {
+        // We'll need to get topics from the topic slice, so just store the completed topic data
+        // The category will be determined when topics are loaded
+        state.topicProgress[completedTopic.topicId] = {
+          topicId: completedTopic.topicId,
+          categoryId: '', // Will be set when topics are loaded
+          completed: true,
+          score: completedTopic.score,
+          attempts: 1, // We don't store attempts in backend, so default to 1
+          lastAttemptDate: completedTopic.completedAt
+        };
+      });
+    },
+
+    /**
+     * Updates category IDs for completed topics when topics are loaded
+     * @param state - Current progress state
+     * @param action - Array of topics from backend
+     */
+    updateCompletedTopicsCategories: (state, action: PayloadAction<Array<{topicId: string, categoryId: string}>>) => {
+      const topics = action.payload;
+      
+      // Update category IDs for completed topics that don't have them set
+      Object.values(state.topicProgress).forEach(topicProgress => {
+        if (topicProgress.completed && topicProgress.categoryId === '') {
+          const topic = topics.find(t => t.topicId === topicProgress.topicId);
+          if (topic) {
+            topicProgress.categoryId = topic.categoryId;
+            
+            // Also update category progress
+            if (state.categoryProgress[topic.categoryId]) {
+              state.categoryProgress[topic.categoryId].completedTopics += 1;
+            }
+          }
+        }
+      });
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -316,14 +371,20 @@ export const selectIsTopicUnlocked = createSelector(
  * @returns Array of category progress objects with completion percentages
  */
 export const selectAllCategoryProgress = createSelector(
-  [(state: RootState) => state.progress.categoryProgress],
-  (categoryProgress) => {
-    return Object.values(categoryProgress).map(progress => ({
-      categoryId: progress.categoryId,
-      completedTopics: progress.completedTopics,
-      totalTopics: progress.totalTopics,
-      percentage: progress.totalTopics > 0 ? Math.round((progress.completedTopics / progress.totalTopics) * 100) : 0
-    }));
+  [(state: RootState) => state.progress.categoryProgress,
+   (state: RootState) => state.topic.topics],
+  (categoryProgress, topics) => {
+    return Object.values(categoryProgress).map(progress => {
+      // Get the actual total topics for this category from the topics slice
+      const actualTotalTopics = topics.filter(topic => topic.categoryId === progress.categoryId).length;
+      
+      return {
+        categoryId: progress.categoryId,
+        completedTopics: progress.completedTopics,
+        totalTopics: actualTotalTopics, // Use actual total from topics slice
+        percentage: actualTotalTopics > 0 ? Math.round((progress.completedTopics / actualTotalTopics) * 100) : 0
+      };
+    });
   }
 );
 
@@ -331,7 +392,9 @@ export const {
   initializeCategoryProgress, 
   completeTopic, 
   updateTopicAttempt, 
-  updateUnlockedTopics 
+  updateUnlockedTopics,
+  loadCompletedTopics,
+  updateCompletedTopicsCategories
 } = progressSlice.actions;
 
 export default progressSlice.reducer; 
