@@ -205,6 +205,7 @@ export const progressSlice = createSlice({
     }>) => {
       const { topicId, categoryId, score } = action.payload;
       const wasAlreadyCompleted = state.topicProgress[topicId]?.completed;
+      
       // Update topic progress
       state.topicProgress[topicId] = {
         topicId,
@@ -214,6 +215,7 @@ export const progressSlice = createSlice({
         attempts: (state.topicProgress[topicId]?.attempts || 0) + 1,
         lastAttemptDate: new Date().toISOString()
       };
+      
       // Update category progress
       if (state.categoryProgress[categoryId] && !wasAlreadyCompleted) {
         state.categoryProgress[categoryId].completedTopics += 1;
@@ -336,13 +338,28 @@ export const selectTopicProgress = (state: RootState, topicId: string) =>
   state.progress.topicProgress[topicId];
 
 /**
- * Selector to get progress data for a specific category
+ * Selector to get progress data for a specific category with calculated total topics
  * @param state - Root state
  * @param categoryId - Category ID to get progress for
- * @returns Category progress data or undefined if not found
+ * @returns Category progress data with actual total topics or undefined if not found
  */
-export const selectCategoryProgress = (state: RootState, categoryId: string) => 
-  state.progress.categoryProgress[categoryId];
+export const selectCategoryProgress = createSelector(
+  [(state: RootState) => state.progress.categoryProgress,
+   (state: RootState) => state.topic.topics,
+   (_state: RootState, categoryId: string) => categoryId],
+  (categoryProgress, topics, categoryId) => {
+    const progress = categoryProgress[categoryId];
+    if (!progress) return undefined;
+    
+    // Calculate actual total topics for this category from the topics slice
+    const actualTotalTopics = topics.filter(topic => topic.categoryId === categoryId).length;
+    
+    return {
+      ...progress,
+      totalTopics: actualTotalTopics // Use actual total from topics slice
+    };
+  }
+);
 
 /**
  * Selector to get unlocked topics for a category

@@ -11,8 +11,6 @@ interface QuestionsState {
   byTopicId: Record<string, Question[]>;
   /** Reading texts indexed by their ID */
   readingTextsById: Record<string, ReadingText>;
-  /** Reading texts grouped by topic ID */
-  readingTextsByTopicId: Record<string, ReadingText[]>;
   /** Loading state for questions operations */
   isLoading: boolean;
   /** Error message from questions operations */
@@ -25,7 +23,6 @@ interface QuestionsState {
 const initialState: QuestionsState = {
   byTopicId: {},
   readingTextsById: {},
-  readingTextsByTopicId: {},
   isLoading: false,
   error: null,
 };
@@ -203,42 +200,7 @@ export const questionsSlice = createSlice({
       state.byTopicId = {};
     },
     
-    /**
-     * Sets reading texts for a specific topic
-     * @param state - Current questions state
-     * @param action - Object containing topic ID and reading texts array
-     */
-    setReadingTextsForTopic: (state, action: PayloadAction<{
-      topicId: string;
-      readingTexts: ReadingText[];
-    }>) => {
-      const { topicId, readingTexts } = action.payload;
-      state.readingTextsByTopicId[topicId] = readingTexts;
-      readingTexts.forEach(text => {
-        state.readingTextsById[text.id] = text;
-      });
-    },
-    
-    /**
-     * Adds reading texts for multiple topics
-     * @param state - Current questions state
-     * @param action - Object mapping topic IDs to reading texts arrays
-     */
-    addReadingTextsForTopics: (state, action: PayloadAction<Record<string, ReadingText[]>>) => {
-      state.readingTextsByTopicId = { ...state.readingTextsByTopicId, ...action.payload };
-      Object.values(action.payload).flat().forEach(text => {
-        state.readingTextsById[text.id] = text;
-      });
-    },
-    
-    /**
-     * Clears all reading texts data
-     * @param state - Current questions state
-     */
-    clearReadingTexts: (state) => {
-      state.readingTextsById = {};
-      state.readingTextsByTopicId = {};
-    },
+
   },
   extraReducers: (builder) => {
     builder
@@ -287,14 +249,7 @@ export const selectReadingTextById = createSelector(
   (readingTextsById, textId) => readingTextsById[textId]
 );
 
-/**
- * Selector to get all reading texts for a specific topic
- * @returns Array of reading texts for the specified topic
- */
-export const selectReadingTextsForTopic = createSelector(
-  [(state: RootState) => state.questions.readingTextsByTopicId, (_state: RootState, topicId: string) => topicId],
-  (readingTextsByTopicId, topicId) => readingTextsByTopicId[topicId] || []
-);
+
 
 /**
  * Selector to get the loading state for questions
@@ -311,10 +266,7 @@ export const selectQuestionsError = (state: RootState) => state.questions.error;
 export const { 
   setQuestionsForTopic, 
   addQuestionsForTopics, 
-  clearQuestions,
-  setReadingTextsForTopic, 
-  addReadingTextsForTopics, 
-  clearReadingTexts
+  clearQuestions
 } = questionsSlice.actions;
 
 export default questionsSlice.reducer;

@@ -8,7 +8,6 @@ import questionsReducer, {
 const initialState = {
   byTopicId: {},
   readingTextsById: {},
-  readingTextsByTopicId: {},
   isLoading: false,
   error: null,
 };

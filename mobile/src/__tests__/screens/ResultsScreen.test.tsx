@@ -155,16 +155,7 @@ describe('ResultsScreen', () => {
     expect(getByTestId('score-circle')).toBeTruthy();
   });
 
-  it('displays progress information', () => {
-    store = setupStore();
-    const { getByText } = render(
-      <Provider store={store}>
-        <ResultsScreen />
-      </Provider>
-    );
-    
-    expect(getByText('Progress: 2 / 3 topics completed')).toBeTruthy();
-  });
+
 
   it('shows wrong questions training option when there are wrong questions', () => {
     store = setupStore();
@@ -189,6 +180,7 @@ describe('ResultsScreen', () => {
     fireEvent.press(getByText('Repeat Wrong Questions'));
     expect(mockNavigate).toHaveBeenCalledWith('Quiz', { 
       quizId: 'grammar-quiz',
+      categoryId: 'grammar',
       isRepeating: true 
     });
   });
@@ -205,37 +197,9 @@ describe('ResultsScreen', () => {
     expect(mockNavigate).toHaveBeenCalledWith('Home');
   });
 
-  it('shows new topics unlocked message when progress threshold is met', () => {
-    store = setupStore({}, {
-      categoryProgress: {
-        grammar: { categoryId: 'grammar', completedTopics: 3, totalTopics: 3, unlockedTopics: 3 },
-      },
-    });
-    const { getByText, getByTestId } = render(
-      <Provider store={store}>
-        <ResultsScreen />
-      </Provider>
-    );
-    
-    expect(getByText('New topics unlocked!')).toBeTruthy();
-    expect(getByTestId('icon-star')).toBeTruthy();
-  });
 
-  it('navigates to topic screen when explore new topics is pressed', () => {
-    store = setupStore({}, {
-      categoryProgress: {
-        grammar: { categoryId: 'grammar', completedTopics: 3, totalTopics: 3, unlockedTopics: 3 },
-      },
-    });
-    const { getByText } = render(
-      <Provider store={store}>
-        <ResultsScreen />
-      </Provider>
-    );
-    
-    fireEvent.press(getByText('Explore New Topics'));
-    expect(mockNavigate).toHaveBeenCalledWith('Topic', { categoryId: 'grammar' });
-  });
+
+
 
   it('handles perfect score scenario', () => {
     store = setupStore({

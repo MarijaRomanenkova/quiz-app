@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
 import { theme } from '../../theme';
 
@@ -17,9 +17,15 @@ export const ReadingText: React.FC<ReadingTextProps> = ({ text }) => {
         <Text variant="headlineSmall" style={styles.readingTitle}>
           {text.title}
         </Text>
-        <Text variant="bodyLarge" style={styles.readingText}>
-          {text.text}
-        </Text>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={true}
+        >
+          <Text variant="bodyLarge" style={styles.readingText}>
+            {text.text}
+          </Text>
+        </ScrollView>
       </View>
     </Surface>
   );
@@ -29,8 +35,9 @@ const styles = StyleSheet.create({
   questionCard: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 15,
+    padding: 24,
+    marginVertical: 12,
     shadowColor: '#000000',
     shadowOpacity: 0.15,
     shadowOffset: {
@@ -43,24 +50,33 @@ const styles = StyleSheet.create({
   fullScreenCard: {
     flex: 1,
     margin: 0,
-    borderRadius: 0,
+    borderRadius: 15,
   },
   questionContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     width: '100%',
   },
   readingTitle: {
     fontSize: 24,
     fontWeight: '600',
     color: theme.colors.onSurface,
-    marginBottom: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+    paddingHorizontal: 8,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+    paddingHorizontal: 8,
   },
   readingText: {
     fontSize: 18,
     lineHeight: 28,
     color: theme.colors.onSurface,
+    textAlign: 'justify',
+    paddingHorizontal: 8,
   },
 });
 

@@ -142,7 +142,7 @@ describe('TopicScreen', () => {
     // Press Start Quiz
     fireEvent.press(getByText('Start Quiz'));
     
-    expect(mockNavigate).toHaveBeenCalledWith('Quiz', { quizId: 'topic1' });
+    expect(mockNavigate).toHaveBeenCalledWith('Quiz', { quizId: 'topic1', categoryId: 'grammar' });
   });
 
   it('navigates back to home when back button is pressed', () => {
@@ -199,7 +199,7 @@ describe('TopicScreen', () => {
     
     // The last selected topic should be the active one
     fireEvent.press(getByText('Start Quiz'));
-    expect(mockNavigate).toHaveBeenCalledWith('Quiz', { quizId: 'topic2' });
+    expect(mockNavigate).toHaveBeenCalledWith('Quiz', { quizId: 'topic2', categoryId: 'grammar' });
   });
 
   it('displays empty state when no topics are available', () => {

@@ -5,6 +5,91 @@ import { configureStore } from '@reduxjs/toolkit';
 import { LoginScreen } from '../../screens/Login/LoginScreen';
 import authReducer from '../../store/authSlice';
 
+// Mock the theme before any other imports
+jest.mock('../../theme', () => ({
+  theme: {
+    colors: {
+      primary: '#EDE7FF',
+      secondary: '#8BF224',
+      tertiary: '#6B4EFF',
+      error: '#FF4B4B',
+      background: 'rgba(67, 19, 226, 0.7)',
+      surface: '#FFFFFF',
+      text: '#000000',
+      textSecondary: '#FFFFFF80',
+      outline: '#6750A4',
+      primaryContainer: '#4313E2',
+      secondaryContainer: '#EDE7FF',
+      tertiaryContainer: 'rgba(67, 19, 226, 0.7)',
+      onPrimaryContainer: '#FFFFFF',
+      onSecondaryContainer: '#000000',
+      onTertiaryContainer: '#FFFFFF',
+    },
+    buttons: {
+      borderRadius: 20,
+      paddingVertical: 8,
+      marginVertical: 8,
+      fontSize: 24,
+      variants: {
+        primary: {
+          backgroundColor: '#8BF224',
+          textColor: '#000000',
+          borderColor: '#8BF224',
+        },
+        secondary: {
+          backgroundColor: '#4313E2',
+          textColor: '#FFFFFF',
+          borderColor: '#4313E2',
+        },
+        tertiary: {
+          backgroundColor: '#EDE7FF',
+          textColor: '#000000',
+          borderColor: '#EDE7FF',
+        },
+      },
+    },
+    inputs: {
+      borderRadius: 20,
+      paddingHorizontal: 15,
+      fontSize: 16,
+      variants: {
+        light: {
+          backgroundColor: 'transparent',
+          textColor: '#FFFFFF',
+          placeholderColor: '#FFFFFF',
+          borderColor: '#FFFFFF',
+          activeBorderColor: '#FFFFFF',
+        },
+        dark: {
+          backgroundColor: 'transparent',
+          textColor: '#000000',
+          placeholderColor: '#000000',
+          borderColor: '#000000',
+          activeBorderColor: '#000000',
+        },
+      },
+    },
+  },
+  fonts: {
+    sizes: {
+      small: 12,
+      medium: 16,
+      large: 20,
+      xlarge: 24,
+      xxlarge: 32
+    },
+    weights: {
+      regular: 'Baloo2-Regular',
+      medium: 'Baloo2-Medium',
+      semiBold: 'Baloo2-SemiBold',
+      bold: 'Baloo2-Bold',
+      bodyRegular: 'Baloo2-Regular',
+      bodyMedium: 'Baloo2-Medium',
+      bodyBold: 'Baloo2-Bold'
+    }
+  }
+}));
+
 // Mock the useAuth hook
 const mockLogin = jest.fn();
 const mockUseAuth = {
@@ -27,24 +112,47 @@ jest.mock('@react-navigation/native', () => ({
 
 // Mock react-native-paper components
 jest.mock('react-native-paper', () => ({
-  TextInput: ({ label, value, onChangeText, error, secureTextEntry, right, testID, ...props }: any) => {
+  Text: ({ children, style, ...props }: any) => {
     const React = require('react');
-    const { View, TextInput, Text } = require('react-native');
-    return (
-      <View testID={testID || 'text-input-container'}>
-        {label && <Text testID="text-input-label">{label}</Text>}
-        <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          secureTextEntry={secureTextEntry}
-          testID="text-input"
-          {...props}
-        />
-        {right && <View testID="text-input-right">{right}</View>}
-        {error && <Text testID="text-input-error">{error}</Text>}
-      </View>
-    );
+    const { Text } = require('react-native');
+    return <Text style={style} {...props}>{children}</Text>;
   },
+  Surface: ({ children, style, ...props }: any) => {
+    const React = require('react');
+    const { View } = require('react-native');
+    return <View style={style} {...props}>{children}</View>;
+  },
+  TextInput: Object.assign(
+    ({ label, value, onChangeText, error, secureTextEntry, right, testID, ...props }: any) => {
+      const React = require('react');
+      const { View, TextInput, Text } = require('react-native');
+      return (
+        <View testID={testID || 'text-input-container'}>
+          {label && <Text testID="text-input-label">{label}</Text>}
+          <TextInput
+            value={value}
+            onChangeText={onChangeText}
+            secureTextEntry={secureTextEntry}
+            testID="text-input"
+            {...props}
+          />
+          {right && <View testID="text-input-right">{right}</View>}
+          {error && <Text testID="text-input-error">{error}</Text>}
+        </View>
+      );
+    },
+    {
+      Icon: ({ icon, onPress }: { icon: string; onPress: () => void }) => {
+        const React = require('react');
+        const { TouchableOpacity, Text } = require('react-native');
+        return (
+          <TouchableOpacity onPress={onPress} testID="text-input-icon">
+            <Text>{icon}</Text>
+          </TouchableOpacity>
+        );
+      },
+    }
+  ),
   Button: ({ onPress, children, disabled, testID, mode }: any) => {
     const React = require('react');
     const { TouchableOpacity, Text } = require('react-native');
@@ -67,6 +175,15 @@ jest.mock('react-native-paper', () => ({
         <Text>{children}</Text>
       </View>
     ) : null;
+  },
+  ActivityIndicator: ({ size, color, ...props }: any) => {
+    const React = require('react');
+    const { View, Text } = require('react-native');
+    return (
+      <View testID="activity-indicator" {...props}>
+        <Text>Loading...</Text>
+      </View>
+    );
   },
 }));
 
@@ -103,6 +220,18 @@ jest.mock('../../components/Modal/CustomModal', () => {
   };
 });
 
+jest.mock('../../components/Button', () => {
+  const React = require('react');
+  const { TouchableOpacity, Text } = require('react-native');
+  return {
+    Button: ({ onPress, children, disabled, testID, mode, variant }: any) => (
+      <TouchableOpacity onPress={onPress} disabled={disabled} testID={testID}>
+        <Text>{children}</Text>
+      </TouchableOpacity>
+    ),
+  };
+});
+
 describe('LoginScreen', () => {
   let store: ReturnType<typeof setupStore>;
 
@@ -132,20 +261,16 @@ describe('LoginScreen', () => {
   describe('Rendering', () => {
     it('should render login form correctly', () => {
       store = setupStore();
-
-      const { getByText, getByTestId } = render(
+      const { getByText, getAllByTestId } = render(
         <Provider store={store}>
           <LoginScreen />
         </Provider>
       );
 
-      expect(getByText('DEUTSCH')).toBeTruthy();
-      expect(getByText('Learn on the go')).toBeTruthy();
-      expect(getByTestId('logo')).toBeTruthy();
       expect(getByText('Email')).toBeTruthy();
       expect(getByText('Password')).toBeTruthy();
-      expect(getByText('Login')).toBeTruthy();
-      expect(getByText('Create Account')).toBeTruthy();
+      expect(getByText('Log In')).toBeTruthy();
+      expect(getByText('Register')).toBeTruthy();
     });
 
     it('should render forgot password link', () => {
@@ -165,28 +290,26 @@ describe('LoginScreen', () => {
   describe('Form Interaction', () => {
     it('should handle email input changes', () => {
       store = setupStore();
-
-      const { getByTestId } = render(
+      const { getAllByTestId } = render(
         <Provider store={store}>
           <LoginScreen />
         </Provider>
       );
 
-      const emailInput = getByTestId('text-input');
+      const emailInput = getAllByTestId('text-input')[0];
       fireEvent.changeText(emailInput, 'test@example.com');
       expect(emailInput.props.value).toBe('test@example.com');
     });
 
     it('should handle password input changes', () => {
       store = setupStore();
-
-      const { getByTestId } = render(
+      const { getAllByTestId } = render(
         <Provider store={store}>
           <LoginScreen />
         </Provider>
       );
 
-      const passwordInput = getByTestId('text-input');
+      const passwordInput = getAllByTestId('text-input')[1];
       fireEvent.changeText(passwordInput, 'password123');
       expect(passwordInput.props.value).toBe('password123');
     });
@@ -196,22 +319,18 @@ describe('LoginScreen', () => {
     it('should call login function with valid credentials', async () => {
       store = setupStore();
       mockLogin.mockResolvedValue(true);
-
-      const { getByTestId, getByText } = render(
+      const { getAllByTestId, findByText } = render(
         <Provider store={store}>
           <LoginScreen />
         </Provider>
       );
 
-      const emailInput = getByTestId('text-input');
-      const passwordInput = getByTestId('text-input');
-      
-      fireEvent.changeText(emailInput, 'test@example.com');
-      fireEvent.changeText(passwordInput, 'Password123!');
-      
-      const loginButton = getByText('Login');
-      fireEvent.press(loginButton);
-
+      const emailInput = getAllByTestId('text-input')[0];
+      const passwordInput = getAllByTestId('text-input')[1];
+      await waitFor(() => fireEvent.changeText(emailInput, 'test@example.com'));
+      await waitFor(() => fireEvent.changeText(passwordInput, 'Password123!'));
+      const loginButton = await findByText('Log In');
+      await waitFor(() => fireEvent.press(loginButton));
       await waitFor(() => {
         expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'Password123!');
       });
@@ -220,24 +339,40 @@ describe('LoginScreen', () => {
     it('should navigate to Home on successful login', async () => {
       store = setupStore();
       mockLogin.mockResolvedValue(true);
-
-      const { getByTestId, getByText } = render(
+      const { getAllByTestId, findByText } = render(
         <Provider store={store}>
           <LoginScreen />
         </Provider>
       );
 
-      const emailInput = getByTestId('text-input');
-      const passwordInput = getByTestId('text-input');
-      
-      fireEvent.changeText(emailInput, 'test@example.com');
-      fireEvent.changeText(passwordInput, 'Password123!');
-      
-      const loginButton = getByText('Login');
-      fireEvent.press(loginButton);
-
+      const emailInput = getAllByTestId('text-input')[0];
+      const passwordInput = getAllByTestId('text-input')[1];
+      await waitFor(() => fireEvent.changeText(emailInput, 'test@example.com'));
+      await waitFor(() => fireEvent.changeText(passwordInput, 'Password123!'));
+      const loginButton = await findByText('Log In');
+      await waitFor(() => fireEvent.press(loginButton));
       await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith('Home');
+      });
+    });
+
+    it('should handle authentication errors', async () => {
+      store = setupStore();
+      mockLogin.mockRejectedValue(new Error('Network error'));
+      const { getAllByTestId, findByText } = render(
+        <Provider store={store}>
+          <LoginScreen />
+        </Provider>
+      );
+
+      const emailInput = getAllByTestId('text-input')[0];
+      const passwordInput = getAllByTestId('text-input')[1];
+      await waitFor(() => fireEvent.changeText(emailInput, 'test@example.com'));
+      await waitFor(() => fireEvent.changeText(passwordInput, 'Password123!'));
+      const loginButton = await findByText('Log In');
+      await waitFor(() => fireEvent.press(loginButton));
+      await waitFor(() => {
+        expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'Password123!');
       });
     });
   });
@@ -258,9 +393,8 @@ describe('LoginScreen', () => {
     });
 
     it('should not show loading state when not authenticating', () => {
-      store = setupStore();
       mockUseAuth.isLoading = false;
-
+      store = setupStore();
       const { queryByText, getByText } = render(
         <Provider store={store}>
           <LoginScreen />
@@ -268,7 +402,7 @@ describe('LoginScreen', () => {
       );
 
       expect(queryByText('Logging in...')).toBeNull();
-      expect(getByText('Login')).toBeTruthy();
+      expect(getByText('Log In')).toBeTruthy();
     });
   });
 
@@ -290,61 +424,30 @@ describe('LoginScreen', () => {
 
     it('should navigate to Register when create account is pressed', () => {
       store = setupStore();
-
       const { getByText } = render(
         <Provider store={store}>
           <LoginScreen />
         </Provider>
       );
 
-      const createAccountButton = getByText('Create Account');
-      fireEvent.press(createAccountButton);
-
+      const registerButton = getByText('Register');
+      fireEvent.press(registerButton);
       expect(mockNavigate).toHaveBeenCalledWith('Register');
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('should handle authentication errors', async () => {
-      store = setupStore();
-      mockLogin.mockRejectedValue(new Error('Network error'));
-
-      const { getByTestId, getByText } = render(
-        <Provider store={store}>
-          <LoginScreen />
-        </Provider>
-      );
-
-      const emailInput = getByTestId('text-input');
-      const passwordInput = getByTestId('text-input');
-      
-      fireEvent.changeText(emailInput, 'test@example.com');
-      fireEvent.changeText(passwordInput, 'Password123!');
-      
-      const loginButton = getByText('Login');
-      fireEvent.press(loginButton);
-
-      // Should not crash and should handle error gracefully
-      await waitFor(() => {
-        expect(mockLogin).toHaveBeenCalled();
-      });
     });
   });
 
   describe('Accessibility', () => {
     it('should be accessible with proper labels', () => {
       store = setupStore();
-
       const { getByText } = render(
         <Provider store={store}>
           <LoginScreen />
         </Provider>
       );
-
       expect(getByText('Email')).toBeTruthy();
       expect(getByText('Password')).toBeTruthy();
-      expect(getByText('Login')).toBeTruthy();
-      expect(getByText('Create Account')).toBeTruthy();
+      expect(getByText('Log In')).toBeTruthy();
+      expect(getByText('Register')).toBeTruthy();
     });
   });
 }); 

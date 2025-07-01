@@ -38,7 +38,7 @@ import { ResultsScreen } from '../screens/Results';
  * @property {undefined} ForgotPassword - Password reset screen (no parameters)
  * @property {undefined} Home - Main app home screen (no parameters)
  * @property {{ categoryId: string }} Topic - Topic selection screen with category ID
- * @property {{ quizId: string; isRepeating?: boolean }} Quiz - Quiz screen with topic ID and optional repeat flag
+ * @property {{ quizId: string; categoryId: string; isRepeating?: boolean }} Quiz - Quiz screen with topic ID, category ID and optional repeat flag
  * @property {{ quizId: string }} Results - Results screen with quiz ID for displaying results
  */
 export type RootStackParamList = {
@@ -48,7 +48,7 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   Home: undefined;
   Topic: { categoryId: string };
-  Quiz: { quizId: string; isRepeating?: boolean };
+  Quiz: { quizId: string; categoryId: string; isRepeating?: boolean };
   Results: { quizId: string };
 };
 
@@ -76,7 +76,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
  * navigation.navigate('Topic', { categoryId: 'grammar' });
  * 
  * // Navigate to a quiz
- * navigation.navigate('Quiz', { quizId: 'topic-123' });
+ * navigation.navigate('Quiz', { quizId: 'topic-123', categoryId: 'grammar' });
  * 
  * // Navigate to quiz results
  * navigation.navigate('Results', { quizId: 'topic-123' });

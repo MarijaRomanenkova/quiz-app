@@ -124,6 +124,12 @@ jest.mock('react-native-paper', () => {
 
   return {
     MD3LightTheme,
+    Surface: ({ children, style, ...props }) => (
+      <View style={style} testID="surface" {...props}>{children}</View>
+    ),
+    Text: ({ children, ...props }) => (
+      <Text {...props}>{children}</Text>
+    ),
     TextInput: Object.assign(
       ({ value, onChangeText, placeholder, label, error, secureTextEntry, keyboardType, style, ...props }) => {
         const RNTextInput = require('react-native').TextInput;
@@ -166,11 +172,6 @@ jest.mock('react-native-paper', () => {
       >
         {children !== undefined && children !== '' ? <Text>{children}</Text> : null}
       </TouchableOpacity>
-    ),
-    Surface: ({ children, style, ...props }) => (
-      <View style={style} testID="paper-surface" {...props}>
-        {children}
-      </View>
     ),
     Card: Object.assign(
       ({ children, style, ...props }) => {
@@ -248,11 +249,6 @@ jest.mock('react-native-paper', () => {
         );
       },
     },
-    Text: ({ children, style, variant, ...props }) => (
-      <Text style={style} testID="paper-text" {...props}>
-        {children}
-      </Text>
-    ),
     SegmentedButtons: ({ value, onValueChange, buttons, ...props }) => {
       const React = require('react');
       const { View, TouchableOpacity, Text } = require('react-native');

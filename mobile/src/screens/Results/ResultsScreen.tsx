@@ -26,8 +26,8 @@ import { theme } from '../../theme';
 import { ScoreCircle } from '../../components/Results/ScoreCircle';
 import { RootState } from '../../store';
 import { Button as CustomButton } from '../../components/Button/Button';
-import { selectCategoryProgress, selectUnlockedTopicsForCategory } from '../../store/progressSlice';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+
 
 type ResultsScreenRouteProp = RouteProp<RootStackParamList, 'Results'>;
 type ResultsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -63,67 +63,11 @@ export const ResultsScreen = () => {
   const quizResult = useSelector((state: RootState) => state.quiz.currentResult);
   const wrongQuestions = useSelector((state: RootState) => state.quiz.wrongQuestions);
   
-  // Get progress information
-  const [categoryId, setCategoryId] = useState<string | null>(null);
+
   
-  // Memoize selectors to prevent unnecessary re-renders
-  const categoryProgress = useSelector((state: RootState) => 
-    categoryId ? selectCategoryProgress(state, categoryId) : null
-  );
-  
-  // Get all topics for the category to show total count
-  const topics = useSelector((state: RootState) => state.topic.topics);
-  const allCategoryTopics = useMemo(() => {
-    if (!categoryId) return [];
-    return topics.filter(topic => topic.categoryId === categoryId);
-  }, [categoryId, topics]);
 
-  // Get completed topics for this category
-  const { topicProgress } = useSelector((state: RootState) => state.progress);
-  const completedTopicsInCategory = useMemo(() => {
-    if (!categoryId) return [];
-    return Object.values(topicProgress).filter(topic => 
-      topic.categoryId === categoryId && topic.completed
-    );
-  }, [categoryId, topicProgress]);
 
-  // Memoize the hasNewUnlocks calculation
-  const hasNewUnlocks = useMemo(() => {
-    return categoryProgress && categoryProgress.completedTopics >= 3;
-  }, [categoryProgress]);
 
-  // Determine category ID from quiz result or wrong questions
-  useEffect(() => {
-    if (!quizResult && !wrongQuestions.length) return;
-
-    let detectedCategory: string | null = null;
-
-    // Try to get category from wrong questions first
-    if (wrongQuestions.length > 0) {
-      const firstWrongQuestion = wrongQuestions[0];
-      detectedCategory = firstWrongQuestion.categoryId;
-    }
-
-    // If no category from wrong questions, try to detect from quizId
-    if (!detectedCategory && route.params.quizId) {
-      const quizId = route.params.quizId.toLowerCase();
-      
-      // Simple category detection based on quizId patterns
-      if (quizId.includes('grammar') || quizId.includes('articles') || quizId.includes('tense') || quizId.includes('plurals') || quizId.includes('adjectives') || quizId.includes('prepositions')) {
-        detectedCategory = 'grammar';
-      } else if (quizId.includes('reading') || quizId.includes('text')) {
-        detectedCategory = 'reading';
-      } else if (quizId.includes('listening') || quizId.includes('audio')) {
-        detectedCategory = 'listening';
-      } else if (quizId.includes('words') || quizId.includes('vocabulary')) {
-        detectedCategory = 'words';
-      }
-    }
-
-    if (detectedCategory) {
-      setCategoryId(detectedCategory);
-    }
-  }, [quizResult, route.params.quizId, wrongQuestions]);
 
   if (!quizResult) {
     return null;
@@ -136,25 +80,21 @@ export const ResultsScreen = () => {
    * users to practice questions they answered incorrectly.
    */
   const handleRepeatWrongQuestions = () => {
+    // Get categoryId from wrong questions
+    let categoryId: string | undefined;
+    
+    if (wrongQuestions.length > 0) {
+      categoryId = wrongQuestions[0].categoryId;
+    }
+    
     navigation.navigate('Quiz', { 
       quizId: route.params.quizId,
+      categoryId,
       isRepeating: true 
-    } as any);
+    });
   };
 
-  /**
-   * Handles navigation to category topics
-   * 
-   * Navigates to the topic selection screen for the current category
-   * to allow users to explore newly unlocked topics.
-   */
-  const handleGoToCategory = () => {
-    if (categoryId) {
-      navigation.navigate('Topic', { categoryId });
-    } else {
-      navigation.navigate('Home');
-    }
-  };
+
 
   return (
     <View style={styles.container}>
@@ -166,27 +106,6 @@ export const ResultsScreen = () => {
           <Text variant="headlineMedium" style={styles.messageText}>
             Great job, {user?.username || 'User'}!
           </Text>
-          
-          {/* Show progress update */}
-          {categoryProgress && (
-            <View style={styles.progressContainer}>
-              <Text variant="titleMedium" style={styles.progressText}>
-                Progress: {completedTopicsInCategory.length} / {allCategoryTopics.length} topics completed
-              </Text>
-              {hasNewUnlocks && (
-                <View style={styles.unlockContainer}>
-                  <MaterialCommunityIcons 
-                    name="star" 
-                    size={24} 
-                    color={theme.colors.primary} 
-                  />
-                  <Text variant="titleMedium" style={styles.unlockText}>
-                    New topics unlocked!
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
           
           {(wrongQuestions.length > 0 || quizResult.score < quizResult.totalQuestions) && (
             <Text variant="titleLarge" style={styles.questionText}>
@@ -203,16 +122,6 @@ export const ResultsScreen = () => {
               style={styles.button}
             >
               Repeat Wrong Questions
-            </CustomButton>
-          )}
-          
-          {hasNewUnlocks && (
-            <CustomButton
-              variant="secondary"
-              onPress={handleGoToCategory}
-              style={styles.button}
-            >
-              Explore New Topics
             </CustomButton>
           )}
           
@@ -267,26 +176,5 @@ const styles = StyleSheet.create({
     color: theme.colors.primaryContainer,
     textAlign: 'center',
   },
-  progressContainer: {
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  progressText: {
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  unlockContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.primaryContainer,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 8,
-  },
-  unlockText: {
-    marginLeft: 8,
-    color: theme.colors.primary,
-    fontWeight: 'bold',
-  },
+
 }); 

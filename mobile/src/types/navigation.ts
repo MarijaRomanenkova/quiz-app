@@ -82,6 +82,7 @@ export type RootStackParamList = {
   Topic: { categoryId: string };
   Quiz: {
     quizId: string;
+    categoryId?: string;
     isRepeating?: boolean;
   };
   Results: {

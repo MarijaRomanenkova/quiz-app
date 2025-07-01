@@ -130,6 +130,11 @@ export const TopicScreen = () => {
     selectUnlockedTopicsForCategory(state, categoryId)
   );
 
+  // Debug: Log topics data
+  console.log('🔍 TopicScreen - categoryId:', categoryId);
+  console.log('🔍 TopicScreen - unlockedTopics:', unlockedTopics);
+  console.log('🔍 TopicScreen - all topics from state:', useSelector((state: RootState) => state.topic.topics));
+
   const [selectedTopic, setSelectedTopic] = useState<string>('');
 
   /**
@@ -146,12 +151,15 @@ export const TopicScreen = () => {
   /**
    * Handles starting a quiz for the selected topic
    * 
-   * Navigates to the Quiz screen with the selected topic ID.
+   * Navigates to the Quiz screen with the selected topic ID and category ID.
    * Only works if a topic is currently selected.
    */
   const handleQuizPress = () => {
     if (selectedTopic) {
-      navigation.navigate('Quiz', { quizId: selectedTopic });
+      navigation.navigate('Quiz', { 
+        quizId: selectedTopic,
+        categoryId: categoryId 
+      });
     }
   };
 

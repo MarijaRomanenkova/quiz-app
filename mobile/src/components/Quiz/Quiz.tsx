@@ -13,7 +13,7 @@
  * @module components/Quiz
  */
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
@@ -29,7 +29,6 @@ import {
   selectAnswer,
   nextQuestion,
   updateScore,
-  setReadingText,
   endQuiz,
   selectActiveQuiz
 } from '../../store/quizSlice';
@@ -104,48 +103,71 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   const activeQuiz = useSelector(selectActiveQuiz);
   const questions = useSelector((state: RootState) => selectQuestionsForTopic(state, quizId));
   const questionsState = useSelector((state: RootState) => state.questions);
-  const topics = useSelector((state: RootState) => state.topic.topics);
   const startTime = useRef(Date.now());
   const audioQuestionRef = useRef<AudioPlayerRef>(null);
   const { token } = useToken();
   const user = useSelector((state: RootState) => state.auth.user);
   const [readingText, setReadingTextState] = React.useState<any>(null);
+  const [hasShownReadingText, setHasShownReadingText] = useState(false);
 
-  // Get categoryId from topics state since quizId is the same as topicId
-  const categoryId = useMemo(() => {
-    const topic = topics.find(t => t.topicId === quizId);
-    return topic?.categoryId || null;
-  }, [topics, quizId]);
+  // Get categoryId from route params
+  const categoryId = route.params?.categoryId;
 
   const handleReadingText = (questions: Question[]) => {
-    if (!activeQuiz) return;
+    console.log('🔍 handleReadingText called');
+    console.log('🔍 activeQuiz:', activeQuiz);
     
-    const currentQuestion = questions[activeQuiz.currentQuestion];
-    if (currentQuestion?.readingTextId) {
-      // For reading questions, show the reading text first
-      dispatch(setReadingText({
-        textId: currentQuestion.readingTextId,
-        show: true
-      }));
+    if (!activeQuiz) {
+      console.log('🔍 No activeQuiz, returning');
+      return;
+    }
+    
+    // Get the reading text ID from the first question that has one
+    const questionWithReadingText = questions.find(q => q.readingTextId);
+    if (!questionWithReadingText?.readingTextId) {
+      console.log('🔍 No reading text ID found in questions');
+      return;
+    }
+    
+    // Get the reading text by its ID
+    const readingText = selectReadingTextById(store.getState(), questionWithReadingText.readingTextId);
+    console.log('🔍 readingText by ID:', readingText);
+    
+    if (readingText) {
+      console.log('🔍 Setting reading text:', readingText);
+      setReadingTextState(readingText);
+    } else {
+      console.log('🔍 No reading text found for ID:', questionWithReadingText.readingTextId);
     }
   };
 
   const loadQuestions = async () => {
     try {
+      console.log('🔍 loadQuestions called for quizId:', quizId);
+      console.log('🔍 questions.length:', questions.length);
+      console.log('🔍 first question:', questions[0]);
+      
       if (route.params?.isRepeating && wrongQuestions?.length) {
+        console.log('🔍 Repeating wrong questions');
         handleReadingText(wrongQuestions);
         return;
       }
 
       // Use questions from Redux (loaded in bulk during app initialization)
       if (questions.length > 0) {
-        // Check if this is a reading topic by looking at the first question
-        if (questions[0]?.readingTextId) {
+        console.log('🔍 Questions loaded successfully, length:', questions.length);
+        
+        // For reading categories, check if reading texts are loaded
+        if (categoryId === 'reading') {
+          console.log('🔍 Reading category detected');
+          
           // Check if reading texts are loaded in Redux
           const state = store.getState();
           const readingTextsLoaded = Object.keys(state.questions.readingTextsById).length > 0;
+          console.log('🔍 readingTextsLoaded:', readingTextsLoaded);
           
           if (!readingTextsLoaded) {
+            console.log('🔍 Reading texts not loaded, waiting...');
             // Wait a bit and try again
             setTimeout(() => {
               loadQuestions();
@@ -153,7 +175,9 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
             return;
           }
           
-          handleReadingText(questions);
+          console.log('🔍 Reading texts loaded, will handle reading text in useEffect');
+        } else {
+          console.log('🔍 Not a reading category:', categoryId);
         }
         return;
       }
@@ -172,6 +196,9 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     dispatch(startQuiz());
     // Start the quiz session timer
     dispatch(startQuizSession());
+    // Reset reading text state for new quiz
+    setReadingTextState(null);
+    setHasShownReadingText(false);
     loadQuestions();
 
     return () => {
@@ -184,6 +211,15 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
       }
     };
   }, [quizId]);
+
+  // Handle reading text after activeQuiz is available
+  useEffect(() => {
+    if (activeQuiz && questions.length > 0 && categoryId === 'reading' && !readingText && !hasShownReadingText) {
+      console.log('🔍 activeQuiz is now available, handling reading text for reading category');
+      handleReadingText(questions);
+      setHasShownReadingText(true);
+    }
+  }, [activeQuiz, questions, categoryId, readingText, hasShownReadingText]);
 
   const handleAnswer = (selectedIndex: number) => {
     if (!activeQuiz || activeQuiz.selectedAnswer !== null) return;
@@ -204,12 +240,16 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   };
 
   const handleNext = () => {
+    console.log('🔍 handleNext called');
+    console.log('🔍 readingText:', !!readingText);
+    
     if (!activeQuiz) return;
     
     dispatch(selectAnswer(null));
     
-    if (activeQuiz.showReadingText) {
-      dispatch(setReadingText({ textId: activeQuiz.currentTextId ?? '', show: false }));
+    if (readingText) {
+      console.log('🔍 Hiding reading text');
+      setReadingTextState(null);
       return;
     }
     
@@ -262,26 +302,17 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     }
   };
 
-  // Get reading text from Redux when needed
-  React.useEffect(() => {
-    if (activeQuiz?.showReadingText && activeQuiz?.currentTextId) {
-      // Get the current question to find the reading text ID
-      const currentQuestion = questions[activeQuiz.currentQuestion];
-      if (currentQuestion?.readingTextId) {
-        const text = selectReadingTextById(store.getState(), currentQuestion.readingTextId);
-        if (text) {
-          setReadingTextState(text);
-        }
-      }
-    }
-  }, [activeQuiz?.showReadingText, activeQuiz?.currentTextId, questions]);
+  // Debug: Monitor reading text state changes
+  useEffect(() => {
+    console.log('🔍 Reading text state changed - readingText:', !!readingText);
+  }, [readingText]);
 
   // Graceful handling for no questions
   useEffect(() => {
     if (questions.length === 0) {
       // Show a message and redirect after a short delay
       setTimeout(() => {
-        navigation.goBack(); // or navigate to Topic screen if you want
+        navigation.goBack();
       }, 2000);
     }
   }, [questions.length, navigation]);
@@ -297,6 +328,8 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
         });
     }
   }, [user, token, questions.length, dispatch]);
+
+
 
   // Early returns after all hooks have been called
   if (!activeQuiz) {
@@ -337,11 +370,11 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
         <QuizTopBar 
           currentQuestion={activeQuiz.currentQuestion}
           totalQuestions={questions.length}
-          showReadingText={activeQuiz.showReadingText}
+          showReadingText={!!readingText}
         />
 
         <View style={styles.contentContainer}>
-          {!activeQuiz.showReadingText ? (
+          {!readingText ? (
             <>
               <View style={styles.topHalf}>
                 <Surface style={styles.questionCard}>
@@ -388,9 +421,9 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
             variant="primary"
             onPress={handleNext}
             style={styles.nextButton}
-            disabled={activeQuiz.selectedAnswer === null && !activeQuiz.showReadingText}
+            disabled={activeQuiz.selectedAnswer === null && !readingText}
           >
-            {activeQuiz.showReadingText ? 'Continue' : 
+            {readingText ? 'Continue' : 
               activeQuiz.currentQuestion === questions.length - 1 ? 'Finish' : 'Next'}
           </CustomButton>
         </View>
