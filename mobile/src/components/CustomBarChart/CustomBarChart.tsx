@@ -42,6 +42,7 @@ interface BarData {
  * @property {boolean} [showValues=false] - Whether to show value labels (currently unused)
  * @property {number} [barSpacing=2] - Spacing between bars in pixels
  * @property {number} [barWidth] - Custom width for bars (auto-calculated if not provided)
+ * @property {string} [testID] - Optional testID for testing
  */
 interface CustomBarChartProps {
   data: BarData[];
@@ -51,6 +52,7 @@ interface CustomBarChartProps {
   showValues?: boolean;
   barSpacing?: number;
   barWidth?: number;
+  testID?: string;
 }
 
 const screenWidth = Dimensions.get('window').width;
@@ -71,6 +73,7 @@ const screenWidth = Dimensions.get('window').width;
  * @param {boolean} [props.showValues=false] - Whether to show value labels
  * @param {number} [props.barSpacing=2] - Spacing between bars in pixels
  * @param {number} [props.barWidth] - Custom width for bars
+ * @param {string} [props.testID] - Optional testID for testing
  * @returns {JSX.Element} An interactive bar chart with tooltips
  * 
  * @example
@@ -103,6 +106,7 @@ export const CustomBarChart: React.FC<CustomBarChartProps> = ({
   showValues = false,
   barSpacing = 2,
   barWidth,
+  testID,
 }) => {
   const [selectedBar, setSelectedBar] = useState<number | null>(null);
   
@@ -163,7 +167,7 @@ export const CustomBarChart: React.FC<CustomBarChartProps> = ({
   };
   
   return (
-    <View style={[styles.container, { width, height: containerHeight }]}>
+    <View style={[styles.container, { width, height: containerHeight }]} testID={testID}>
       <View style={[styles.barsContainer, { width: totalBarWidth }]}>
         {data.map((item, index) => {
           const barHeight = Math.max(getBarHeight(item.value), 4); // Minimum height for visibility

@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import { theme } from '../../theme';
 
@@ -38,9 +38,9 @@ import { theme } from '../../theme';
  * </Surface>
  * ```
  */
-export function Terms() {
+export const Terms = () => {
   return (
-    <Surface style={styles.container}>
+    <View testID="terms" style={styles.container}>
       <ScrollView style={styles.scroll}>
         <Text variant="headlineMedium" style={styles.title}>
           Terms and Conditions
@@ -50,9 +50,9 @@ export function Terms() {
           By using this application, you agree to...
         </Text>
       </ScrollView>
-    </Surface>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

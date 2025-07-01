@@ -147,7 +147,7 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audio
   }, [sound]);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="audio-player">
       <View style={styles.playerContainer}>
         <Svg width={radius * 2} height={radius * 2} style={styles.svg}>
           {/* Background circle */}
@@ -183,6 +183,7 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audio
         <TouchableOpacity
           style={styles.playButton}
           onPress={isPlaying ? stopSound : playSound}
+          testID="audio-play-button"
         >
           <MaterialCommunityIcons
             name={isPlaying ? 'pause' : 'play'}

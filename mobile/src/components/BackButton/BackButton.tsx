@@ -36,6 +36,7 @@ type BackButtonVariant = 'dark' | 'light';
  * @property {number} [size] - Optional size for the icon (default: 32)
  * @property {string} [text] - Optional text to display next to the icon
  * @property {any} [style] - Optional additional styles
+ * @property {string} [testID] - Optional testID for testing
  */
 interface BackButtonProps {
   onPress?: () => void;
@@ -43,6 +44,7 @@ interface BackButtonProps {
   size?: number;
   text?: string;
   style?: any;
+  testID?: string;
 }
 
 /**
@@ -58,6 +60,7 @@ interface BackButtonProps {
  * @param {number} [props.size] - Optional size for the icon (default: 32)
  * @param {string} [props.text] - Optional text to display next to the icon
  * @param {any} [props.style] - Optional additional styles
+ * @param {string} [props.testID] - Optional testID for testing
  * @returns {JSX.Element} A styled back button component
  * 
  * @example
@@ -77,7 +80,8 @@ export const BackButton = ({
   variant = 'dark', 
   size = 32, 
   text, 
-  style 
+  style,
+  testID
 }: BackButtonProps) => {
   const navigation = useNavigation();
 
@@ -94,6 +98,7 @@ export const BackButton = ({
       style={[styles.button, style]}
       onPress={handlePress}
       activeOpacity={0.7}
+      testID={testID}
     >
       <MaterialCommunityIcons 
         name="chevron-left" 

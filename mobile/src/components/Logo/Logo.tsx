@@ -12,8 +12,9 @@
  */
 
 import React from 'react';
-import { Image, StyleSheet, Platform, ViewStyle, ImageStyle } from 'react-native';
+import { Image, StyleSheet, Platform, ViewStyle, ImageStyle, View } from 'react-native';
 import QuizLogoSvg from '../../../assets/images/quiz_logo.svg';
+import { Svg, Rect, Text } from 'react-native-svg';
 
 /**
  * Props interface for the Logo component
@@ -55,22 +56,45 @@ interface LogoProps {
 export const Logo = ({ width = 200, height = 200, style }: LogoProps) => {
   if (Platform.OS === 'web') {
     return (
-      <Image 
-        source={require('../../../assets/images/quiz_logo.png')}
-        style={[
-          styles.logo,
-          { width, height },
-          style as ImageStyle
-        ]}
-        resizeMode="contain"
-      />
+      <View testID="logo" style={styles.container}>
+        <Image 
+          source={require('../../../assets/images/quiz_logo.png')}
+          style={[
+            styles.logo,
+            { width, height },
+            style as ImageStyle
+          ]}
+          resizeMode="contain"
+        />
+      </View>
     );
   }
-  return <QuizLogoSvg width={width} height={height} style={[styles.logo, style]} />;
+  return (
+    <View testID="logo" style={styles.container}>
+      <Svg width={120} height={120} viewBox="0 0 1024 1024">
+        <Rect width={1024} height={1024} fill="#4313E2" />
+        <Text
+          x={512}
+          y={512}
+          fontFamily="Arial"
+          fontSize={400}
+          fill="white"
+          textAnchor="middle"
+        >
+          Q
+        </Text>
+      </Svg>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
   logo: {
     marginBottom: 24,
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 }); 

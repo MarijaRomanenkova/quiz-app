@@ -101,6 +101,7 @@ export const CustomModal = ({
       visible={visible}
       onDismiss={onDismiss}
       contentContainerStyle={styles.modalContainer}
+      testID="custom-modal"
     >
       <Text variant="headlineMedium" style={styles.modalTitle}>
         {title}
@@ -115,6 +116,7 @@ export const CustomModal = ({
             onPress={onSecondaryButtonPress}
             style={styles.modalButton}
             variant="secondary"
+            testID="modal-secondary-button"
           >
             {secondaryButtonText}
           </Button>
@@ -124,6 +126,7 @@ export const CustomModal = ({
           onPress={onPrimaryButtonPress}
           style={styles.modalButton}
           variant="primary"
+          testID="modal-primary-button"
         >
           {primaryButtonText}
         </Button>

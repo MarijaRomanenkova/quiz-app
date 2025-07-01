@@ -31,7 +31,7 @@ import Svg, { Rect, Text } from 'react-native-svg';
  */
 export const AppIcon = () => {
   return (
-    <View>
+    <View testID="app-icon">
       <Svg width={1024} height={1024} viewBox="0 0 1024 1024">
         <Rect width={1024} height={1024} fill="#4313E2" />
         <Text

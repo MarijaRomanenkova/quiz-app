@@ -71,7 +71,7 @@ export const StudyPaceSelector = ({ currentPaceId, onPaceChange }: StudyPaceSele
   const selectedPace = STUDY_PACES.find(pace => pace.studyPaceId === (currentPaceId?.toString() || '1'));
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="study-pace-selector">
       <SegmentedButtons
         value={(currentPaceId || 1).toString()}
         onValueChange={handlePaceChange}

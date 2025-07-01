@@ -33,6 +33,7 @@ type ButtonVariant = 'success' | 'primary' | 'secondary';
  * @property {ButtonVariant} [variant='success'] - Button color variant
  * @property {boolean} [disabled=false] - Whether the button is disabled
  * @property {any} [style] - Additional styles to apply to the button
+ * @property {string} [testID] - Test ID for the button
  */
 interface ButtonProps {
   mode?: 'text' | 'outlined' | 'contained';
@@ -41,6 +42,7 @@ interface ButtonProps {
   variant?: ButtonVariant;
   disabled?: boolean;
   style?: any;
+  testID?: string;
 }
 
 /**
@@ -93,6 +95,7 @@ const getButtonColors = (variant: ButtonVariant, disabled: boolean = false) => {
  * @param {ButtonVariant} [props.variant='success'] - Button color variant
  * @param {boolean} [props.disabled=false] - Whether the button is disabled
  * @param {any} [props.style] - Additional styles to apply
+ * @param {string} [props.testID] - Test ID for the button
  * @returns {JSX.Element} A styled button component
  * 
  * @example
@@ -116,6 +119,7 @@ export const Button = ({
   variant = 'success',
   disabled = false,
   style,
+  testID,
 }: ButtonProps) => {
   const colors = getButtonColors(variant, disabled);
 
@@ -129,6 +133,7 @@ export const Button = ({
       buttonColor={colors.backgroundColor}
       contentStyle={styles.content}
       labelStyle={styles.label}
+      testID={testID}
     >
       {children}
     </PaperButton>
