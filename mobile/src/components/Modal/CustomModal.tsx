@@ -125,7 +125,7 @@ export const CustomModal = ({
           mode="contained"
           onPress={onPrimaryButtonPress}
           style={styles.modalButton}
-          variant="primary"
+          variant="success"
           testID="modal-primary-button"
         >
           {primaryButtonText}

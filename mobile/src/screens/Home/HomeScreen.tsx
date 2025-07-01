@@ -20,7 +20,7 @@ import { StyleSheet, View } from 'react-native';
 import { Text, RadioButton } from 'react-native-paper';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/AppNavigator';
-import { theme } from '../../theme';
+import { theme, fonts, spacing, layout } from '../../theme';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { fetchCategoriesThunk, setSelectedCategory } from '../../store/categorySlice';
@@ -31,6 +31,8 @@ import { initializeCategoryProgress, updateCompletedTopicsCategories } from '../
 import type { AppDispatch } from '../../store';
 import { Button } from '../../components/Button/Button';
 import type { Topic } from '../../types';
+import { LoadingWrapper } from '../../components/common/LoadingWrapper';
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
 
 /**
  * Props interface for the HomeScreen component
@@ -197,99 +199,84 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     }
   };
 
-  // Show loading state while checking authentication
-  if (!user) {
-    return (
-      <View style={styles.container}>
-        <Text>Please log in to access categories...</Text>
-      </View>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <Text>Loading categories...</Text>
-      </View>
-    );
-  }
-
-  if (error && categories.length === 0) {
-    return (
-      <View style={styles.container}>
-        <Text>Error: {error}</Text>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      <Text variant="headlineMedium" style={styles.title}>
-        Select a Category:
-      </Text>
-      
-      <View style={styles.radioContainer}>
-        <RadioButton.Group onValueChange={handleCategorySelect} value={selectedCategoryId || ''}>
-          {categories.map((category) => (
-            <View key={category.categoryId} style={[
-              styles.radioItem,
-              selectedCategoryId === category.categoryId && styles.selectedRadioItem
-            ]}>
-              <RadioButton.Item
-                label={category.categoryId}
-                value={category.categoryId}
-                position="trailing"
-                labelStyle={[
-                  styles.radioLabel,
-                  selectedCategoryId === category.categoryId && styles.selectedRadioLabel
-                ]}
-                style={styles.radioButton}
-                theme={{
-                  colors: {
-                    primary: theme.colors.primaryContainer,
-                  }
-                }}
-              />
-            </View>
-          ))}
-        </RadioButton.Group>
-      </View>
+    <LoadingWrapper isLoading={isLoading} error={error || undefined}>
+      {!user ? (
+        <View style={styles.container}>
+          <Text style={styles.title}>Please log in to access categories</Text>
+        </View>
+      ) : (
+        <View style={styles.container}>
+          <Text variant="headlineMedium" style={styles.title}>
+            Select a Category:
+          </Text>
+          
+          <View style={styles.radioContainer}>
+            <RadioButton.Group onValueChange={handleCategorySelect} value={selectedCategoryId || ''}>
+              {categories.map((category) => (
+                <View key={category.categoryId} style={[
+                  styles.radioItem,
+                  selectedCategoryId === category.categoryId && styles.selectedRadioItem
+                ]}>
+                  <RadioButton.Item
+                    label={category.categoryId}
+                    value={category.categoryId}
+                    position="trailing"
+                    labelStyle={[
+                      styles.radioLabel,
+                      selectedCategoryId === category.categoryId && styles.selectedRadioLabel
+                    ]}
+                    style={styles.radioButton}
+                    theme={{
+                      colors: {
+                        primary: theme.colors.primaryContainer,
+                      }
+                    }}
+                  />
+                </View>
+              ))}
+            </RadioButton.Group>
+          </View>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          variant="primary"
-          onPress={handleContinue}
-          style={styles.button}
-          disabled={!selectedCategoryId}
-          testID="continue-button"
-        >
-          Continue
-        </Button>
-      </View>
-    </View>
+          <View style={styles.buttonContainer}>
+            <Button
+              variant="primary"
+              onPress={handleContinue}
+              style={styles.button}
+              disabled={!selectedCategoryId}
+              testID="continue-button"
+            >
+              Next
+            </Button>
+          </View>
+        </View>
+      )}
+    </LoadingWrapper>
   );
 };
 
+const layoutStyles = createLayoutStyles();
+const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.text);
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 24,
+    ...layoutStyles.container,
+    padding: spacing.lg,
     backgroundColor: theme.colors.secondaryContainer,
   },
   title: {
+    ...titleStyles.text,
     textAlign: 'center',
-    marginVertical: 24,
-    fontFamily: 'Baloo2-SemiBold',
-    fontSize: 24,
+    marginVertical: spacing.lg,
   },
   radioContainer: {
     flex: 1,
-    marginTop: 16,
+    marginTop: spacing.md,
   },
   radioItem: {
-    marginBottom: 12,
+    marginBottom: spacing.sm,
     backgroundColor: theme.colors.surface,
-    borderRadius: 20,
+    borderRadius: layout.borderRadius.large,
     borderWidth: 1,
     borderColor: theme.colors.outline,
   },
@@ -298,7 +285,7 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.primaryContainer,
   },
   radioLabel: {
-    fontSize: 16,
+    fontSize: fonts.sizes.medium,
     fontWeight: 'bold',
   },
   selectedRadioLabel: {
@@ -308,9 +295,9 @@ const styles = StyleSheet.create({
     marginVertical: 0,
   },
   buttonContainer: {
-    marginTop: 24,
+    marginTop: spacing.lg,
   },
   button: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
 }); 

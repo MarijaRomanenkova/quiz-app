@@ -16,6 +16,7 @@ import { View, StyleSheet } from 'react-native';
 import { SegmentedButtons, Text } from 'react-native-paper';
 import { theme } from '../../theme';
 import { STUDY_PACES } from '../../constants';
+import { handlePaceChange, getSelectedPace } from '../../utils/studyPaceUtils';
 
 /**
  * Props interface for the StudyPaceSelector component
@@ -56,25 +57,13 @@ interface StudyPaceSelectorProps {
  * ```
  */
 export const StudyPaceSelector = ({ currentPaceId, onPaceChange }: StudyPaceSelectorProps) => {
-  /**
-   * Handles study pace selection changes
-   * 
-   * Converts the string value from SegmentedButtons to a number
-   * and calls the onPaceChange callback if provided.
-   * 
-   * @param {string} value - The selected pace ID as a string
-   */
-  const handlePaceChange = (value: string) => {
-    onPaceChange?.(parseInt(value));
-  };
-
-  const selectedPace = STUDY_PACES.find(pace => pace.studyPaceId === (currentPaceId?.toString() || '1'));
+  const selectedPace = getSelectedPace(currentPaceId);
 
   return (
     <View style={styles.container} testID="study-pace-selector">
       <SegmentedButtons
         value={(currentPaceId || 1).toString()}
-        onValueChange={handlePaceChange}
+        onValueChange={(value) => handlePaceChange(value, onPaceChange)}
         buttons={STUDY_PACES.map(pace => ({
           value: pace.studyPaceId,
           label: pace.title,

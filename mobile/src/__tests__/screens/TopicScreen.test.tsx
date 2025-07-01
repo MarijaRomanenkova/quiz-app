@@ -109,7 +109,7 @@ describe('TopicScreen', () => {
     expect(getByText('topic1')).toBeTruthy();
     expect(getByText('topic2')).toBeTruthy();
     expect(getByText('topic3')).toBeTruthy();
-    expect(getByText('Start Quiz')).toBeTruthy();
+    expect(getByText('OK')).toBeTruthy();
   });
 
   it('allows topic selection', () => {
@@ -123,8 +123,8 @@ describe('TopicScreen', () => {
     // Select a topic
     fireEvent.press(getByText('topic2'));
     
-    // The Start Quiz button should be enabled
-    const startQuizButton = getByText('Start Quiz');
+    // The OK button should be enabled
+    const startQuizButton = getByText('OK');
     expect(startQuizButton).toBeTruthy();
   });
 
@@ -139,8 +139,8 @@ describe('TopicScreen', () => {
     // Select a topic first
     fireEvent.press(getByText('topic1'));
     
-    // Press Start Quiz
-    fireEvent.press(getByText('Start Quiz'));
+    // Press OK
+    fireEvent.press(getByText('OK'));
     
     expect(mockNavigate).toHaveBeenCalledWith('Quiz', { quizId: 'topic1', categoryId: 'grammar' });
   });
@@ -178,7 +178,7 @@ describe('TopicScreen', () => {
       </Provider>
     );
     
-    const startQuizButton = getByText('Start Quiz');
+    const startQuizButton = getByText('OK');
     // The button should be disabled initially
     expect(startQuizButton).toBeTruthy();
   });
@@ -198,7 +198,7 @@ describe('TopicScreen', () => {
     fireEvent.press(getByText('topic2'));
     
     // The last selected topic should be the active one
-    fireEvent.press(getByText('Start Quiz'));
+    fireEvent.press(getByText('OK'));
     expect(mockNavigate).toHaveBeenCalledWith('Quiz', { quizId: 'topic2', categoryId: 'grammar' });
   });
 

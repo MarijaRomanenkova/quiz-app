@@ -21,11 +21,12 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { Text, ActivityIndicator } from 'react-native-paper';
-import { theme } from '../../theme';
+import { theme, fonts, spacing, layout } from '../../theme';
 import { Logo } from '../../components/Logo';
 import * as Font from 'expo-font';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
@@ -207,9 +208,12 @@ export const SplashScreen = () => {
   );
 };
 
+const layoutStyles = createLayoutStyles();
+const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.surface);
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...layoutStyles.container,
     backgroundColor: theme.colors.background,
   },
   topContainer: {
@@ -219,8 +223,8 @@ const styles = StyleSheet.create({
   },
   deutschText: {
     color: theme.colors.surface,
-    fontSize: 72,
-    fontFamily: 'Baloo2-Bold',
+    fontSize: fonts.sizes.xxlarge,
+    fontFamily: fonts.weights.bold,
   },
   middleContainer: {
     flex: 2,
@@ -229,7 +233,7 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     alignItems: 'center',
-    paddingVertical: 48,
+    paddingVertical: spacing.xl,
   },
   textContainer: {
     flex: 1,
@@ -237,22 +241,22 @@ const styles = StyleSheet.create({
   },
   learnText: {
     color: theme.colors.surface,
-    fontSize: 32,
-    fontFamily: 'Baloo2-SemiBold',
-    lineHeight: 32,
+    fontSize: fonts.sizes.large,
+    fontFamily: fonts.weights.semiBold,
+    lineHeight: fonts.sizes.large,
   },
   germanText: {
     color: theme.colors.surface,
-    fontSize:70,
-    fontFamily: 'Baloo2-SemiBold',
-    lineHeight:70,
+    fontSize: fonts.sizes.xxlarge,
+    fontFamily: fonts.weights.semiBold,
+    lineHeight: fonts.sizes.xxlarge,
     letterSpacing: 1.2,
   },
   subtitleText: {
     color: theme.colors.surface,
-    fontSize: 28,
-    fontFamily: 'Baloo2-Regular',
-    lineHeight: 32,
+    fontSize: fonts.sizes.medium,
+    fontFamily: fonts.weights.regular,
+    lineHeight: fonts.sizes.large,
   },
   loadingContainer: {
     flex: 1,
@@ -261,19 +265,19 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     color: theme.colors.surface,
-    fontSize: 32,
-    fontFamily: 'Baloo2-SemiBold',
+    fontSize: fonts.sizes.large,
+    fontFamily: fonts.weights.semiBold,
   },
   dotsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: spacing.md,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: theme.colors.surface,
-    marginHorizontal: 4,
+    marginHorizontal: spacing.xs,
   },
 }); 

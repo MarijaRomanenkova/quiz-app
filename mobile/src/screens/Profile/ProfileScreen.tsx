@@ -18,8 +18,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Text, Surface, IconButton, Switch } from 'react-native-paper';
+import { View, StyleSheet } from 'react-native';
+import { Text, Surface, Switch } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
@@ -27,13 +27,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { setUser } from '../../store/userSlice';
 import { updateUserPreferences } from '../../store/authSlice';
-import { theme } from '../../theme';
+import { theme, fonts, spacing, layout } from '../../theme';
 import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceSelector';
 import { Button } from '../../components/Button/Button';
 import { CustomModal } from '../../components/Modal/CustomModal';
 import { useAuth } from '../../hooks/useAuth';
 import { deleteUserAccount } from '../../services/api';
 import { BackButton } from '../../components/BackButton';
+import { handleApiError } from '../../utils/apiUtils';
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -153,11 +155,7 @@ export const ProfileScreen = () => {
       setShowTermsModal(false);
       logout();
     } catch (error) {
-      Alert.alert(
-        'Delete Failed',
-        'Failed to delete your account. Please try again.',
-        [{ text: 'OK' }]
-      );
+      handleApiError(error, 'Failed to delete your account. Please try again.');
     }
   };
 
@@ -244,7 +242,7 @@ export const ProfileScreen = () => {
         <Button
           mode="contained"
           onPress={() => setShowTermsModal(true)}
-          variant="secondary"
+          variant="primary"
           style={styles.deleteButton}
         >
           Delete Account
@@ -275,98 +273,90 @@ export const ProfileScreen = () => {
   );
 };
 
+const layoutStyles = createLayoutStyles();
+const titleStyles = createTextStyles('xlarge', 'bold', theme.colors.surface);
+const sectionTitleStyles = createTextStyles('large', 'medium', theme.colors.surface);
+const bodyTextStyles = createTextStyles('medium', 'regular', theme.colors.surface);
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...layoutStyles.container,
     backgroundColor: theme.colors.background,
-    padding: 24,
+    padding: spacing.lg,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: spacing.md,
   },
   backText: {
-    color: theme.colors.surface,
-    fontSize: 16,
-    fontFamily: 'Baloo2-Regular',
+    ...bodyTextStyles.text,
   },
   mainContent: {
     flex: 1,
     justifyContent: 'space-between',
   },
   userInfo: {
-    paddingVertical: 16,
+    paddingVertical: spacing.md,
     alignItems: 'center',
   },
   userName: {
-    color: theme.colors.surface,
-    fontSize: 32,
-    fontFamily: 'Baloo2-Bold',
-    marginBottom: 16,
+    ...titleStyles.text,
+    marginBottom: spacing.md,
   },
   infoRow: {
     flexDirection: 'row',
     width: '100%',
-    marginBottom: 12,
+    marginBottom: spacing.sm,
   },
   infoLabel: {
-    color: theme.colors.surface,
-    fontSize: 16,
-    fontFamily: 'Baloo2-Regular',
+    ...bodyTextStyles.text,
     width: 80,
   },
   infoValue: {
-    color: theme.colors.surface,
-    fontSize: 16,
-    fontFamily: 'Baloo2-Regular',
+    ...bodyTextStyles.text,
     flex: 1,
   },
   section: {
-    paddingVertical: 16,
+    paddingVertical: spacing.md,
   },
   sectionTitle: {
-    color: theme.colors.surface,
-    fontSize: 20,
-    fontFamily: 'Baloo2-Medium',
+    ...sectionTitleStyles.text,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   toggles: {
-    paddingVertical: 24,
+    paddingVertical: spacing.lg,
   },
   toggleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   toggleLabel: {
-    color: theme.colors.surface,
-    fontSize: 16,
-    fontFamily: 'Baloo2-Regular',
+    ...bodyTextStyles.text,
     flex: 1,
   },
   termsLink: {
-    color: theme.colors.surface,
-    fontSize: 16,
-    fontFamily: 'Baloo2-Bold',
+    ...bodyTextStyles.text,
+    fontFamily: fonts.weights.bold,
     textDecorationLine: 'underline',
   },
   buttonsContainer: {
-    paddingBottom: 16,
+    paddingBottom: spacing.md,
   },
   deleteButton: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   logoutButton: {
     marginBottom: 0,
   },
   errorText: {
-    fontSize: 16,
+    fontSize: fonts.sizes.medium,
     color: theme.colors.error,
     textAlign: 'center',
-    marginTop: 50,
+    marginTop: spacing.xxl,
   },
   studyPaceContainer: {
     width: '100%',

@@ -166,7 +166,7 @@ describe('ResultsScreen', () => {
     );
     
     expect(getByText('Would you like to train harder questions?')).toBeTruthy();
-    expect(getByText('Repeat Wrong Questions')).toBeTruthy();
+    expect(getByText('Repeat')).toBeTruthy();
   });
 
   it('navigates to quiz with repeat flag when repeat wrong questions is pressed', () => {
@@ -177,7 +177,7 @@ describe('ResultsScreen', () => {
       </Provider>
     );
     
-    fireEvent.press(getByText('Repeat Wrong Questions'));
+    fireEvent.press(getByText('Repeat'));
     expect(mockNavigate).toHaveBeenCalledWith('Quiz', { 
       quizId: 'grammar-quiz',
       categoryId: 'grammar',
@@ -193,7 +193,7 @@ describe('ResultsScreen', () => {
       </Provider>
     );
     
-    fireEvent.press(getByText('Continue Learning'));
+    fireEvent.press(getByText('Continue'));
     expect(mockNavigate).toHaveBeenCalledWith('Home');
   });
 
@@ -219,7 +219,7 @@ describe('ResultsScreen', () => {
     
     // Should not show wrong questions training option
     expect(queryByText('Would you like to train harder questions?')).toBeNull();
-    expect(queryByText('Repeat Wrong Questions')).toBeNull();
+    expect(queryByText('Repeat')).toBeNull();
   });
 
   it('handles missing user gracefully', () => {

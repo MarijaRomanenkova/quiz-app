@@ -40,6 +40,37 @@ jest.mock('../../components/Button/Button', () => {
   };
 });
 
+// Mock theme utilities
+jest.mock('../../utils/themeUtils', () => ({
+  createLayoutStyles: () => ({
+    container: { flex: 1 },
+    content: { flex: 1, padding: 24 },
+    centered: { justifyContent: 'center', alignItems: 'center' },
+    row: { flexDirection: 'row', alignItems: 'center' },
+    spaceBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  }),
+  createTextStyles: () => ({
+    text: { fontSize: 16, fontFamily: 'Baloo2-Regular', color: '#000000' },
+  }),
+}));
+
+// Mock LoadingWrapper
+jest.mock('../../components/common/LoadingWrapper', () => {
+  const React = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    LoadingWrapper: ({ children, isLoading, error, loadingText }: any) => {
+      if (isLoading) {
+        return <Text>{loadingText || 'Loading...'}</Text>;
+      }
+      if (error) {
+        return <Text>Error: {error}</Text>;
+      }
+      return <View>{children}</View>;
+    },
+  };
+});
+
 jest.mock('react-native-paper', () => ({
   Text: ({ children, variant, style, testID }: any) => {
     const React = require('react');
@@ -180,7 +211,7 @@ describe('HomeScreen', () => {
       
       expect(getByText('Select a Category:')).toBeTruthy();
       expect(getByTestId('radio-button-group')).toBeTruthy();
-      expect(getByText('Continue')).toBeTruthy();
+      expect(getByText('Next')).toBeTruthy();
     });
 
     it('should render home screen with category selection', () => {
@@ -206,7 +237,7 @@ describe('HomeScreen', () => {
         </Provider>
       );
       
-      fireEvent.press(getByText('Continue'));
+      fireEvent.press(getByText('Next'));
       expect(mockNavigate).toHaveBeenCalledWith('Topic', { categoryId: '1' });
     });
   });
@@ -259,7 +290,7 @@ describe('HomeScreen', () => {
         </Provider>
       );
       
-      expect(getByText('Loading categories...')).toBeTruthy();
+      expect(getByText('Loading...')).toBeTruthy();
     });
 
     it('should not show loading state when categories are loaded', () => {
@@ -270,7 +301,7 @@ describe('HomeScreen', () => {
         </Provider>
       );
       
-      expect(queryByText('Loading categories...')).toBeNull();
+      expect(queryByText('Loading...')).toBeNull();
       expect(getByText('Select a Category:')).toBeTruthy();
     });
   });
@@ -292,7 +323,7 @@ describe('HomeScreen', () => {
       if (queryByText('Error: Failed to load categories')) {
         expect(getByText('Error: Failed to load categories')).toBeTruthy();
       } else {
-        expect(getByText('Loading categories...')).toBeTruthy();
+        expect(getByText('Loading...')).toBeTruthy();
       }
     });
   });
@@ -306,7 +337,7 @@ describe('HomeScreen', () => {
         </Provider>
       );
       
-      expect(getByText('Please log in to access categories...')).toBeTruthy();
+      expect(getByText('Please log in to access categories')).toBeTruthy();
     });
   });
 }); 

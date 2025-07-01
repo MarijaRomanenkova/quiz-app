@@ -14,7 +14,8 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TextInput, Text } from 'react-native-paper';
-import { theme } from '../../theme';
+import { theme, spacing, layout } from '../../theme';
+import { createInputStyles } from '../../utils/themeUtils';
 
 /**
  * Props interface for the Input component
@@ -91,9 +92,11 @@ export const Input = ({
   keyboardType = 'default',
   right,
 }: InputProps) => {
+  const inputStyles = createInputStyles('light');
+  
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, { color: theme.colors.surface, fontFamily: 'Baloo2-SemiBold', fontSize: 18 }]}>
+      <Text style={[inputStyles.label, { color: theme.colors.surface }]}>
         {label}
       </Text>
       <TextInput
@@ -111,8 +114,9 @@ export const Input = ({
           colors: {
             primary: theme.colors.primary,
             onSurfaceVariant: theme.colors.surface,
+            onSurface: theme.colors.surface,
           },
-          roundness: 20,
+          roundness: layout.borderRadius.large,
         }}
         outlineColor={theme.colors.surface}
         activeOutlineColor={theme.colors.primary}

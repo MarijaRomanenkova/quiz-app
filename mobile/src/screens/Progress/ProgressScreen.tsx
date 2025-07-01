@@ -3,10 +3,10 @@ import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { Card } from 'react-native-paper';
-import { theme } from '../../theme';
+import { theme, fonts, spacing, layout } from '../../theme';
 import { CustomBarChart } from '../../components/CustomBarChart';
 import { LevelProgress } from '../../components/Results/LevelProgress';
-import { Button } from '../../components/Button/Button';
+
 import { 
   selectCurrentWeekData,
   selectLastFiveWeeksData,
@@ -17,18 +17,22 @@ import {
   selectMonthlyGoalProgress
 } from '../../store/statisticsSlice';
 import { selectAllCategoryProgress } from '../../store/progressSlice';
-import { RootState } from '../../store';
+import { createLayoutStyles, createTextStyles} from '../../utils/themeUtils';
+import { formatTime, formatGoalPercentage } from '../../utils/formatUtils';
 
+// Constants
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const chartWidth = Math.min(screenWidth / 2 - 30, 180); // Responsive width with max of 180px
 const chartHeight = chartWidth; // Square charts
 
+
+
 /**
  * Statistics screen displaying user's progress and study habits
  */
 export const ProgressScreen = () => {
-  const navigation = useNavigation();
+  // Hooks
   const currentWeekData = useSelector(selectCurrentWeekData);
   const lastFiveWeeksData = useSelector(selectLastFiveWeeksData);
   const currentMonthTotal = useSelector(selectCurrentMonthTotal);
@@ -37,30 +41,6 @@ export const ProgressScreen = () => {
   const weeklyGoalProgress = useSelector(selectWeeklyGoalProgress);
   const monthlyGoalProgress = useSelector(selectMonthlyGoalProgress);
   const categoryProgress = useSelector(selectAllCategoryProgress);
-
-  // Debug: Get raw statistics data
-  const statistics = useSelector((state: RootState) => state.statistics);
-  const auth = useSelector((state: RootState) => state.auth);
-  const progress = useSelector((state: RootState) => state.progress);
-
-  // Format time (minutes to hours and minutes)
-  const formatTime = (minutes: number): string => {
-    if (minutes < 60) return `${Math.round(minutes)} min`;
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.round(minutes % 60);
-    return `${hours}h ${mins}min`;
-  };
-
-  // Format goal percentage
-  const formatGoalPercentage = (percentage: number): string => {
-    if (percentage > 100) {
-      return `+${percentage - 100} % of the target`;
-    } else if (percentage < 100) {
-      return `-${100 - percentage} % of the target`;
-    } else {
-      return '100 % of target';
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -150,16 +130,19 @@ export const ProgressScreen = () => {
   );
 };
 
+// Styles
+const layoutStyles = createLayoutStyles();
+const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.text);
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...layoutStyles.container,
     backgroundColor: theme.colors.secondaryContainer,
-    padding: 24,
+    padding: spacing.lg,
   },
   screenTitle: {
-    fontFamily: 'Baloo2-SemiBold',
-    fontSize: 32,
-    marginBottom: 2,
+    ...titleStyles.text,
+    marginBottom: spacing.xs,
     textAlign: 'center',
   },
   mainContent: {
@@ -170,24 +153,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'flex-start',
-    gap: 20,
-    paddingTop: 20,
-    paddingHorizontal: 16,
+    gap: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingHorizontal: spacing.md,
   },
   staggeredChart: {
     marginTop: ((Dimensions.get('window').width / 3)) / 3,
   },
   chartCard: {
     backgroundColor: theme.colors.surface,
-    borderRadius: 10,
-    shadowColor: theme.colors.text,
-    shadowOpacity: 0.15,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowRadius: 50,
-    elevation: 8,
+    borderRadius: layout.borderRadius.medium,
+    ...layout.shadow.large,
   },
   chartCardContent: {
     flex: 1,
@@ -203,62 +179,62 @@ const styles = StyleSheet.create({
     height: '50%',
   },
   chartTitle: {
-    fontSize: 14,
-    fontFamily: 'Baloo2-Regular',
+    fontSize: fonts.sizes.small,
+    fontFamily: fonts.weights.regular,
     color: theme.colors.outline,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   chartSubtitle: {
-    fontSize: 28,
-    fontFamily: 'Baloo2-SemiBold',
+    fontSize: fonts.sizes.medium,
+    fontFamily: fonts.weights.semiBold,
     color: theme.colors.text,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   chartSubtext: {
-    fontSize: 14,
-    fontFamily: 'Baloo2-Regular',
+    fontSize: fonts.sizes.small,
+    fontFamily: fonts.weights.regular,
     color: theme.colors.outline,
   },
   levelSection: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: spacing.lg,
   },
   categorySection: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 30,
-    paddingVertical: 10,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm,
   },
   categoryItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: spacing.xs,
   },
   categoryName: {
-    fontFamily: 'Baloo2-SemiBold',
-    fontSize: 24,
+    fontFamily: fonts.weights.semiBold,
+    fontSize: fonts.sizes.large,
   },
   categoryPercentage: {
-    fontFamily: 'Baloo2-SemiBold',
-    fontSize: 24,
+    fontFamily: fonts.weights.semiBold,
+    fontSize: fonts.sizes.large,
   },
   buttonSection: {
-    marginTop: 16,
-    marginBottom: 16,
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
   },
   wideButton: {
     width: '100%',
   },
   categoryTitle: {
     color: theme.colors.surface,
-    fontSize: 18,
-    fontFamily: 'Baloo2-Regular',
-    marginBottom: 8,
+    fontSize: fonts.sizes.medium,
+    fontFamily: fonts.weights.regular,
+    marginBottom: spacing.sm,
   },
   categoryProgress: {
     color: theme.colors.surface,
-    fontSize: 16,
-    fontFamily: 'Baloo2-Regular',
+    fontSize: fonts.sizes.medium,
+    fontFamily: fonts.weights.regular,
   },
 }); 

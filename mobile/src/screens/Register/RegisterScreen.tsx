@@ -18,57 +18,32 @@
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Text, TextInput, Surface, IconButton, Switch, Portal } from 'react-native-paper';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { Text, TextInput, Surface, Switch, Portal } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../store/userSlice';
-import { theme } from '../../theme';
+import { theme, spacing } from '../../theme';
 import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceSelector';
 import { Button } from '../../components/Button/Button';
 import { Input } from '../../components/Input/Input';
 import { CustomModal } from '../../components/Modal/CustomModal';
 import { useForm, Controller } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import authService from '../../services/authService';
 import { BackButton } from '../../components/BackButton';
+import { registerSchema, type RegisterFormData } from '../../utils/validationSchemas';
+import { usePasswordVisibility } from '../../hooks/usePasswordVisibility';
+import { useFormLoading } from '../../hooks/useFormLoading';
+import { handleApiError } from '../../utils/apiUtils';
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
+import { LoadingWrapper } from '../../components/common/LoadingWrapper';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
-/**
- * Zod schema for registration form validation
- * 
- * Defines comprehensive validation rules for all registration fields:
- * - Name must be at least 2 characters
- * - Email must be valid format
- * - Password must meet strength requirements
- * - Password confirmation must match
- * - Terms agreement is required
- * - Study pace must be selected
- */
-const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
-  confirmPassword: z.string(),
-  agreedToTerms: z.boolean().refine((val) => val === true, {
-    message: 'You must agree to the Terms and Conditions',
-  }),
-  studyPaceId: z.number().min(1, 'Please select a study pace'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
 
-type RegisterFormData = z.infer<typeof registerSchema>;
 
 /**
  * Register Screen component for new user account creation
@@ -99,11 +74,11 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export const RegisterScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const dispatch = useDispatch();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { showPassword, togglePasswordVisibility } = usePasswordVisibility();
+  const { showPassword: showConfirmPassword, togglePasswordVisibility: toggleConfirmPasswordVisibility } = usePasswordVisibility();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showEmailExistsModal, setShowEmailExistsModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, withLoading } = useFormLoading();
   const [error, setError] = useState('');
 
   const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
@@ -153,11 +128,7 @@ export const RegisterScreen = () => {
         return;
       }
       
-      Alert.alert(
-        'Registration Failed',
-        error instanceof Error ? error.message : 'Please try again later.',
-        [{ text: 'OK' }]
-      );
+      handleApiError(error, 'Registration failed');
     }
   };
 
@@ -237,7 +208,8 @@ export const RegisterScreen = () => {
                   right={
                     <TextInput.Icon
                       icon={showPassword ? "eye-off" : "eye"}
-                      onPress={() => setShowPassword(!showPassword)}
+                      onPress={togglePasswordVisibility}
+                      color={theme.colors.surface}
                     />
                   }
                 />
@@ -258,7 +230,8 @@ export const RegisterScreen = () => {
                   right={
                     <TextInput.Icon
                       icon={showConfirmPassword ? "eye-off" : "eye"}
-                      onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onPress={toggleConfirmPasswordVisibility}
+                      color={theme.colors.surface}
                     />
                   }
                 />
@@ -321,7 +294,7 @@ export const RegisterScreen = () => {
           <Button
             mode="contained"
             onPress={handleSubmit(onSubmit)}
-            variant="primary"
+            variant="success"
           >
             Register
           </Button>

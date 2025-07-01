@@ -14,14 +14,8 @@
 
 import { StyleSheet } from 'react-native';
 import { Button as PaperButton } from 'react-native-paper';
-import { theme } from '../../theme';
-
-/**
- * Available button variants with their respective color schemes
- * 
- * @typedef {'success' | 'primary' | 'secondary'} ButtonVariant
- */
-type ButtonVariant = 'success' | 'primary' | 'secondary';
+import { theme, spacing } from '../../theme';
+import { getButtonColors, type ButtonVariant } from '../../utils/buttonUtils';
 
 /**
  * Props interface for the Button component
@@ -44,42 +38,6 @@ interface ButtonProps {
   style?: any;
   testID?: string;
 }
-
-/**
- * Gets the appropriate colors for a button variant and state
- * 
- * @param {ButtonVariant} variant - The button variant
- * @param {boolean} [disabled=false] - Whether the button is disabled
- * @returns {Object} Object containing backgroundColor and textColor
- * @returns {string} returns.backgroundColor - The background color hex code
- * @returns {string} returns.textColor - The text color hex code
- */
-const getButtonColors = (variant: ButtonVariant, disabled: boolean = false) => {
-  if (disabled) {
-    return {
-      backgroundColor: '#CCCCCC', // gray when disabled
-      textColor: '#666666',
-    };
-  }
-
-  switch (variant) {
-    case 'success':
-      return {
-        backgroundColor: '#8BF224', // bright green
-        textColor: '#000000',
-      };
-    case 'primary':
-      return {
-        backgroundColor: theme.colors.background, // #4313E2 with opacity
-        textColor: theme.colors.surface, // white
-      };
-    case 'secondary':
-      return {
-        backgroundColor: '#EDE7FF', // pale violet
-        textColor: '#000000',
-      };
-  }
-};
 
 /**
  * Custom Button component with predefined variants and styling
@@ -140,17 +98,23 @@ export const Button = ({
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 20,
-    height: 56, // Back to original height
+    borderRadius: theme.buttons.borderRadius,
+    paddingVertical: theme.buttons.paddingVertical,
+    marginVertical: theme.buttons.marginVertical,
+    height: 56,
   },
   content: {
-    paddingVertical: 4, // Back to original padding
+    paddingVertical: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   label: {
-    fontSize: 24,
+    fontSize: theme.buttons.fontSize,
     fontFamily: 'Baloo2-SemiBold',
     lineHeight: 24,
+    textAlignVertical: 'center',
   },
 }); 

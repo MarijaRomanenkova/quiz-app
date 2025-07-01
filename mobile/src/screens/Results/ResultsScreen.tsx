@@ -15,17 +15,18 @@
  * @module screens/Results
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import type { RootStackParamList } from '../../types/navigation';
-import { theme } from '../../theme';
+import { theme, spacing } from '../../theme';
 import { ScoreCircle } from '../../components/Results/ScoreCircle';
 import { RootState } from '../../store';
 import { Button as CustomButton } from '../../components/Button/Button';
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
 
 
 
@@ -58,16 +59,9 @@ type ResultsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>
 export const ResultsScreen = () => {
   const navigation = useNavigation<ResultsScreenNavigationProp>();
   const route = useRoute<ResultsScreenRouteProp>();
-  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.user);
   const quizResult = useSelector((state: RootState) => state.quiz.currentResult);
   const wrongQuestions = useSelector((state: RootState) => state.quiz.wrongQuestions);
-  
-
-  
-
-
-
 
   if (!quizResult) {
     return null;
@@ -117,20 +111,20 @@ export const ResultsScreen = () => {
         <View style={styles.buttonContainer}>
           {wrongQuestions.length > 0 && (
             <CustomButton
-              variant="primary"
+              variant="success"
               onPress={handleRepeatWrongQuestions}
               style={styles.button}
             >
-              Repeat Wrong Questions
+              Repeat
             </CustomButton>
           )}
           
           <CustomButton
-            variant="success"
+            variant="primary"
             onPress={() => navigation.navigate('Home')}
             style={styles.button}
           >
-            Continue Learning
+            Continue
           </CustomButton>
         </View>
       </View>
@@ -138,43 +132,42 @@ export const ResultsScreen = () => {
   );
 };
 
+const layoutStyles = createLayoutStyles();
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...layoutStyles.container,
     backgroundColor: theme.colors.secondaryContainer,
   },
   content: {
-    flex: 1,
-    padding: 24,
+    ...layoutStyles.content,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   congratsContainer: {
     alignItems: 'center',
-    marginTop: 32,
+    marginTop: spacing.xl,
   },
   congratsText: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   messageText: {
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   questionText: {
-    marginTop: 16,
+    marginTop: spacing.md,
     textAlign: 'center',
   },
   buttonContainer: {
     width: '100%',
-    gap: 16,
-    marginTop: 32,
+    gap: spacing.md,
+    marginTop: spacing.xl,
   },
   button: {
     width: '100%',
-    height: 56,
   },
   percentage: {
     color: theme.colors.primaryContainer,
     textAlign: 'center',
   },
-
 }); 

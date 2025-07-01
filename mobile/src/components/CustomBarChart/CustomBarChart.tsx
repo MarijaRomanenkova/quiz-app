@@ -14,8 +14,9 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { theme } from '../../theme';
+import { formatTime } from '../../utils/formatUtils';
 
 /**
  * Data structure for individual bar items
@@ -37,9 +38,9 @@ interface BarData {
  * @interface CustomBarChartProps
  * @property {BarData[]} data - Array of data points to display as bars
  * @property {number} [height] - Custom height for the chart container
- * @property {number} [width] - Custom width for the chart container (defaults to screen width - 64)
- * @property {number} [maxValue] - Maximum value for scaling (auto-calculated if not provided)
- * @property {boolean} [showValues=false] - Whether to show value labels (currently unused)
+ * @property {number} [width=screenWidth - 64] - Custom width for the chart container
+ * @property {number} [maxValue] - Maximum value for scaling
+ * @property {boolean} [showValues=false] - Whether to show value labels
  * @property {number} [barSpacing=2] - Spacing between bars in pixels
  * @property {number} [barWidth] - Custom width for bars (auto-calculated if not provided)
  * @property {string} [testID] - Optional testID for testing
@@ -55,7 +56,34 @@ interface CustomBarChartProps {
   testID?: string;
 }
 
+// Constants
 const screenWidth = Dimensions.get('window').width;
+const SOFT_CAP = 75; // Soft cap at 75 minutes for visual purposes
+
+// Utility functions
+/**
+ * Calculates the height of a bar based on its value and the soft cap system
+ * 
+ * Values up to the soft cap (75 minutes) are displayed proportionally.
+ * Values above the soft cap are compressed to prevent visual domination
+ * while still indicating they are higher than the cap.
+ * 
+ * @param {number} value - The numeric value to calculate height for
+ * @param {number} visualMax - The maximum value for scaling
+ * @param {number} containerHeight - The height of the chart container
+ * @returns {number} The calculated height in pixels
+ */
+const getBarHeight = (value: number, visualMax: number, containerHeight: number): number => {
+  if (value <= SOFT_CAP) {
+    return (value / visualMax) * (containerHeight - 20);
+  } else {
+    // For values above soft cap, compress but still show they're higher
+    const compressedValue = SOFT_CAP + (value - SOFT_CAP) * 0.3;
+    return (compressedValue / visualMax) * (containerHeight - 20);
+  }
+};
+
+
 
 /**
  * Custom Bar Chart component with interactive tooltips
@@ -108,16 +136,12 @@ export const CustomBarChart: React.FC<CustomBarChartProps> = ({
   barWidth,
   testID,
 }) => {
+  // State
   const [selectedBar, setSelectedBar] = useState<number | null>(null);
   
-  // Calculate max value if not provided
+  // Derived values
   const actualMax = maxValue || Math.max(...data.map(item => item.value), 1);
-  
-  // Soft cap at 75 minutes for visual purposes
-  const softCap = 75;
-  const visualMax = Math.min(actualMax, softCap);
-  
-  // Use provided height or calculate a reasonable height based on width
+  const visualMax = Math.min(actualMax, SOFT_CAP);
   const containerHeight = height || Math.min(width * 0.6, 200); // 60% of width, max 200px
   
   // Calculate responsive bar width if not provided
@@ -131,46 +155,11 @@ export const CustomBarChart: React.FC<CustomBarChartProps> = ({
   // Calculate total width needed for bars
   const totalBarWidth = data.length * calculatedBarWidth + (data.length - 1) * barSpacing;
   
-  /**
-   * Calculates the height of a bar based on its value and the soft cap system
-   * 
-   * Values up to the soft cap (75 minutes) are displayed proportionally.
-   * Values above the soft cap are compressed to prevent visual domination
-   * while still indicating they are higher than the cap.
-   * 
-   * @param {number} value - The numeric value to calculate height for
-   * @returns {number} The calculated height in pixels
-   */
-  const getBarHeight = (value: number) => {
-    if (value <= softCap) {
-      return (value / visualMax) * (containerHeight - 20);
-    } else {
-      // For values above soft cap, compress but still show they're higher
-      const compressedValue = softCap + (value - softCap) * 0.3;
-      return (compressedValue / visualMax) * (containerHeight - 20);
-    }
-  };
-  
-  /**
-   * Formats time values for display in tooltips
-   * 
-   * Converts minutes to hours and minutes format for better readability.
-   * 
-   * @param {number} minutes - The time value in minutes
-   * @returns {string} Formatted time string (e.g., "1h 30min" or "45 min")
-   */
-  const formatTime = (minutes: number): string => {
-    if (minutes < 60) return `${Math.round(minutes)} min`;
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.round(minutes % 60);
-    return `${hours}h ${mins}min`;
-  };
-  
   return (
     <View style={[styles.container, { width, height: containerHeight }]} testID={testID}>
       <View style={[styles.barsContainer, { width: totalBarWidth }]}>
         {data.map((item, index) => {
-          const barHeight = Math.max(getBarHeight(item.value), 4); // Minimum height for visibility
+          const barHeight = Math.max(getBarHeight(item.value, visualMax, containerHeight), 4); // Minimum height for visibility
           const barColor = item.color || theme.colors.primaryContainer;
           const isSelected = selectedBar === index;
           
@@ -207,6 +196,7 @@ export const CustomBarChart: React.FC<CustomBarChartProps> = ({
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',

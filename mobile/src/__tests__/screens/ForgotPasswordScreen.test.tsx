@@ -5,6 +5,97 @@ import { configureStore } from '@reduxjs/toolkit';
 import { ForgotPasswordScreen } from '../../screens/ForgotPassword/ForgotPasswordScreen';
 import authReducer from '../../store/authSlice';
 
+// Mock theme
+jest.mock('../../theme', () => ({
+  theme: {
+    colors: {
+      primary: '#EDE7FF',
+      secondary: '#8BF224',
+      background: '#FFF',
+      surface: '#FFF',
+      text: '#000',
+      error: '#FF4B4B',
+      secondaryContainer: '#EDE7FF',
+    },
+    buttons: {
+      borderRadius: 20,
+      paddingVertical: 8,
+      marginVertical: 8,
+      fontSize: 24,
+      variants: {
+        primary: {
+          backgroundColor: '#8BF224',
+          textColor: '#000000',
+          borderColor: '#8BF224',
+        },
+        secondary: {
+          backgroundColor: '#4313E2',
+          textColor: '#FFFFFF',
+          borderColor: '#4313E2',
+        },
+        success: {
+          backgroundColor: '#8BF224',
+          textColor: '#000000',
+          borderColor: '#8BF224',
+        },
+      },
+    },
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 16,
+    lg: 24,
+    xl: 32,
+    xxl: 48,
+  },
+  fonts: {
+    sizes: { small: 12, medium: 16, large: 20, xlarge: 24 },
+    weights: { regular: 'Baloo2-Regular', semiBold: 'Baloo2-SemiBold' },
+  },
+  layout: {
+    borderRadius: { small: 8, medium: 15, large: 20 },
+    shadow: {
+      small: {},
+      medium: {},
+      large: {},
+    },
+  },
+}));
+
+jest.mock('../../utils/themeUtils', () => ({
+  createLayoutStyles: () => ({
+    container: { flex: 1 },
+    content: { flex: 1, padding: 24 },
+    centered: { justifyContent: 'center', alignItems: 'center' },
+    row: { flexDirection: 'row', alignItems: 'center' },
+    spaceBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  }),
+  createTextStyles: () => ({
+    text: { fontSize: 16, fontFamily: 'Baloo2-Regular', color: '#000000' },
+  }),
+  createInputStyles: () => ({
+    input: { borderRadius: 20, paddingHorizontal: 15, fontSize: 16, backgroundColor: '#FFF', color: '#000', borderColor: '#000', borderWidth: 1 },
+    label: { fontSize: 16, fontFamily: 'Baloo2-SemiBold', color: '#000', marginBottom: 8 },
+  }),
+}));
+
+jest.mock('../../components/common/LoadingWrapper', () => {
+  const React = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    LoadingWrapper: ({ children, isLoading, error, loadingText }: any) => {
+      if (isLoading) {
+        return <Text>{loadingText || 'Loading...'}</Text>;
+      }
+      if (error) {
+        return <Text>Error: {error}</Text>;
+      }
+      return <View>{children}</View>;
+    },
+  };
+});
+
 // Mock the useAuth hook
 const mockForgotPassword = jest.fn();
 const mockUseAuth = {

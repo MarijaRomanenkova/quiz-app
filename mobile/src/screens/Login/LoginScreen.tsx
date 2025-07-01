@@ -18,8 +18,8 @@
  */
 
 import React, { useState } from 'react';
-import { StyleSheet, View, Dimensions } from 'react-native';
-import { Text, Surface, ActivityIndicator, Portal } from 'react-native-paper';
+import { StyleSheet, View } from 'react-native';
+import { Text, Surface, Portal } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
@@ -28,33 +28,20 @@ import { Button } from '../../components/Button/Button';
 import { Input } from '../../components/Input/Input';
 import { CustomModal } from '../../components/Modal/CustomModal';
 import { useForm, Controller } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { theme } from '../../theme';
+import { theme, fonts, spacing } from '../../theme';
 import { useAuth } from '../../hooks/useAuth';
-import { Alert } from 'react-native';
 import { TextInput } from 'react-native-paper';
+import { loginSchema, type LoginFormData } from '../../utils/validationSchemas';
+import { usePasswordVisibility } from '../../hooks/usePasswordVisibility';
+import { useFormLoading } from '../../hooks/useFormLoading';
+import { handleApiError } from '../../utils/apiUtils';
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
+import { LoadingWrapper } from '../../components/common/LoadingWrapper';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
-/**
- * Zod schema for login form validation
- * 
- * Defines validation rules for email and password fields:
- * - Email must be a valid email format
- * - Password must be at least 8 characters with specific requirements
- */
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
-});
 
-type LoginFormData = z.infer<typeof loginSchema>;
 
 /**
  * Login Screen component for user authentication
@@ -83,7 +70,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
  */
 export const LoginScreen = () => {
   const navigation = useNavigation<NavigationProp>();
-  const [showPassword, setShowPassword] = useState(false);
+  const { showPassword, togglePasswordVisibility } = usePasswordVisibility();
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const { login, isLoading, error } = useAuth();
 
@@ -130,10 +117,9 @@ export const LoginScreen = () => {
 
   if (isLoading) {
     return (
-      <Surface style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color={theme.colors.secondary} />
-        <Text style={styles.loadingText}>Logging in...</Text>
-      </Surface>
+      <LoadingWrapper isLoading={true} loadingText="Logging in...">
+        <></>
+      </LoadingWrapper>
     );
   }
 
@@ -178,7 +164,8 @@ export const LoginScreen = () => {
                 right={
                   <TextInput.Icon
                     icon={showPassword ? "eye-off" : "eye"}
-                    onPress={() => setShowPassword(!showPassword)}
+                    onPress={togglePasswordVisibility}
+                    color={theme.colors.surface}
                   />
                 }
               />
@@ -230,86 +217,72 @@ export const LoginScreen = () => {
   );
 };
 
+const layoutStyles = createLayoutStyles();
+const titleStyles = createTextStyles('xlarge', 'bold', theme.colors.surface);
+const subtitleStyles = createTextStyles('large', 'semiBold', theme.colors.surface);
+const bodyStyles = createTextStyles('medium', 'medium', theme.colors.surface);
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...layoutStyles.container,
     width: '100%',
     height: '100%',
-    backgroundColor: theme.colors.background,
     padding: 0,
   },
   content: {
-    flex: 1,
-    padding: 24,
+    ...layoutStyles.content,
   },
   header: {
     marginTop: 40,
     alignItems: 'center',
-    color: theme.colors.surface,
     textAlign: 'center',
     fontFamily: 'BalooBhaina2-Bold',
     fontSize: 42,
     fontWeight: 'bold',
+    color: theme.colors.surface,
   },
   title: {
-    color: theme.colors.surface,
-    textAlign: 'center',
+    ...subtitleStyles.text,
     fontFamily: 'BalooBhaina2-Bold',
-    fontSize: 28,
   },
   logoContainer: {
     width: '100%',
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 10,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
   },
   formContainer: {
     flex: 1,
     justifyContent: 'center',
-    marginTop: 16, // Adjust this value to fine-tune the vertical centering
+    marginTop: spacing.md,
   },
   buttonContainer: {
-    padding: 24,
+    padding: spacing.lg,
     paddingBottom: 40,
   },
   registerButton: {
-    marginTop: 12,
+    marginTop: spacing.sm,
   },
   forgotPasswordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   forgotPasswordText: {
-    color: theme.colors.surface,
-    fontSize: 16,
-    fontFamily: 'Baloo2-Medium',
+    ...bodyStyles.text,
     textAlign: 'center',
   },
   recoverLink: {
-    color: theme.colors.surface,
-    fontSize: 16,
-    marginLeft: 4,
+    ...bodyStyles.text,
+    marginLeft: spacing.xs,
     fontWeight: 'bold',
-    fontFamily: 'Baloo2-Bold',
-    textAlignVertical: 'center',
-  },
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: theme.colors.surface,
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 12,
+    fontFamily: fonts.weights.bold,
   },
   registerText: {
-    color: theme.colors.surface,
-    fontSize: 16,
-    fontFamily: 'Baloo2-Bold',
+    ...bodyStyles.text,
+    fontFamily: fonts.weights.bold,
     textAlign: 'center',
-    marginTop: 16,
+    marginTop: spacing.md,
   },
 }); 

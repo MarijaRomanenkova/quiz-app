@@ -22,7 +22,7 @@ import { Text } from 'react-native-paper';
 import { useNavigation, RouteProp, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/AppNavigator';
-import { theme } from '../../theme';
+import { theme, fonts, spacing, layout } from '../../theme';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { Button } from '../../components/Button/Button';
@@ -30,6 +30,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { QuizTopic } from '../../types';
 import { selectUnlockedTopicsForCategory, selectTopicProgress } from '../../store/progressSlice';
 import { BackButton } from '../../components/BackButton';
+import { createLayoutStyles, createTextStyles, createCardStyles } from '../../utils/themeUtils';
 
 /**
  * Props interface for the TopicItem component
@@ -202,27 +203,29 @@ export const TopicScreen = () => {
           onPress={handleQuizPress}
           disabled={!selectedTopic}
         >
-          Start Quiz
+          OK
         </Button>
       </View>
     </View>
   );
 };
 
+const layoutStyles = createLayoutStyles();
+const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.text);
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 24,
+    ...layoutStyles.container,
+    padding: spacing.lg,
     backgroundColor: theme.colors.secondaryContainer,
   },
   backButton: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   topics: {
+    ...titleStyles.text,
     textAlign: 'center',
-    fontFamily: 'Baloo2-SemiBold',
-    fontSize: 24,
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   scrollView: {
     flex: 1,
@@ -231,11 +234,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.sm,
     backgroundColor: theme.colors.surface,
-    borderRadius: 20,
+    borderRadius: layout.borderRadius.large,
     borderWidth: 1,
     borderColor: theme.colors.outline,
   },
@@ -251,7 +254,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   radioLabel: {
-    fontSize: 16,
+    fontSize: fonts.sizes.medium,
     fontWeight: 'bold',
   },
   selectedRadioLabel: {

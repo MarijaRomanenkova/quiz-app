@@ -21,29 +21,23 @@ import { Text, Surface, Portal } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
-import { theme } from '../../theme';
+import { theme, spacing } from '../../theme';
 import { Button } from '../../components/Button/Button';
 import { Input } from '../../components/Input/Input';
 import { CustomModal } from '../../components/Modal/CustomModal';
 import { useForm, Controller } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { API_URL } from '../../config';
 import { BackButton } from '../../components/BackButton';
+import { forgotPasswordSchema, type ForgotPasswordFormData } from '../../utils/validationSchemas';
+import { useFormLoading } from '../../hooks/useFormLoading';
+import { handleApiError, fetchWithAuth } from '../../utils/apiUtils';
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
+import { LoadingWrapper } from '../../components/common/LoadingWrapper';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'ForgotPassword'>;
 
-/**
- * Zod schema for forgot password form validation
- * 
- * Defines validation rules for the email field:
- * - Email must be a valid email format
- */
-const forgotPasswordSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-});
 
-type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 /**
  * Forgot Password Screen component for password recovery
@@ -72,7 +66,7 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export const ForgotPasswordScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, withLoading } = useFormLoading();
 
   const { control, handleSubmit, formState: { errors } } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -91,29 +85,19 @@ export const ForgotPasswordScreen = () => {
    * @param {ForgotPasswordFormData} data - The validated form data
    */
   const onSubmit = async (data: ForgotPasswordFormData) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`${API_URL}/auth/forgot-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send recovery email');
+    await withLoading(async () => {
+      try {
+        await fetchWithAuth(`${API_URL}/auth/forgot-password`, {
+          method: 'POST',
+          body: JSON.stringify({
+            email: data.email,
+          }),
+        });
+        setShowSuccessModal(true);
+      } catch (error) {
+        handleApiError(error, 'Failed to send recovery email');
       }
-
-      setShowSuccessModal(true);
-    } catch (error) {
-      console.error('Password recovery error:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   /**
@@ -161,7 +145,7 @@ export const ForgotPasswordScreen = () => {
           <Button
             mode="contained"
             onPress={handleSubmit(onSubmit)}
-            variant="primary"
+            variant="success"
             disabled={isLoading}
           >
             {isLoading ? 'Sending...' : 'Send Recovery Email'}

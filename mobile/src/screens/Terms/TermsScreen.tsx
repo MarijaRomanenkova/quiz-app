@@ -20,7 +20,8 @@ import { Surface, Text, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
-import { theme } from '../../theme';
+import { theme, fonts, spacing, layout } from '../../theme';
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Terms'>;
 
@@ -69,36 +70,39 @@ export const TermsScreen = () => {
   );
 };
 
+const layoutStyles = createLayoutStyles();
+const titleStyles = createTextStyles('large', 'semiBold', theme.colors.primary);
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...layoutStyles.container,
     backgroundColor: theme.colors.secondaryContainer,
-    padding: 24,
+    padding: spacing.lg,
   },
   screenContainer: {
-    flex: 1,
+    ...layoutStyles.container,
     backgroundColor: theme.colors.background,
-    padding: 16,
+    padding: spacing.md,
   },
   title: {
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   titleText: {
-    color: theme.colors.primary,
+    ...titleStyles.text,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   termsText: {
-    marginVertical: 24,
-    lineHeight: 24,
+    marginVertical: spacing.lg,
+    lineHeight: fonts.sizes.large,
   },
   backButton: {
     backgroundColor: theme.colors.primary,
-    borderRadius: 30,
-    paddingVertical: 6,
+    borderRadius: layout.borderRadius.large,
+    paddingVertical: spacing.xs,
   },
   buttonMargin: {
-    marginTop: 16,
+    marginTop: spacing.md,
   },
 }); 
