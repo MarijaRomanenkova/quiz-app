@@ -15,16 +15,14 @@ interface DailyStats {
 }
 
 /**
- * Interface representing the best attempt for a topic
+ * Interface representing a quiz result
  */
-interface BestAttempt {
-  /** Topic ID */
-  topicId: string;
-  /** Score achieved (0-100) */
+interface QuizResult {
+  /** Score achieved in the quiz (0-100) */
   score: number;
-  /** Date of the attempt in ISO format */
-  date: string;
-  /** Time spent on the attempt in minutes */
+  /** Total number of questions in the quiz */
+  totalQuestions: number;
+  /** Time spent on the quiz in minutes */
   timeSpent: number;
 }
 
@@ -50,12 +48,12 @@ interface ActiveQuiz {
 interface QuizState {
   /** ID of the currently selected topic */
   currentTopicId: string | null;
-  /** Array of question IDs that were answered incorrectly */
-  wrongQuestionIds: string[];
+  /** Array of questions that were answered incorrectly */
+  wrongQuestions: Question[];
   /** Array of daily statistics */
   dailyStats: DailyStats[];
-  /** Array of best attempts for each topic */
-  bestAttempts: BestAttempt[];
+  /** Current quiz result or null if no result is stored */
+  currentResult: QuizResult | null;
   /** Current active quiz state or null if no quiz is active */
   activeQuiz: ActiveQuiz | null;
 }
@@ -65,9 +63,9 @@ interface QuizState {
  */
 const initialState: QuizState = {
   currentTopicId: null,
-  wrongQuestionIds: [],
+  wrongQuestions: [],
   dailyStats: [],
-  bestAttempts: [],
+  currentResult: null,
   activeQuiz: null,
 };
 
@@ -75,7 +73,7 @@ const initialState: QuizState = {
  * Redux slice for managing quiz state and progress
  * 
  * This slice handles active quiz sessions, wrong question tracking,
- * daily statistics, best attempts, and quiz navigation state.
+ * daily statistics, quiz results, and quiz navigation state.
  */
 export const quizSlice = createSlice({
   name: 'quiz',
@@ -91,20 +89,20 @@ export const quizSlice = createSlice({
     },
     
     /**
-     * Adds a question ID to the list of wrong questions
+     * Adds a question to the list of wrong questions
      * @param state - Current quiz state
-     * @param action - Question ID to add
+     * @param action - Question object to add
      */
-    addWrongQuestion: (state, action: PayloadAction<string>) => {
-      state.wrongQuestionIds.push(action.payload);
+    addWrongQuestion: (state, action: PayloadAction<Question>) => {
+      state.wrongQuestions.push(action.payload);
     },
     
     /**
-     * Clears all wrong question IDs
+     * Clears all wrong questions
      * @param state - Current quiz state
      */
     clearWrongQuestions: (state) => {
-      state.wrongQuestionIds = [];
+      state.wrongQuestions = [];
     },
     
     /**
@@ -134,35 +132,20 @@ export const quizSlice = createSlice({
     },
     
     /**
-     * Updates the best attempt for a topic if the new score is higher
+     * Sets the current quiz result
      * @param state - Current quiz state
-     * @param action - Object containing topic ID, score, and time spent
+     * @param action - Quiz result data to store
      */
-    updateBestAttempt: (state, action: PayloadAction<{
-      topicId: string;
-      score: number;
-      timeSpent: number;
-    }>) => {
-      const { topicId, score, timeSpent } = action.payload;
-      const existingIndex = state.bestAttempts.findIndex(attempt => attempt.topicId === topicId);
-      
-      if (existingIndex >= 0) {
-        if (state.bestAttempts[existingIndex].score < score) {
-          state.bestAttempts[existingIndex] = {
-            topicId,
-            score,
-            timeSpent,
-            date: new Date().toISOString()
-          };
-        }
-      } else {
-        state.bestAttempts.push({
-          topicId,
-          score,
-          timeSpent,
-          date: new Date().toISOString()
-        });
-      }
+    setQuizResult: (state, action: PayloadAction<QuizResult>) => {
+      state.currentResult = action.payload;
+    },
+    
+    /**
+     * Clears the current quiz result
+     * @param state - Current quiz state
+     */
+    clearQuizResult: (state) => {
+      state.currentResult = null;
     },
     
     /**
@@ -239,7 +222,8 @@ export const {
   addWrongQuestion, 
   clearWrongQuestions,
   updateDailyStats,
-  updateBestAttempt,
+  setQuizResult,
+  clearQuizResult,
   startQuiz,
   selectAnswer,
   nextQuestion,
@@ -261,12 +245,21 @@ export const selectCurrentTopicId = createSelector(
 );
 
 /**
- * Selector to get all wrong question IDs
- * @returns Array of question IDs that were answered incorrectly
+ * Selector to get all wrong questions
+ * @returns Array of questions that were answered incorrectly
  */
-export const selectWrongQuestionIds = createSelector(
+export const selectWrongQuestions = createSelector(
   [selectQuizState],
-  (quizState) => quizState.wrongQuestionIds
+  (quizState) => quizState.wrongQuestions
+);
+
+/**
+ * Selector to get wrong questions for a specific topic
+ * @returns Array of wrong questions for the specified topic
+ */
+export const selectWrongQuestionsByTopic = createSelector(
+  [selectWrongQuestions, (_state: RootState, topicId: string) => topicId],
+  (questions, topicId) => questions.filter(q => q.topicId === topicId)
 );
 
 /**
@@ -279,21 +272,12 @@ export const selectDailyStats = createSelector(
 );
 
 /**
- * Selector to get all best attempts
- * @returns Array of best attempts for each topic
+ * Selector to get the current quiz result
+ * @returns Current quiz result or null if no result is stored
  */
-export const selectBestAttempts = createSelector(
+export const selectCurrentQuizResult = createSelector(
   [selectQuizState],
-  (quizState) => quizState.bestAttempts
-);
-
-/**
- * Selector to get the best attempt for a specific topic
- * @returns Best attempt for the specified topic or undefined if not found
- */
-export const selectBestAttemptByTopic = createSelector(
-  [selectBestAttempts, (_state: RootState, topicId: string) => topicId],
-  (bestAttempts, topicId) => bestAttempts.find(attempt => attempt.topicId === topicId)
+  (quizState) => quizState.currentResult
 );
 
 /**

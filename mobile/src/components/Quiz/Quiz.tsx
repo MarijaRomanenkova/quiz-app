@@ -25,7 +25,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../../store';
 import { 
   updateDailyStats,
-  updateBestAttempt,
   startQuiz,
   selectAnswer,
   nextQuestion,
@@ -34,12 +33,14 @@ import {
   endQuiz,
   selectActiveQuiz
 } from '../../store/quizSlice';
-import { selectQuestionsForTopic } from '../../store/questionsSlice';
-import { selectReadingTextById } from '../../store/readingTextsSlice';
+import { selectQuestionsForTopic, selectReadingTextById } from '../../store/questionsSlice';
 import { store } from '../../store';
 import { Button as CustomButton } from '../../components/Button/Button';
-import { setQuizResult } from '../../store/quizResultsSlice';
-import { addWrongQuestion as addToWrongQuestions, selectWrongQuestions } from '../../store/wrongQuestionsSlice';
+import { 
+  addWrongQuestion, 
+  selectWrongQuestions, 
+  setQuizResult 
+} from '../../store/quizSlice';
 import { completeTopic, updateTopicAttempt, loadMoreQuestionsThunk } from '../../store/progressSlice';
 import { startQuizSession, endQuizSession } from '../../store/statisticsSlice';
 import { AudioPlayer, AudioPlayerRef } from '../AudioPlayer/AudioPlayer';
@@ -103,7 +104,6 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   const activeQuiz = useSelector(selectActiveQuiz);
   const questions = useSelector((state: RootState) => selectQuestionsForTopic(state, quizId));
   const questionsState = useSelector((state: RootState) => state.questions);
-  const readingTextsState = useSelector((state: RootState) => state.readingTexts);
   const topics = useSelector((state: RootState) => state.topic.topics);
   const startTime = useRef(Date.now());
   const audioQuestionRef = useRef<AudioPlayerRef>(null);
@@ -143,7 +143,7 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
         if (questions[0]?.readingTextId) {
           // Check if reading texts are loaded in Redux
           const state = store.getState();
-          const readingTextsLoaded = Object.keys(state.readingTexts.byId).length > 0;
+          const readingTextsLoaded = Object.keys(state.questions.readingTextsById).length > 0;
           
           if (!readingTextsLoaded) {
             // Wait a bit and try again
@@ -177,7 +177,11 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     return () => {
       dispatch(endQuiz());
       // End the quiz session timer when component unmounts
-      dispatch(endQuizSession());
+      // Only end session if it's still active
+      const currentState = store.getState();
+      if (currentState.statistics.currentSessionStart) {
+        dispatch(endQuizSession());
+      }
     };
   }, [quizId]);
 
@@ -195,7 +199,7 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
     if (isCorrect && activeQuiz) {
       dispatch(updateScore(activeQuiz.score + 1));
     } else if (currentQuestion) {
-      dispatch(addToWrongQuestions(currentQuestion));
+      dispatch(addWrongQuestion(currentQuestion));
     }
   };
 
@@ -220,12 +224,6 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
       dispatch(updateDailyStats({
         timeSpent,
         questionsAnswered: questions.length
-      }));
-
-      dispatch(updateBestAttempt({
-        topicId: quizId,
-        score: finalScore,
-        timeSpent
       }));
 
       dispatch(setQuizResult({
@@ -255,7 +253,11 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
       }
 
       // End the quiz session timer before navigating to results
-      dispatch(endQuizSession());
+      // Only end session if it's still active (not already ended by cleanup)
+      const currentState = store.getState();
+      if (currentState.statistics.currentSessionStart) {
+        dispatch(endQuizSession());
+      }
       navigation.navigate('Results', { quizId });
     }
   };
@@ -316,7 +318,7 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
 
   // Check if reading texts are needed and loaded
   const needsReadingTexts = questions[0]?.readingTextId;
-  const readingTextsLoaded = Object.keys(readingTextsState.byId).length > 0;
+  const readingTextsLoaded = Object.keys(questionsState.readingTextsById).length > 0;
   
   if (needsReadingTexts && !readingTextsLoaded) {
     return (

@@ -26,7 +26,7 @@ import { RootState } from '../../store';
 import { fetchCategoriesThunk, setSelectedCategory } from '../../store/categorySlice';
 import { fetchTopicsThunk } from '../../store/topicSlice';
 import { fetchAllQuestionsThunk } from '../../store/questionsSlice';
-import { fetchAllReadingTextsThunk } from '../../store/readingTextsSlice';
+import { fetchAllReadingTextsThunk } from '../../store/questionsSlice';
 import { initializeCategoryProgress, updateCompletedTopicsCategories } from '../../store/progressSlice';
 import type { AppDispatch } from '../../store';
 import { Button } from '../../components/Button/Button';
@@ -72,7 +72,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const { topics } = useSelector((state: RootState) => state.topic);
   const { user, token } = useSelector((state: RootState) => state.auth);
   const questionsState = useSelector((state: RootState) => state.questions);
-  const readingTextsState = useSelector((state: RootState) => state.readingTexts);
+  const readingTextsState = useSelector((state: RootState) => state.questions);
   const { topicProgress, categoryProgress } = useSelector((state: RootState) => state.progress);
 
   /**
@@ -137,7 +137,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
           });
       } else {
         // Check if reading texts are loaded
-        const hasReadingTexts = readingTextsState.byId && Object.keys(readingTextsState.byId).length > 0;
+        const hasReadingTexts = readingTextsState.readingTextsById && Object.keys(readingTextsState.readingTextsById).length > 0;
         if (!hasReadingTexts) {
           dispatch(fetchAllReadingTextsThunk()).unwrap()
             .then((readingTextsData) => {

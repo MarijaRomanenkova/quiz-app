@@ -60,8 +60,8 @@ export const ResultsScreen = () => {
   const route = useRoute<ResultsScreenRouteProp>();
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.user);
-  const quizResult = useSelector((state: RootState) => state.quizResults.currentResult);
-  const wrongQuestions = useSelector((state: RootState) => state.wrongQuestions.wrongQuestions);
+  const quizResult = useSelector((state: RootState) => state.quiz.currentResult);
+  const wrongQuestions = useSelector((state: RootState) => state.quiz.wrongQuestions);
   
   // Get progress information
   const [categoryId, setCategoryId] = useState<string | null>(null);

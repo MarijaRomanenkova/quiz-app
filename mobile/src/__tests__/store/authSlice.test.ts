@@ -9,7 +9,7 @@ import authReducer, {
   logoutWithStatisticsSync,
 } from '../../store/authSlice';
 import { loadStatisticsData } from '../../store/statisticsSlice';
-import { loadCompletedTopics } from '../../store/progressSlice';
+import { loadCompletedTopics, updateCompletedTopicsCategories } from '../../store/progressSlice';
 import authService from '../../services/authService';
 import { fetchStatisticsData, syncStatisticsData, updateUserProfile } from '../../services/api';
 
@@ -31,15 +31,34 @@ describe('authSlice', () => {
     return configureStore({
       reducer: {
         auth: authReducer,
-        statistics: (state = { totalQuizMinutes: 0, dailyQuizTimes: [] }, action: any) => {
+        statistics: (state: any = { totalQuizMinutes: 0, dailyQuizTimes: [] }, action: any) => {
           if (action.type === loadStatisticsData.type) {
-            return { ...state, ...action.payload };
+            const payload = action.payload || {};
+            return { 
+              totalQuizMinutes: payload.totalQuizMinutes || state.totalQuizMinutes,
+              dailyQuizTimes: payload.dailyQuizTimes || state.dailyQuizTimes
+            };
           }
           return state;
         },
-        progress: (state = { topicProgress: {} }, action: any) => {
+        progress: (state: any = { topicProgress: {} }, action: any) => {
           if (action.type === loadCompletedTopics.type) {
-            return { ...state, topicProgress: action.payload };
+            const completedTopics = action.payload || [];
+            const newTopicProgress = { ...state.topicProgress };
+            
+            // Convert completed topics to topic progress format
+            completedTopics.forEach((completedTopic: any) => {
+              newTopicProgress[completedTopic.topicId] = {
+                topicId: completedTopic.topicId,
+                categoryId: '', // Will be set when topics are loaded
+                completed: true,
+                score: completedTopic.score,
+                attempts: 1, // We don't store attempts in backend, so default to 1
+                lastAttemptDate: completedTopic.completedAt
+              };
+            });
+            
+            return { topicProgress: newTopicProgress };
           }
           return state;
         },
@@ -276,16 +295,23 @@ describe('authSlice', () => {
         // Set up statistics and progress state
         store.dispatch(loadStatisticsData({
           totalQuizMinutes: 120,
-          dailyQuizTimes: [{ date: '2024-01-01', minutes: 30 }],
+          dailyQuizTimes: [{ date: '2024-01-01', minutes: 30, lastUpdated: '2024-01-01T00:00:00Z' }],
         }));
-        store.dispatch(loadCompletedTopics({
-          'topic-1': {
+        
+        // Set up completed topics in progress state
+        store.dispatch(loadCompletedTopics([
+          {
             topicId: 'topic-1',
-            completed: true,
             score: 85,
-            lastAttemptDate: '2024-01-01',
+            completedAt: '2024-01-01T10:00:00Z',
           },
-        }));
+        ]));
+        
+        // Manually set the categoryId for the completed topic since loadCompletedTopics sets it to empty string
+        const progressState = store.getState().progress;
+        if (progressState.topicProgress['topic-1']) {
+          store.dispatch(updateCompletedTopicsCategories([{ topicId: 'topic-1', categoryId: 'test-category' }]));
+        }
 
         mockApi.syncStatisticsData.mockResolvedValue(undefined);
         mockApi.updateUserProfile.mockResolvedValue(undefined);
@@ -300,12 +326,12 @@ describe('authSlice', () => {
 
         expect(mockApi.syncStatisticsData).toHaveBeenCalledWith({
           totalQuizMinutes: 120,
-          dailyQuizTimes: [{ date: '2024-01-01', minutes: 30 }],
+          dailyQuizTimes: [{ date: '2024-01-01', minutes: 30, lastUpdated: '2024-01-01T00:00:00Z' }],
           completedTopics: [
             {
               topicId: 'topic-1',
               score: 85,
-              completedAt: '2024-01-01',
+              completedAt: '2024-01-01T10:00:00Z',
             },
           ],
         }, 'test-token');

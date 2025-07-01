@@ -8,14 +8,11 @@
  * The store includes the following slices:
  * - auth: Authentication state and user session management
  * - user: User profile data and preferences
- * - quiz: Current quiz session state and progress
+ * - quiz: Current quiz session state, wrong questions, and quiz results
  * - statistics: User performance statistics and analytics
  * - category: Available quiz categories
  * - topic: Available quiz topics
- * - questions: Quiz questions data
- * - readingTexts: Reading comprehension texts
- * - quizResults: Historical quiz results and scores
- * - wrongQuestions: Incorrectly answered questions for review
+ * - questions: Quiz questions data and reading texts
  * - progress: User learning progress and achievements
  * 
  * @module store
@@ -33,9 +30,6 @@ import statisticsReducer from './statisticsSlice';
 import categoryReducer from './categorySlice';
 import topicReducer from './topicSlice';
 import questionsReducer from './questionsSlice';
-import readingTextsReducer from './readingTextsSlice';
-import quizResultsReducer from './quizResultsSlice';
-import wrongQuestionsReducer from './wrongQuestionsSlice';
 import progressReducer from './progressSlice';
 
 /**
@@ -58,7 +52,6 @@ const persistConfig = {
     'user', 
     'statistics', 
     'questions',
-    'readingTexts',
     'category',
     'topic',
     'progress'
@@ -71,14 +64,11 @@ const persistConfig = {
  * Each slice manages a specific domain of the application state:
  * - user: User profile and preferences
  * - auth: Authentication and session state
- * - quiz: Current quiz session
+ * - quiz: Current quiz session, wrong questions, and quiz results
  * - statistics: Performance metrics
  * - category: Quiz categories
  * - topic: Quiz topics
- * - questions: Quiz questions data
- * - readingTexts: Reading materials
- * - quizResults: Historical results
- * - wrongQuestions: Incorrect answers for review
+ * - questions: Quiz questions data and reading texts
  * - progress: Learning progress tracking
  * 
  * @type {Reducer}
@@ -91,9 +81,6 @@ const rootReducer = combineReducers({
   category: categoryReducer,
   topic: topicReducer,
   questions: questionsReducer,
-  readingTexts: readingTextsReducer,
-  quizResults: quizResultsReducer,
-  wrongQuestions: wrongQuestionsReducer,
   progress: progressReducer,
 });
 
