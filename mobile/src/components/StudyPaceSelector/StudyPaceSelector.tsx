@@ -73,11 +73,11 @@ export const StudyPaceSelector = ({ currentPaceId, onPaceChange }: StudyPaceSele
         style={styles.segmentedButtons}
         theme={{
           colors: {
-            secondaryContainer: '#EDE7FF',
-            onSecondaryContainer: '#000000',
-            primary: '#EDE7FF',
-            onPrimary: '#000000',
-            onSurface: '#FFFFFF',
+            secondaryContainer: theme.colors.secondaryContainer,
+            onSecondaryContainer: theme.colors.onSecondaryContainer,
+            primary: theme.colors.primary,
+            onPrimary: theme.colors.onSecondaryContainer,
+            onSurface: theme.colors.surface,
           },
         }}
       />
@@ -87,23 +87,23 @@ export const StudyPaceSelector = ({ currentPaceId, onPaceChange }: StudyPaceSele
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  segmentedButtons: {
-    width: '100%',
-    backgroundColor: 'transparent',
-  },
   button: {
-    flex: 1,
     borderColor: theme.colors.surface,
+    flex: 1,
+  },
+  container: {
+    alignItems: 'center',
+    width: '100%',
   },
   description: {
-    color: '#FFFFFF',
-    fontSize: 14,
+    color: theme.colors.surface,
     fontFamily: 'Baloo2-Regular',
-    textAlign: 'center',
+    fontSize: 14,
     marginTop: 8,
+    textAlign: 'center',
+  },
+  segmentedButtons: {
+    backgroundColor: theme.colors.transparent,
+    width: '100%',
   },
 }); 

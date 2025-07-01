@@ -30,8 +30,8 @@ export const createCardStyles = (variant: 'default' | 'selected' | 'elevated' = 
         card: {
           ...baseCard,
           ...layout.shadow.medium,
-          borderWidth: 2,
           borderColor: theme.colors.primary,
+          borderWidth: 2,
         },
       });
     case 'elevated':
@@ -66,9 +66,9 @@ export const createTextStyles = (
 ) => {
   return StyleSheet.create({
     text: {
-      fontSize: fonts.sizes[size],
-      fontFamily: fonts.weights[weight],
       color,
+      fontFamily: fonts.weights[weight],
+      fontSize: fonts.sizes[size],
     },
   });
 };
@@ -84,17 +84,17 @@ export const createButtonStyles = (variant: keyof typeof theme.buttons.variants 
   
   return StyleSheet.create({
     button: {
-      borderRadius: theme.buttons.borderRadius,
-      paddingVertical: theme.buttons.paddingVertical,
-      marginVertical: theme.buttons.marginVertical,
       backgroundColor: buttonVariant.backgroundColor,
       borderColor: buttonVariant.borderColor,
+      borderRadius: theme.buttons.borderRadius,
       borderWidth: 1,
+      marginVertical: theme.buttons.marginVertical,
+      paddingVertical: theme.buttons.paddingVertical,
     },
     buttonText: {
-      fontSize: theme.buttons.fontSize,
-      fontFamily: fonts.weights.semiBold,
       color: buttonVariant.textColor,
+      fontFamily: fonts.weights.semiBold,
+      fontSize: theme.buttons.fontSize,
       textAlign: 'center',
     },
   });
@@ -111,18 +111,18 @@ export const createInputStyles = (variant: keyof typeof theme.inputs.variants = 
   
   return StyleSheet.create({
     input: {
-      borderRadius: theme.inputs.borderRadius,
-      paddingHorizontal: theme.inputs.paddingHorizontal,
-      fontSize: theme.inputs.fontSize,
       backgroundColor: inputVariant.backgroundColor,
-      color: inputVariant.textColor,
       borderColor: inputVariant.borderColor,
+      borderRadius: theme.inputs.borderRadius,
       borderWidth: 1,
+      color: inputVariant.textColor,
+      fontSize: theme.inputs.fontSize,
+      paddingHorizontal: theme.inputs.paddingHorizontal,
     },
     label: {
-      fontSize: fonts.sizes.medium,
-      fontFamily: fonts.weights.semiBold,
       color: inputVariant.textColor,
+      fontFamily: fonts.weights.semiBold,
+      fontSize: fonts.sizes.medium,
       marginBottom: spacing.sm,
     },
   });
@@ -135,26 +135,74 @@ export const createInputStyles = (variant: keyof typeof theme.inputs.variants = 
  */
 export const createLayoutStyles = () => {
   return StyleSheet.create({
+    centered: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     container: {
-      flex: 1,
       backgroundColor: theme.colors.background,
+      flex: 1,
     },
     content: {
       flex: 1,
       padding: spacing.lg,
     },
-    centered: {
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
     row: {
-      flexDirection: 'row',
       alignItems: 'center',
+      flexDirection: 'row',
     },
     spaceBetween: {
+      alignItems: 'center',
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
+    },
+  });
+};
+
+/**
+ * Creates common shadow styles using theme values
+ * 
+ * @param variant - Shadow variant ('small', 'medium', 'large')
+ * @returns StyleSheet object with shadow styles
+ */
+export const createShadowStyles = (variant: keyof typeof layout.shadow = 'medium') => {
+  return StyleSheet.create({
+    shadow: layout.shadow[variant],
+  });
+};
+
+/**
+ * Creates common color styles using theme colors
+ * 
+ * @param colorType - Type of color to create ('surface', 'text', 'primary', 'error')
+ * @param opacity - Optional opacity (0-1, defaults to 1)
+ * @returns StyleSheet object with color styles
+ */
+export const createColorStyles = (
+  colorType: 'surface' | 'text' | 'primary' | 'error' | 'onSurface' | 'onSecondaryContainer' = 'surface',
+  opacity: number = 1
+) => {
+  const colorMap = {
+    surface: theme.colors.surface,
+    text: theme.colors.text,
+    primary: theme.colors.primary,
+    error: theme.colors.error,
+    onSurface: theme.colors.onSurface,
+    onSecondaryContainer: theme.colors.onSecondaryContainer,
+  };
+
+  const baseColor = colorMap[colorType];
+  const colorWithOpacity = opacity < 1 ? baseColor + Math.round(opacity * 255).toString(16).padStart(2, '0') : baseColor;
+
+  return StyleSheet.create({
+    backgroundColor: {
+      backgroundColor: colorWithOpacity,
+    },
+    textColor: {
+      color: colorWithOpacity,
+    },
+    borderColor: {
+      borderColor: colorWithOpacity,
     },
   });
 }; 

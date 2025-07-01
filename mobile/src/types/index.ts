@@ -468,3 +468,11 @@ export interface ContentState {
 // Remove duplicate RootStackParamList and export it from navigation.ts
 export type { RootStackParamList } from './navigation';
 
+// Export all types from centralized type files
+export * from './user.types';
+export * from './quiz.types';
+export * from './progress.types';
+export * from './auth.types';
+export * from './statistics.types';
+export * from './components.types';
+

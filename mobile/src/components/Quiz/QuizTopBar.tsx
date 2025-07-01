@@ -1,16 +1,10 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { theme } from '../../theme';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BackButton } from '../BackButton';
-
-type QuizTopBarProps = {
-  currentQuestion: number;
-  totalQuestions: number;
-  showReadingText: boolean;
-};
+import { QuizTopBarProps } from '../../types/components.types';
+import { theme } from '../../theme';
 
 export const QuizTopBar: React.FC<QuizTopBarProps> = ({ 
   currentQuestion, 
@@ -40,22 +34,22 @@ export const QuizTopBar: React.FC<QuizTopBarProps> = ({
 };
 
 const styles = StyleSheet.create({
+  backButton: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
   container: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingVertical: 4,
   },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  counterText: {
+    color: theme.colors.primaryContainer,
+    fontWeight: 'bold',
   },
   questionCounter: {
-    flexDirection: 'row',
     alignItems: 'center',
-  },
-  counterText: {
-    color: '#583FB0',
-    fontWeight: 'bold',
+    flexDirection: 'row',
   },
 }); 

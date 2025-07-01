@@ -131,9 +131,6 @@ export const fetchAllReadingTextsThunk = createAsyncThunk(
     // Filter questions that have reading texts
     const questionsWithReadingTexts = allQuestions.filter(q => q.readingTextId);
     
-    // Get unique reading text IDs
-    const readingTextIds = [...new Set(questionsWithReadingTexts.map(q => q.readingTextId))];
-    
     // Group questions by topic to fetch reading texts efficiently
     const topicsWithReadingQuestions = new Set(
       questionsWithReadingTexts.map(q => q.topicId)

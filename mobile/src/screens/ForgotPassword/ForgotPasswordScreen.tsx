@@ -22,6 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { theme, spacing } from '../../theme';
+import { createTextStyles } from '../../utils/themeUtils';
 import { Button } from '../../components/Button/Button';
 import { Input } from '../../components/Input/Input';
 import { CustomModal } from '../../components/Modal/CustomModal';
@@ -32,12 +33,14 @@ import { BackButton } from '../../components/BackButton';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '../../utils/validationSchemas';
 import { useFormLoading } from '../../hooks/useFormLoading';
 import { handleApiError, fetchWithAuth } from '../../utils/apiUtils';
-import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
-import { LoadingWrapper } from '../../components/common/LoadingWrapper';
+
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'ForgotPassword'>;
 
-
+// Create utility styles
+const backTextStyles = createTextStyles('medium', 'regular', theme.colors.surface);
+const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.surface);
+const subtitleStyles = createTextStyles('large', 'regular', theme.colors.surface);
 
 /**
  * Forgot Password Screen component for password recovery
@@ -124,7 +127,7 @@ export const ForgotPasswordScreen = () => {
             Recover Password
           </Text>
           <Text variant="bodyLarge" style={styles.subtitle}>
-            Enter your email address and we'll send you instructions to reset your password.
+            Enter your email address and we&apos;ll send you instructions to reset your password.
           </Text>
 
           <Controller
@@ -168,38 +171,36 @@ export const ForgotPasswordScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    gap: 8,
-  },
   backText: {
-    color: theme.colors.surface,
-    fontSize: 16,
-    fontFamily: 'Baloo2-Regular',
+    ...backTextStyles.text,
+  },
+  container: {
+    backgroundColor: theme.colors.background,
+    flex: 1,
   },
   content: {
     flex: 1,
-    padding: 24,
+    padding: spacing.xl,
   },
   formContainer: {
     flex: 1,
     justifyContent: 'center',
   },
-  title: {
-    color: theme.colors.surface,
-    textAlign: 'center',
-    marginBottom: 16,
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+    padding: spacing.md,
   },
   subtitle: {
-    color: theme.colors.surface,
-    textAlign: 'center',
-    marginBottom: 32,
+    ...subtitleStyles.text,
+    marginBottom: spacing.xl,
     opacity: 0.8,
+    textAlign: 'center',
+  },
+  title: {
+    ...titleStyles.text,
+    marginBottom: spacing.md,
+    textAlign: 'center',
   },
 }); 

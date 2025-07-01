@@ -91,7 +91,7 @@ export const TabNavigator = () => {
         name="Dashboard"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ color, size }: TabBarIconProps) => (
+          tabBarIcon: ({ color }: TabBarIconProps) => (
             <MaterialCommunityIcons name="home" size={32} color={color} />
           ),
         }}
@@ -100,7 +100,7 @@ export const TabNavigator = () => {
         name="Progress"
         component={ProgressScreen}
         options={{
-          tabBarIcon: ({ color, size }: TabBarIconProps) => (
+          tabBarIcon: ({ color }: TabBarIconProps) => (
             <MaterialCommunityIcons name="chart-line" size={32} color={color} />
           ),
         }}
@@ -109,7 +109,7 @@ export const TabNavigator = () => {
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarIcon: ({ color, size }: TabBarIconProps) => (
+          tabBarIcon: ({ color }: TabBarIconProps) => (
             <MaterialCommunityIcons name="account" size={32} color={color} />
           ),
         }}

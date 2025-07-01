@@ -34,8 +34,6 @@ import { useAuth } from '../../hooks/useAuth';
 import { TextInput } from 'react-native-paper';
 import { loginSchema, type LoginFormData } from '../../utils/validationSchemas';
 import { usePasswordVisibility } from '../../hooks/usePasswordVisibility';
-import { useFormLoading } from '../../hooks/useFormLoading';
-import { handleApiError } from '../../utils/apiUtils';
 import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
 import { LoadingWrapper } from '../../components/common/LoadingWrapper';
 
@@ -72,7 +70,7 @@ export const LoginScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const { showPassword, togglePasswordVisibility } = usePasswordVisibility();
   const [showRegisterModal, setShowRegisterModal] = useState(false);
-  const { login, isLoading, error } = useAuth();
+  const { login, isLoading } = useAuth();
 
   const { control, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -194,7 +192,7 @@ export const LoginScreen = () => {
         <Button
           mode="contained"
           onPress={() => navigation.navigate('Register')}
-          style={[styles.registerButton]}
+          style={styles.registerButton}
           variant="secondary"
         >
           Register
@@ -218,54 +216,27 @@ export const LoginScreen = () => {
 };
 
 const layoutStyles = createLayoutStyles();
-const titleStyles = createTextStyles('xlarge', 'bold', theme.colors.surface);
+
 const subtitleStyles = createTextStyles('large', 'semiBold', theme.colors.surface);
 const bodyStyles = createTextStyles('medium', 'medium', theme.colors.surface);
 
 const styles = StyleSheet.create({
+  buttonContainer: {
+    padding: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
   container: {
     ...layoutStyles.container,
-    width: '100%',
     height: '100%',
     padding: 0,
+    width: '100%',
   },
   content: {
     ...layoutStyles.content,
   },
-  header: {
-    marginTop: 40,
-    alignItems: 'center',
-    textAlign: 'center',
-    fontFamily: 'BalooBhaina2-Bold',
-    fontSize: 42,
-    fontWeight: 'bold',
-    color: theme.colors.surface,
-  },
-  title: {
-    ...subtitleStyles.text,
-    fontFamily: 'BalooBhaina2-Bold',
-  },
-  logoContainer: {
-    width: '100%',
-    alignItems: 'center',
-    marginTop: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  formContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    marginTop: spacing.md,
-  },
-  buttonContainer: {
-    padding: spacing.lg,
-    paddingBottom: 40,
-  },
-  registerButton: {
-    marginTop: spacing.sm,
-  },
   forgotPasswordContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     justifyContent: 'center',
     marginTop: spacing.sm,
   },
@@ -273,16 +244,37 @@ const styles = StyleSheet.create({
     ...bodyStyles.text,
     textAlign: 'center',
   },
+  formContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    marginTop: spacing.md,
+  },
+  header: {
+    alignItems: 'center',
+    color: theme.colors.surface,
+    fontFamily: 'BalooBhaina2-Bold',
+    fontSize: fonts.sizes.huge,
+    fontWeight: 'bold',
+    marginTop: spacing.xl,
+    textAlign: 'center',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+    marginTop: spacing.md,
+    width: '100%',
+  },
   recoverLink: {
     ...bodyStyles.text,
-    marginLeft: spacing.xs,
+    fontFamily: fonts.weights.bold,
     fontWeight: 'bold',
-    fontFamily: fonts.weights.bold,
+    marginLeft: spacing.xs,
   },
-  registerText: {
-    ...bodyStyles.text,
-    fontFamily: fonts.weights.bold,
-    textAlign: 'center',
-    marginTop: spacing.md,
+  registerButton: {
+    marginTop: spacing.sm,
+  },
+  title: {
+    ...subtitleStyles.text,
+    fontFamily: 'BalooBhaina2-Bold',
   },
 }); 

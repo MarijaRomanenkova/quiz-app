@@ -23,14 +23,14 @@ import { useNavigation, RouteProp, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/AppNavigator';
 import { theme, fonts, spacing, layout } from '../../theme';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { Button } from '../../components/Button/Button';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { QuizTopic } from '../../types';
 import { selectUnlockedTopicsForCategory, selectTopicProgress } from '../../store/progressSlice';
 import { BackButton } from '../../components/BackButton';
-import { createLayoutStyles, createTextStyles, createCardStyles } from '../../utils/themeUtils';
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
 
 /**
  * Props interface for the TopicItem component
@@ -124,17 +124,24 @@ export const TopicScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<TopicScreenRouteProp>();
   const { categoryId } = route.params;
-  const dispatch = useDispatch();
 
   // Get unlocked topics for this category
   const unlockedTopics = useSelector((state: RootState) => 
     selectUnlockedTopicsForCategory(state, categoryId)
   );
 
+  // Get progress for all unlocked topics
+  const topicsProgress = useSelector((state: RootState) => {
+    const progress: Record<string, { completed: boolean }> = {};
+    unlockedTopics.forEach(topic => {
+      progress[topic.topicId] = selectTopicProgress(state, topic.topicId) || { completed: false };
+    });
+    return progress;
+  });
+
   // Debug: Log topics data
   console.log('🔍 TopicScreen - categoryId:', categoryId);
   console.log('🔍 TopicScreen - unlockedTopics:', unlockedTopics);
-  console.log('🔍 TopicScreen - all topics from state:', useSelector((state: RootState) => state.topic.topics));
 
   const [selectedTopic, setSelectedTopic] = useState<string>('');
 
@@ -180,21 +187,15 @@ export const TopicScreen = () => {
       </Text>
       
       <ScrollView style={styles.scrollView}>
-        {unlockedTopics.map((topic) => {
-          const progress = useSelector((state: RootState) => 
-            selectTopicProgress(state, topic.topicId)
-          );
-          
-          return (
-            <TopicItem
-              key={topic.topicId}
-              topic={topic}
-              isSelected={selectedTopic === topic.topicId}
-              onSelect={handleTopicSelect}
-              isCompleted={progress?.completed || false}
-            />
-          );
-        })}
+        {unlockedTopics.map((topic) => (
+          <TopicItem
+            key={topic.topicId}
+            topic={topic}
+            isSelected={selectedTopic === topic.topicId}
+            onSelect={handleTopicSelect}
+            isCompleted={topicsProgress[topic.topicId]?.completed || false}
+          />
+        ))}
       </ScrollView>
 
       <View >
@@ -214,53 +215,53 @@ const layoutStyles = createLayoutStyles();
 const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.text);
 
 const styles = StyleSheet.create({
-  container: {
-    ...layoutStyles.container,
-    padding: spacing.lg,
-    backgroundColor: theme.colors.secondaryContainer,
-  },
   backButton: {
     marginBottom: spacing.md,
   },
-  topics: {
-    ...titleStyles.text,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
+  completedRadioItem: {
+    backgroundColor: theme.colors.primaryContainer + '20',
+    borderColor: theme.colors.primary,
   },
-  scrollView: {
-    flex: 1,
+  completedRadioLabel: {
+    color: theme.colors.outline,
+  },
+  container: {
+    ...layoutStyles.container,
+    backgroundColor: theme.colors.secondaryContainer,
+    padding: spacing.lg,
   },
   radioItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.sm,
     backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.outline,
     borderRadius: layout.borderRadius.large,
     borderWidth: 1,
-    borderColor: theme.colors.outline,
-  },
-  selectedRadioItem: {
-    borderWidth: 2,
-    borderColor: theme.colors.primaryContainer,
-  },
-  completedRadioItem: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primaryContainer + '20',
-  },
-  topicContent: {
-    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
   },
   radioLabel: {
     fontSize: fonts.sizes.medium,
     fontWeight: 'bold',
   },
+  scrollView: {
+    flex: 1,
+  },
+  selectedRadioItem: {
+    borderColor: theme.colors.primaryContainer,
+    borderWidth: 2,
+  },
   selectedRadioLabel: {
     color: theme.colors.primaryContainer,
   },
-  completedRadioLabel: {
-    color: theme.colors.outline,
+  topicContent: {
+    flex: 1,
+  },
+  topics: {
+    ...titleStyles.text,
+    marginBottom: spacing.lg,
+    textAlign: 'center',
   },
 }); 

@@ -16,22 +16,8 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
 import { theme } from '../../theme';
-
-/**
- * Props interface for the LevelProgress component
- * 
- * @interface LevelProgressProps
- * @property {string} level - The current level name (e.g., "Beginner", "Intermediate")
- * @property {number} completedTopics - Number of topics completed in the current level
- * @property {number} totalTopics - Total number of topics in the current level
- * @property {number} percentage - Completion percentage (0-100)
- */
-interface LevelProgressProps {
-  level: string;
-  completedTopics: number;
-  totalTopics: number;
-  percentage: number;
-}
+import { createTextStyles, createShadowStyles } from '../../utils/themeUtils';
+import { LevelProgressProps } from '../../types/components.types';
 
 /**
  * Level Progress component with circular progress indicator
@@ -69,8 +55,6 @@ interface LevelProgressProps {
  */
 export const LevelProgress: React.FC<LevelProgressProps> = ({ 
   level, 
-  completedTopics, 
-  totalTopics, 
   percentage 
 }) => {
   const radius = 78;
@@ -120,42 +104,38 @@ export const LevelProgress: React.FC<LevelProgressProps> = ({
   );
 };
 
+// Create utility styles
+const levelStyles = createTextStyles('large', 'regular', theme.colors.outline);
+const percentageStyles = createTextStyles('large', 'bold', theme.colors.text);
+const shadowStyles = createShadowStyles('small');
+
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    justifyContent: 'center',
     borderRadius: 90,
-    shadowColor: '#000000',
-    shadowOpacity: 0.1,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowRadius: 4,
-    elevation: 4,
+    justifyContent: 'center',
+    ...shadowStyles.shadow,
   },
   levelContainer: {
-    position: 'absolute',
     alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
     height: '100%',
+    justifyContent: 'center',
+    position: 'absolute',
+    width: '100%',
+    paddingHorizontal: 8,
   },
   levelLabel: {
-    fontSize: 18,
-    fontFamily: 'Baloo2-Regular',
-    color: theme.colors.outline,
-    marginBottom: -4,
-  },
-  percentageText: {
-    fontSize: 40,
-    fontFamily: 'Baloo2-Bold',
-    color: theme.colors.text,
-    marginBottom: -2,
+    ...levelStyles.text,
+    marginBottom: 2,
+    textAlign: 'center',
   },
   levelText: {
-    fontSize: 18,
-    fontFamily: 'Baloo2-Regular',
-    color: theme.colors.outline,
+    ...levelStyles.text,
+    textAlign: 'center',
+  },
+  percentageText: {
+    ...percentageStyles.text,
+    marginBottom: 4,
+    textAlign: 'center',
   },
 }); 

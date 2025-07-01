@@ -19,36 +19,29 @@
  */
 
 import { API_URL } from '../config';
-import { Question, Topic } from '../types';
+import { 
+  Question, 
+  QuizResponse, 
+  Topic, 
+  ReadingText 
+} from '../types';
+import { 
+  ProfileUpdateData 
+} from '../types/auth.types';
+import { 
+  StatisticsData 
+} from '../types/statistics.types';
+import { User } from '../types/user.types';
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import type { RootState } from '../store';
 
 /**
- * Interface for quiz response data
- * 
- * Represents the structure of quiz data returned from the API,
- * including questions, pagination cursor, and availability status.
- * 
- * @interface QuizResponse
- * @property {Question[]} questions - Array of quiz questions
- * @property {string} [nextCursor] - Optional cursor for pagination
- * @property {boolean} hasMore - Whether more questions are available
- */
-interface QuizResponse {
-  questions: Question[];
-  nextCursor?: string;
-  hasMore: boolean;
-}
-
-/**
- * Interface for category data
- * 
- * Represents the structure of category information including
- * identification, metadata, and progress tracking.
+ * Interface for category data with title property
  * 
  * @interface Category
  * @property {string} categoryId - Unique identifier for the category
  * @property {string} title - Display title for the category
- * @property {string} description - Detailed description of the category
+ * @property {string} description - Description of the category
  * @property {number} progress - User's progress percentage in this category
  */
 interface Category {
@@ -180,14 +173,15 @@ export const fetchTopics = async (token?: string): Promise<Topic[]> => {
 };
 
 /**
- * Fetches reading texts, optionally filtered by topic
+ * Fetches reading texts for a specific topic or all reading texts
  * 
- * Retrieves reading materials that can be filtered by topic ID.
- * Supports both authenticated and unauthenticated requests.
+ * Retrieves reading text content for topics that include reading
+ * comprehension exercises. Can fetch texts for a specific topic
+ * or all available reading texts.
  * 
- * @param {string} [topicId] - Optional topic identifier to filter texts
+ * @param {string} [topicId] - Optional topic ID to filter reading texts
  * @param {string} [token] - Optional authentication token
- * @returns {Promise<any[]>} Array of reading text objects
+ * @returns {Promise<ReadingText[]>} Array of reading text objects
  * @throws {Error} When the request fails
  * 
  * @example
@@ -195,7 +189,7 @@ export const fetchTopics = async (token?: string): Promise<Topic[]> => {
  * const texts = await fetchReadingTexts('grammar-basics', token);
  * ```
  */
-export const fetchReadingTexts = async (topicId?: string, token?: string): Promise<any[]> => {
+export const fetchReadingTexts = async (topicId?: string, token?: string): Promise<ReadingText[]> => {
   try {
     const url = topicId 
       ? `${API_URL}/reading-texts?topicId=${topicId}`
@@ -228,8 +222,8 @@ export const fetchReadingTexts = async (topicId?: string, token?: string): Promi
  * ```
  */
 export const fetchCategoriesThunk = createAsyncThunk('categories/fetchCategories', async (_, { getState }) => {
-  const state = getState() as any;
-  const token = state.auth.token;
+  const state = getState() as RootState;
+  const token = state.auth.token || undefined;
   return fetchCategories(token);
 });
 
@@ -267,7 +261,7 @@ export const fetchInitialData = async (token?: string) => {
     }
     
     // Fetch reading texts for topics that have them
-    const readingTextsData: Record<string, any> = {};
+    const readingTextsData: Record<string, ReadingText> = {};
     for (const topic of topics) {
       try {
         const response = await fetchReadingTexts(topic.topicId, token);
@@ -297,7 +291,7 @@ export const fetchInitialData = async (token?: string) => {
  * settings, and account information. Requires authentication.
  * 
  * @param {string} token - Authentication token
- * @returns {Promise<any>} User profile data
+ * @returns {Promise<UserProfile>} User profile data
  * @throws {Error} When the request fails
  * 
  * @example
@@ -305,7 +299,7 @@ export const fetchInitialData = async (token?: string) => {
  * const profile = await fetchUserProfile(token);
  * ```
  */
-export const fetchUserProfile = async (token: string): Promise<any> => {
+export const fetchUserProfile = async (token: string): Promise<User> => {
   try {
     const response = await fetch(`${API_URL}/auth/profile`, {
       headers: {
@@ -326,30 +320,23 @@ export const fetchUserProfile = async (token: string): Promise<any> => {
  * Sends profile updates to the backend including study preferences,
  * privacy settings, and notification preferences. Requires authentication.
  * 
- * @param {string} token - Authentication token
- * @param {Object} profileData - Profile data to update
- * @param {number} [profileData.studyPaceId] - Study pace preference
- * @param {boolean} [profileData.marketingEmails] - Marketing email consent
- * @param {boolean} [profileData.shareDevices] - Device sharing preference
- * @returns {Promise<any>} Updated profile data
+ * @param {ProfileUpdateData} profileData - Profile data to update
+ * @param {string} [token] - Optional authentication token
+ * @returns {Promise<UserProfile>} Updated profile data
  * @throws {Error} When the request fails
  * 
  * @example
  * ```tsx
- * const result = await updateUserProfile(token, {
+ * const result = await updateUserProfile({
  *   studyPaceId: 2,
  *   marketingEmails: true
- * });
+ * }, token);
  * ```
  */
 export const updateUserProfile = async (
-  profileData: {
-    studyPaceId: number;
-    marketingEmails: boolean;
-    shareDevices: boolean;
-  },
+  profileData: ProfileUpdateData,
   token?: string
-): Promise<any> => {
+): Promise<User> => {
   try {
     const response = await fetch(`${API_URL}/auth/profile`, {
       method: 'PUT',
@@ -379,7 +366,7 @@ export const updateUserProfile = async (
  * from the system. This action cannot be undone. Requires authentication.
  * 
  * @param {string} token - Authentication token
- * @returns {Promise<any>} Deletion confirmation
+ * @returns {Promise<{success: boolean}>} Deletion confirmation
  * @throws {Error} When the request fails
  * 
  * @example
@@ -387,7 +374,7 @@ export const updateUserProfile = async (
  * await deleteUserAccount(token);
  * ```
  */
-export const deleteUserAccount = async (token: string): Promise<any> => {
+export const deleteUserAccount = async (token: string): Promise<{success: boolean}> => {
   try {
     const response = await fetch(`${API_URL}/auth/account`, {
       method: 'DELETE',
@@ -404,37 +391,29 @@ export const deleteUserAccount = async (token: string): Promise<any> => {
 };
 
 /**
- * Syncs quiz time data and completed topics to the backend
+ * Synchronizes quiz statistics data with the backend
  * 
- * Sends the current quiz time statistics and completed topics data
- * to the backend for persistence. This is typically called during logout
- * to ensure data is saved before clearing local state.
+ * Sends local quiz statistics to the backend for persistence and
+ * analysis. Includes daily quiz times and completed topics data.
  * 
- * @param {Object} statisticsData - Complete statistics data to sync
- * @param {number} statisticsData.totalQuizMinutes - Total minutes spent on quizzes
- * @param {Array} statisticsData.dailyQuizTimes - Array of daily quiz time records
- * @param {Array} statisticsData.completedTopics - Array of completed topic records
+ * @param {StatisticsData} statisticsData - Statistics data to sync
  * @param {string} [token] - Optional authentication token
- * @returns {Promise<any>} Sync confirmation from backend
+ * @returns {Promise<{success: boolean}>} Sync confirmation
  * @throws {Error} When the request fails
  * 
  * @example
  * ```tsx
  * await syncStatisticsData({
  *   totalQuizMinutes: 120,
- *   dailyQuizTimes: [{ date: '2024-01-01', minutes: 30 }],
- *   completedTopics: [{ topicId: 'articles', score: 85, completedAt: '2024-01-01T00:00:00Z' }]
+ *   dailyQuizTimes: [...],
+ *   completedTopics: [...]
  * }, token);
  * ```
  */
 export const syncStatisticsData = async (
-  statisticsData: {
-    totalQuizMinutes: number;
-    dailyQuizTimes: Array<{date: string, minutes: number, lastUpdated: string}>;
-    completedTopics: Array<{topicId: string, score: number, completedAt: string}>;
-  },
+  statisticsData: StatisticsData,
   token?: string
-): Promise<any> => {
+): Promise<{success: boolean}> => {
   try {
     const response = await fetch(`${API_URL}/auth/quiz-time`, {
       method: 'POST',
@@ -458,27 +437,21 @@ export const syncStatisticsData = async (
 };
 
 /**
- * Fetches quiz time data and completed topics from the backend
+ * Fetches user statistics data from the backend
  * 
- * Retrieves the user's quiz time statistics and completed topics
- * from the backend for loading into Redux state on login.
+ * Retrieves the user's quiz statistics including daily quiz times,
+ * total minutes spent, and completed topics. Requires authentication.
  * 
  * @param {string} [token] - Optional authentication token
- * @returns {Promise<Object>} Quiz time and completed topics data
+ * @returns {Promise<StatisticsData>} User statistics data
  * @throws {Error} When the request fails
  * 
  * @example
  * ```tsx
- * const data = await fetchStatisticsData(token);
- * console.log(data.totalQuizMinutes); // Total quiz time
- * console.log(data.completedTopics.length); // Number of completed topics
+ * const stats = await fetchStatisticsData(token);
  * ```
  */
-export const fetchStatisticsData = async (token?: string): Promise<{
-  dailyQuizTimes: Array<{date: string, minutes: number, lastUpdated: string}>;
-  totalQuizMinutes: number;
-  completedTopics: Array<{topicId: string, score: number, completedAt: string}>;
-}> => {
+export const fetchStatisticsData = async (token?: string): Promise<StatisticsData> => {
   try {
     const response = await fetch(`${API_URL}/auth/quiz-time`, {
       headers: token ? {

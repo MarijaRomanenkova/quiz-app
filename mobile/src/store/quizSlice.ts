@@ -1,83 +1,23 @@
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
-import type { RootState } from './index';
-import type { Question } from '../types';
+import { RootState } from './index';
+import { Question } from '../types';
+import { QuizResult, QuizState } from '../types/quiz.types';
 
 /**
- * Interface representing daily quiz statistics
- */
-interface DailyStats {
-  /** Date in YYYY-MM-DD format */
-  date: string;
-  /** Time spent on quizzes in minutes */
-  timeSpent: number;
-  /** Number of questions answered */
-  questionsAnswered: number;
-}
-
-/**
- * Interface representing a quiz result
- */
-interface QuizResult {
-  /** Score achieved in the quiz (0-100) */
-  score: number;
-  /** Total number of questions in the quiz */
-  totalQuestions: number;
-  /** Time spent on the quiz in minutes */
-  timeSpent: number;
-}
-
-/**
- * Interface representing the active quiz state
- */
-interface ActiveQuiz {
-  /** Current question index (0-based) */
-  currentQuestion: number;
-  /** Current score */
-  score: number;
-  /** Currently selected answer index or null if none selected */
-  selectedAnswer: number | null;
-  /** Current reading text ID or null if none */
-  currentTextId: string | null;
-  /** Whether reading text is currently shown */
-  showReadingText: boolean;
-}
-
-/**
- * Interface representing the complete quiz state
- */
-interface QuizState {
-  /** ID of the currently selected topic */
-  currentTopicId: string | null;
-  /** Array of questions that were answered incorrectly */
-  wrongQuestions: Question[];
-  /** Array of daily statistics */
-  dailyStats: DailyStats[];
-  /** Current quiz result or null if no result is stored */
-  currentResult: QuizResult | null;
-  /** Current active quiz state or null if no quiz is active */
-  activeQuiz: ActiveQuiz | null;
-}
-
-/**
- * Initial state for the quiz slice
- */
-const initialState: QuizState = {
-  currentTopicId: null,
-  wrongQuestions: [],
-  dailyStats: [],
-  currentResult: null,
-  activeQuiz: null,
-};
-
-/**
- * Redux slice for managing quiz state and progress
+ * Redux slice for managing quiz state
  * 
- * This slice handles active quiz sessions, wrong question tracking,
- * daily statistics, quiz results, and quiz navigation state.
+ * This slice handles the current quiz session, including the active quiz,
+ * quiz results, wrong questions tracking, and daily statistics.
  */
 export const quizSlice = createSlice({
   name: 'quiz',
-  initialState,
+  initialState: {
+    currentTopicId: null,
+    wrongQuestions: [],
+    dailyStats: [],
+    currentResult: null,
+    activeQuiz: null,
+  } as QuizState,
   reducers: {
     /**
      * Sets the currently selected topic for quiz

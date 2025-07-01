@@ -14,30 +14,9 @@
 
 import { StyleSheet } from 'react-native';
 import { Button as PaperButton } from 'react-native-paper';
-import { theme, spacing } from '../../theme';
-import { getButtonColors, type ButtonVariant } from '../../utils/buttonUtils';
-
-/**
- * Props interface for the Button component
- * 
- * @interface ButtonProps
- * @property {'text' | 'outlined' | 'contained'} [mode='contained'] - Button display mode
- * @property {() => void} onPress - Function called when button is pressed
- * @property {React.ReactNode} children - Button content (usually text)
- * @property {ButtonVariant} [variant='success'] - Button color variant
- * @property {boolean} [disabled=false] - Whether the button is disabled
- * @property {any} [style] - Additional styles to apply to the button
- * @property {string} [testID] - Test ID for the button
- */
-interface ButtonProps {
-  mode?: 'text' | 'outlined' | 'contained';
-  onPress: () => void;
-  children: React.ReactNode;
-  variant?: ButtonVariant;
-  disabled?: boolean;
-  style?: any;
-  testID?: string;
-}
+import { theme } from '../../theme';
+import { getButtonColors } from '../../utils/buttonUtils';
+import { ButtonProps } from '../../types/components.types';
 
 /**
  * Custom Button component with predefined variants and styling
@@ -52,7 +31,7 @@ interface ButtonProps {
  * @param {React.ReactNode} props.children - Button content
  * @param {ButtonVariant} [props.variant='success'] - Button color variant
  * @param {boolean} [props.disabled=false] - Whether the button is disabled
- * @param {any} [props.style] - Additional styles to apply
+ * @param {ViewStyle} [props.style] - Additional styles to apply
  * @param {string} [props.testID] - Test ID for the button
  * @returns {JSX.Element} A styled button component
  * 
@@ -102,18 +81,18 @@ export const Button = ({
 const styles = StyleSheet.create({
   button: {
     borderRadius: theme.buttons.borderRadius,
-    paddingVertical: theme.buttons.paddingVertical,
-    marginVertical: theme.buttons.marginVertical,
     height: 56,
+    marginVertical: theme.buttons.marginVertical,
+    paddingVertical: theme.buttons.paddingVertical,
   },
   content: {
-    paddingVertical: 0,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 0,
   },
   label: {
-    fontSize: theme.buttons.fontSize,
     fontFamily: 'Baloo2-SemiBold',
+    fontSize: theme.buttons.fontSize,
     lineHeight: 24,
     textAlignVertical: 'center',
   },

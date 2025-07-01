@@ -20,6 +20,7 @@ export const theme = {
     onPrimaryContainer: '#FFFFFF',
     onSecondaryContainer: '#000000',
     onTertiaryContainer: '#FFFFFF',
+    transparent: 'transparent',
   },
   buttons: {
     borderRadius: 20,

@@ -79,7 +79,7 @@ describe('useToken', () => {
 
     it('should update authorization header when token changes', () => {
       // First render: no token
-      let { result, rerender } = renderHook(() => useToken());
+      const { result, rerender } = renderHook(() => useToken());
 
       expect(result.current.getAuthHeader()).toEqual({});
 
@@ -143,7 +143,7 @@ describe('useToken', () => {
   describe('token state changes', () => {
     it('should update token when Redux state changes', () => {
       // First render: no token
-      let { result, rerender } = renderHook(() => useToken());
+      const { result, rerender } = renderHook(() => useToken());
 
       expect(result.current.token).toBeNull();
 
@@ -162,7 +162,7 @@ describe('useToken', () => {
 
     it('should update authorization header when token changes', () => {
       // First render: no token
-      let { result, rerender } = renderHook(() => useToken());
+      const { result, rerender } = renderHook(() => useToken());
 
       expect(result.current.getAuthHeader()).toEqual({});
 
@@ -185,7 +185,7 @@ describe('useToken', () => {
   describe('integration scenarios', () => {
     it('should handle complete authentication flow', () => {
       // Initial state: no token
-      let { result, rerender } = renderHook(() => useToken());
+      const { result, rerender } = renderHook(() => useToken());
 
       expect(result.current.token).toBeNull();
       expect(result.current.getAuthHeader()).toEqual({});
@@ -222,7 +222,7 @@ describe('useToken', () => {
         return {};
       });
 
-      let { result, rerender } = renderHook(() => useToken());
+      const { result, rerender } = renderHook(() => useToken());
 
       expect(result.current.getAuthHeader()).toEqual({
         Authorization: 'Bearer old-token-123',

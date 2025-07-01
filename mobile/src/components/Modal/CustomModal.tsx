@@ -15,32 +15,10 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Modal, Text } from 'react-native-paper';
-import { theme } from '../../theme';
+import { theme, spacing, layout } from '../../theme';
+import { createTextStyles } from '../../utils/themeUtils';
 import { Button } from '../Button/Button';
-
-/**
- * Props interface for the CustomModal component
- * 
- * @interface CustomModalProps
- * @property {boolean} visible - Whether the modal is currently visible
- * @property {() => void} onDismiss - Function called when modal is dismissed (backdrop tap)
- * @property {string} title - The title text displayed at the top of the modal
- * @property {string} message - The main message text displayed in the modal body
- * @property {string} primaryButtonText - Text for the primary action button
- * @property {() => void} onPrimaryButtonPress - Function called when primary button is pressed
- * @property {string} [secondaryButtonText] - Text for the secondary action button (optional)
- * @property {() => void} [onSecondaryButtonPress] - Function called when secondary button is pressed (optional)
- */
-interface CustomModalProps {
-  visible: boolean;
-  onDismiss: () => void;
-  title: string;
-  message: string;
-  primaryButtonText: string;
-  onPrimaryButtonPress: () => void;
-  secondaryButtonText?: string;
-  onSecondaryButtonPress?: () => void;
-}
+import { CustomModalProps } from '../../types/components.types';
 
 /**
  * Custom Modal component with consistent styling and button layout
@@ -135,29 +113,33 @@ export const CustomModal = ({
   );
 };
 
+// Create utility styles
+const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.onSecondaryContainer);
+const textStyles = createTextStyles('large', 'regular', theme.colors.onSecondaryContainer);
+
 const styles = StyleSheet.create({
-  modalContainer: {
-    padding: 24,
-    margin: 24,
-    borderRadius: 20,
-    backgroundColor: theme.colors.secondaryContainer,
-  },
-  modalTitle: {
-    color: '#000000',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  modalText: {
-    color: '#000000',
-    textAlign: 'center',
-    marginBottom: 24,
+  modalButton: {
+    flex: 1,
   },
   modalButtons: {
     flexDirection: 'row',
+    gap: spacing.md,
     justifyContent: 'space-between',
-    gap: 16,
   },
-  modalButton: {
-    flex: 1,
+  modalContainer: {
+    backgroundColor: theme.colors.secondaryContainer,
+    borderRadius: layout.borderRadius.large,
+    margin: spacing.xl,
+    padding: spacing.xl,
+  },
+  modalText: {
+    ...textStyles.text,
+    marginBottom: spacing.xl,
+    textAlign: 'center',
+  },
+  modalTitle: {
+    ...titleStyles.text,
+    marginBottom: spacing.md,
+    textAlign: 'center',
   },
 }); 

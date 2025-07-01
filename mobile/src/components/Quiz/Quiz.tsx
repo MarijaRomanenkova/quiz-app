@@ -13,13 +13,14 @@
  * @module components/Quiz
  */
 
-import React, { useEffect, useRef, useMemo, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
-import { theme } from '../../theme';
+import { theme, spacing, layout } from '../../theme';
+import { createTextStyles, createShadowStyles, createColorStyles } from '../../utils/themeUtils';
 import type { Question } from '../../types';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../../store';
@@ -42,12 +43,14 @@ import {
 } from '../../store/quizSlice';
 import { completeTopic, updateTopicAttempt, loadMoreQuestionsThunk } from '../../store/progressSlice';
 import { startQuizSession, endQuizSession } from '../../store/statisticsSlice';
-import { AudioPlayer, AudioPlayerRef } from '../AudioPlayer/AudioPlayer';
+import { AudioPlayer } from '../AudioPlayer/AudioPlayer';
+import { AudioPlayerRef } from '../../types/components.types';
 import { QuizRadioGroup } from './QuizRadioGroup';
 import { ReadingText } from './ReadingText';
 import { QuizTopBar } from './QuizTopBar';
 import { useToken } from '../../hooks/useToken';
 import { fetchAllQuestionsThunk } from '../../store/questionsSlice';
+import type { ReadingText as ReadingTextType } from '../../types';
 
 type QuizScreenRouteProp = RouteProp<RootStackParamList, 'Quiz'>;
 type QuizScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -81,7 +84,6 @@ type QuizProps = {
  * 
  * @param {QuizProps} props - The quiz props
  * @param {string} props.quizId - The unique identifier for the quiz/topic
- * @param {boolean} [props.isRepeating=false] - Whether this is a repeat quiz for wrong questions
  * @returns {JSX.Element} The complete quiz interface with questions and navigation
  * 
  * @example
@@ -94,7 +96,7 @@ type QuizProps = {
  * <Quiz quizId="topic-456" isRepeating={true} />
  * ```
  */
-const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) => {
+const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId }) => {
   const dispatch = useDispatch<AppDispatch>();
   const route = useRoute<QuizScreenRouteProp>();
   const navigation = useNavigation<QuizScreenNavigationProp>();
@@ -107,7 +109,7 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   const audioQuestionRef = useRef<AudioPlayerRef>(null);
   const { token } = useToken();
   const user = useSelector((state: RootState) => state.auth.user);
-  const [readingText, setReadingTextState] = React.useState<any>(null);
+  const [readingText, setReadingTextState] = React.useState<ReadingTextType | null>(null);
   const [hasShownReadingText, setHasShownReadingText] = useState(false);
 
   // Get categoryId from route params
@@ -321,7 +323,8 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   useEffect(() => {
     if (user && token && questions.length === 0) {
       dispatch(fetchAllQuestionsThunk()).unwrap()
-        .then((questionsData) => {
+        .then(() => {
+          // Questions loaded successfully
         })
         .catch((error) => {
           console.error('Quiz - fetchAllQuestionsThunk failed:', error);
@@ -432,100 +435,83 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId, isRepeating = false }) 
   );
 };
 
+// Create utility styles
+const textStyles = createTextStyles('xlarge', 'semiBold', theme.colors.onSurface);
+const shadowStyles = createShadowStyles('large');
+const colorStyles = createColorStyles('surface');
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.secondaryContainer,
-  },
-  mainContainer: {
-    flex: 1,
-    padding: 16,
-    paddingTop: 8,
-  },
-  contentContainer: {
-    flex: 1,
-    padding: 16,
-  },
-  topHalf: {
-    flex: 1,
-    marginBottom: 16,
-    alignItems: 'center',
+  audioPlayerContainer: {
+    height: 100,
+    left: '50%',
+    position: 'absolute',
+    top: '-20%',
+    transform: [{ translateX: -50 }],
+    width: 100,
+    zIndex: 1,
   },
   bottomHalf: {
     flex: 1,
     justifyContent: 'flex-end',
   },
-  questionCard: {
+  container: {
+    backgroundColor: theme.colors.secondaryContainer,
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
-    marginVertical: 42,
-    shadowColor: '#000000',
-    shadowOpacity: 0.15,
-    shadowOffset: {
-      width: 0,
-      height: 20,
-    },
-    shadowRadius: 50,
-    elevation: 8,
-    position: 'relative',
-    width: '100%',
   },
-  questionContent: {
+  contentContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-  },
-  nextButton: {
-    marginTop: 16,
+    padding: spacing.md,
   },
   loadingContainer: {
+    ...colorStyles.backgroundColor,
+    alignItems: 'center',
+    borderRadius: layout.borderRadius.large,
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
-    shadowColor: '#000000',
-    shadowOpacity: 0.15,
-    shadowOffset: {
-      width: 0,
-      height: 20,
-    },
-    shadowRadius: 50,
-    elevation: 8,
+    padding: spacing.md,
+    ...shadowStyles.shadow,
   },
-  emptyContainer: {
+  mainContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: spacing.md,
+    paddingTop: spacing.sm,
+  },
+  nextButton: {
+    marginTop: spacing.md,
   },
   optionsContainer: {
     flex: 1,
   },
-  questionText: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#000000',
-    textAlign: 'center',
-    paddingHorizontal: 16,
+  questionCard: {
+    ...colorStyles.backgroundColor,
+    borderRadius: layout.borderRadius.large,
+    flex: 1,
+    marginVertical: spacing.xl,
+    padding: spacing.md,
+    position: 'relative',
+    ...shadowStyles.shadow,
+    width: '100%',
+  },
+  questionContent: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    width: '100%',
   },
   questionImage: {
-    width: '100%',
     height: '100%',
     resizeMode: 'contain',
+    width: '100%',
   },
-
-  audioPlayerContainer: {
-    position: 'absolute',
-    top: '-20%',
-    left: '50%',
-    transform: [{ translateX: -50 }],
-    zIndex: 1,
-    width: 100,
-    height: 100,
+  questionText: {
+    ...textStyles.text,
+    paddingHorizontal: spacing.md,
+    textAlign: 'center',
+  },
+  topHalf: {
+    alignItems: 'center',
+    flex: 1,
+    marginBottom: spacing.md,
   },
 });
 

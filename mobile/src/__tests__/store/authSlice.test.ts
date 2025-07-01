@@ -313,8 +313,18 @@ describe('authSlice', () => {
           store.dispatch(updateCompletedTopicsCategories([{ topicId: 'topic-1', categoryId: 'test-category' }]));
         }
 
-        mockApi.syncStatisticsData.mockResolvedValue(undefined);
-        mockApi.updateUserProfile.mockResolvedValue(undefined);
+        mockApi.syncStatisticsData.mockResolvedValue({ success: true });
+        mockApi.updateUserProfile.mockResolvedValue({
+          id: 'user-123',
+          email: 'test@example.com',
+          username: 'testuser',
+          emailVerified: true,
+          levelId: 'A1.1',
+          studyPaceId: 2,
+          agreedToTerms: true,
+          marketingEmails: false,
+          shareDevices: false,
+        });
 
         await store.dispatch(logoutWithStatisticsSync());
 

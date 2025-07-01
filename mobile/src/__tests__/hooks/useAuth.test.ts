@@ -116,6 +116,7 @@ describe('useAuth', () => {
         id: 'user-123',
         email: 'test@example.com',
         username: 'testuser',
+        name: 'testuser',
         emailVerified: true,
         levelId: 'A1.1',
         studyPaceId: 2,
@@ -136,7 +137,7 @@ describe('useAuth', () => {
 
       const { result } = renderHook(() => useAuth());
 
-      let loginResult: boolean = false;
+      let loginResult = false;
       await act(async () => {
         loginResult = await result.current.login(credentials.email, credentials.password);
       });
@@ -167,7 +168,7 @@ describe('useAuth', () => {
 
       const { result } = renderHook(() => useAuth());
 
-      let loginResult: boolean = false;
+      let loginResult = false;
       await act(async () => {
         loginResult = await result.current.login(credentials.email, credentials.password);
       });
@@ -189,7 +190,7 @@ describe('useAuth', () => {
 
       const { result } = renderHook(() => useAuth());
 
-      let loginResult: boolean = false;
+      let loginResult = false;
       await act(async () => {
         loginResult = await result.current.login(credentials.email, credentials.password);
       });
@@ -205,7 +206,7 @@ describe('useAuth', () => {
 
       const { result } = renderHook(() => useAuth());
 
-      let loginResult: boolean = false;
+      let loginResult = false;
       await act(async () => {
         loginResult = await result.current.login(credentials.email, credentials.password);
       });
@@ -251,7 +252,7 @@ describe('useAuth', () => {
 
       const { result } = renderHook(() => useAuth());
 
-      let registerResult: boolean = false;
+      let registerResult = false;
       await act(async () => {
         registerResult = await result.current.register(
           registerData.email,
@@ -274,7 +275,7 @@ describe('useAuth', () => {
 
       const { result } = renderHook(() => useAuth());
 
-      let registerResult: boolean = false;
+      let registerResult = false;
       await act(async () => {
         registerResult = await result.current.register(
           registerData.email,

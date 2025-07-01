@@ -29,8 +29,8 @@ import { Alert } from 'react-native';
  */
 export const handleApiError = (
   error: unknown,
-  defaultMessage: string = 'An error occurred',
-  showAlert: boolean = true
+  defaultMessage = 'An error occurred',
+  showAlert = true
 ): string => {
   const message = error instanceof Error ? error.message : defaultMessage;
   
@@ -123,8 +123,8 @@ export const debounce = <T extends (...args: any[]) => any>(
  */
 export const retryWithBackoff = async <T>(
   fn: () => Promise<T>,
-  maxRetries: number = 3,
-  baseDelay: number = 1000
+  maxRetries = 3,
+  baseDelay = 1000
 ): Promise<T> => {
   let lastError: Error;
   

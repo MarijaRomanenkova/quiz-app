@@ -62,14 +62,6 @@ const errorStyles = createTextStyles('medium', 'regular', theme.colors.error);
 const retryStyles = createTextStyles('medium', 'semiBold', theme.colors.primary);
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    ...layoutStyles.centered,
-    flex: 1,
-  },
-  loadingText: {
-    ...bodyStyles.text,
-    marginTop: spacing.sm,
-  },
   errorContainer: {
     ...layoutStyles.centered,
     flex: 1,
@@ -77,8 +69,16 @@ const styles = StyleSheet.create({
   },
   errorText: {
     ...errorStyles.text,
-    textAlign: 'center',
     marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  loadingContainer: {
+    ...layoutStyles.centered,
+    flex: 1,
+  },
+  loadingText: {
+    ...bodyStyles.text,
+    marginTop: spacing.sm,
   },
   retryText: {
     ...retryStyles.text,

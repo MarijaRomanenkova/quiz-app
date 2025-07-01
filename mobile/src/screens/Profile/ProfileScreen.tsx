@@ -17,7 +17,7 @@
  * @module screens/Profile
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Surface, Switch } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -25,9 +25,9 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { setUser } from '../../store/userSlice';
+
 import { updateUserPreferences } from '../../store/authSlice';
-import { theme, fonts, spacing, layout } from '../../theme';
+import { theme, fonts, spacing } from '../../theme';
 import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceSelector';
 import { Button } from '../../components/Button/Button';
 import { CustomModal } from '../../components/Modal/CustomModal';
@@ -242,7 +242,7 @@ export const ProfileScreen = () => {
         <Button
           mode="contained"
           onPress={() => setShowTermsModal(true)}
-          variant="primary"
+          variant="secondary"
           style={styles.deleteButton}
         >
           Delete Account
@@ -279,86 +279,86 @@ const sectionTitleStyles = createTextStyles('large', 'medium', theme.colors.surf
 const bodyTextStyles = createTextStyles('medium', 'regular', theme.colors.surface);
 
 const styles = StyleSheet.create({
+  backText: {
+    ...bodyTextStyles.text,
+  },
+  buttonsContainer: {
+    paddingBottom: spacing.md,
+  },
   container: {
     ...layoutStyles.container,
     backgroundColor: theme.colors.background,
     padding: spacing.lg,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-  },
-  backText: {
-    ...bodyTextStyles.text,
-  },
-  mainContent: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  userInfo: {
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-  },
-  userName: {
-    ...titleStyles.text,
+  deleteButton: {
     marginBottom: spacing.md,
   },
-  infoRow: {
+  errorText: {
+    color: theme.colors.error,
+    fontSize: fonts.sizes.medium,
+    marginTop: spacing.xxl,
+    textAlign: 'center',
+  },
+  header: {
+    alignItems: 'center',
     flexDirection: 'row',
-    width: '100%',
-    marginBottom: spacing.sm,
+    paddingVertical: spacing.md,
   },
   infoLabel: {
     ...bodyTextStyles.text,
     width: 80,
   },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+    width: '100%',
+  },
   infoValue: {
     ...bodyTextStyles.text,
     flex: 1,
+  },
+  logoutButton: {
+    marginBottom: 0,
+  },
+  mainContent: {
+    flex: 1,
+    justifyContent: 'space-between',
   },
   section: {
     paddingVertical: spacing.md,
   },
   sectionTitle: {
     ...sectionTitleStyles.text,
+    marginBottom: spacing.md,
     textAlign: 'center',
-    marginBottom: spacing.md,
   },
-  toggles: {
-    paddingVertical: spacing.lg,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  toggleLabel: {
-    ...bodyTextStyles.text,
-    flex: 1,
+  studyPaceContainer: {
+    width: '100%',
   },
   termsLink: {
     ...bodyTextStyles.text,
     fontFamily: fonts.weights.bold,
     textDecorationLine: 'underline',
   },
-  buttonsContainer: {
-    paddingBottom: spacing.md,
+  toggleLabel: {
+    ...bodyTextStyles.text,
+    flex: 1,
   },
-  deleteButton: {
+  toggleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: spacing.md,
   },
-  logoutButton: {
-    marginBottom: 0,
+  toggles: {
+    paddingVertical: spacing.lg,
   },
-  errorText: {
-    fontSize: fonts.sizes.medium,
-    color: theme.colors.error,
-    textAlign: 'center',
-    marginTop: spacing.xxl,
+  userInfo: {
+    alignItems: 'center',
+    paddingVertical: spacing.md,
   },
-  studyPaceContainer: {
-    width: '100%',
+  userName: {
+    ...titleStyles.text,
+    marginBottom: spacing.md,
   },
 });

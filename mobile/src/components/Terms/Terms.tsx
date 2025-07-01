@@ -13,7 +13,7 @@
 
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Text, Surface } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import { theme } from '../../theme';
 
 /**
@@ -56,16 +56,16 @@ export const Terms = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: theme.colors.background,
+    flex: 1,
   },
   scroll: {
     padding: 16,
   },
-  title: {
-    marginBottom: 16,
-  },
   text: {
     lineHeight: 24,
+  },
+  title: {
+    marginBottom: 16,
   },
 }); 

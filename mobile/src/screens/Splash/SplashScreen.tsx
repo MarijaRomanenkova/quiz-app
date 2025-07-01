@@ -21,12 +21,12 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
 import { Text, ActivityIndicator } from 'react-native-paper';
-import { theme, fonts, spacing, layout } from '../../theme';
+import { theme, fonts, spacing } from '../../theme';
 import { Logo } from '../../components/Logo';
 import * as Font from 'expo-font';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
+import { createLayoutStyles } from '../../utils/themeUtils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
@@ -62,7 +62,7 @@ export const SplashScreen = () => {
     new Animated.Value(0),
     new Animated.Value(0),
   ]);
-  const [loadingText, setLoadingText] = useState('Loading');
+
 
   /**
    * Loads custom fonts required by the application
@@ -209,75 +209,74 @@ export const SplashScreen = () => {
 };
 
 const layoutStyles = createLayoutStyles();
-const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.surface);
 
 const styles = StyleSheet.create({
-  container: {
-    ...layoutStyles.container,
-    backgroundColor: theme.colors.background,
-  },
-  topContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  deutschText: {
-    color: theme.colors.surface,
-    fontSize: fonts.sizes.xxlarge,
-    fontFamily: fonts.weights.bold,
-  },
-  middleContainer: {
-    flex: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   bottomContainer: {
     alignItems: 'center',
     paddingVertical: spacing.xl,
   },
-  textContainer: {
-    flex: 1,
-    alignItems: 'center',
+  container: {
+    ...layoutStyles.container,
+    backgroundColor: theme.colors.background,
   },
-  learnText: {
+  deutschText: {
     color: theme.colors.surface,
-    fontSize: fonts.sizes.large,
-    fontFamily: fonts.weights.semiBold,
-    lineHeight: fonts.sizes.large,
+    fontFamily: fonts.weights.bold,
+    fontSize: fonts.sizes.xxlarge,
+  },
+  dot: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 4,
+    height: 8,
+    marginHorizontal: spacing.xs,
+    width: 8,
+  },
+  dotsContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: spacing.md,
   },
   germanText: {
     color: theme.colors.surface,
-    fontSize: fonts.sizes.xxlarge,
     fontFamily: fonts.weights.semiBold,
-    lineHeight: fonts.sizes.xxlarge,
+    fontSize: fonts.sizes.xxlarge,
     letterSpacing: 1.2,
+    lineHeight: fonts.sizes.xxlarge,
   },
-  subtitleText: {
+  learnText: {
     color: theme.colors.surface,
-    fontSize: fonts.sizes.medium,
-    fontFamily: fonts.weights.regular,
+    fontFamily: fonts.weights.semiBold,
+    fontSize: fonts.sizes.large,
     lineHeight: fonts.sizes.large,
   },
   loadingContainer: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
   },
   loadingText: {
     color: theme.colors.surface,
-    fontSize: fonts.sizes.large,
     fontFamily: fonts.weights.semiBold,
+    fontSize: fonts.sizes.large,
   },
-  dotsContainer: {
-    flexDirection: 'row',
+  middleContainer: {
     alignItems: 'center',
-    marginTop: spacing.md,
+    flex: 2,
+    justifyContent: 'center',
   },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: theme.colors.surface,
-    marginHorizontal: spacing.xs,
+  subtitleText: {
+    color: theme.colors.surface,
+    fontFamily: fonts.weights.regular,
+    fontSize: fonts.sizes.medium,
+    lineHeight: fonts.sizes.large,
+  },
+  textContainer: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  topContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
   },
 }); 

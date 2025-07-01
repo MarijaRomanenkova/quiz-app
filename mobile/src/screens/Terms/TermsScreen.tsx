@@ -15,7 +15,7 @@
  */
 
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Surface, Text, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -74,6 +74,14 @@ const layoutStyles = createLayoutStyles();
 const titleStyles = createTextStyles('large', 'semiBold', theme.colors.primary);
 
 const styles = StyleSheet.create({
+  backButton: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: layout.borderRadius.large,
+    paddingVertical: spacing.xs,
+  },
+  buttonMargin: {
+    marginTop: spacing.md,
+  },
   container: {
     ...layoutStyles.container,
     backgroundColor: theme.colors.secondaryContainer,
@@ -84,25 +92,17 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     padding: spacing.md,
   },
+  termsText: {
+    lineHeight: fonts.sizes.large,
+    marginVertical: spacing.lg,
+  },
   title: {
-    textAlign: 'center',
     marginBottom: spacing.lg,
+    textAlign: 'center',
   },
   titleText: {
     ...titleStyles.text,
-    textAlign: 'center',
     marginBottom: spacing.lg,
-  },
-  termsText: {
-    marginVertical: spacing.lg,
-    lineHeight: fonts.sizes.large,
-  },
-  backButton: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: layout.borderRadius.large,
-    paddingVertical: spacing.xs,
-  },
-  buttonMargin: {
-    marginTop: spacing.md,
+    textAlign: 'center',
   },
 }); 

@@ -14,32 +14,9 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TextInput, Text } from 'react-native-paper';
-import { theme, spacing, layout } from '../../theme';
+import { theme, layout } from '../../theme';
 import { createInputStyles } from '../../utils/themeUtils';
-
-/**
- * Props interface for the Input component
- * 
- * @interface InputProps
- * @property {string} label - The label text displayed above the input
- * @property {string} value - The current value of the input field
- * @property {(text: string) => void} onChangeText - Function called when input text changes
- * @property {string} [placeholder] - Placeholder text shown when input is empty
- * @property {string} [error] - Error message to display below the input
- * @property {boolean} [secureTextEntry] - Whether to hide the input text (for passwords)
- * @property {'default' | 'email-address' | 'numeric' | 'phone-pad'} [keyboardType='default'] - Type of keyboard to show
- * @property {React.ReactNode} [right] - Content to display on the right side of the input
- */
-export interface InputProps {
-  label: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  placeholder?: string;
-  error?: string;
-  secureTextEntry?: boolean;
-  keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
-  right?: React.ReactNode;
-}
+import { InputProps } from '../../types/components.types';
 
 /**
  * Custom Input component with consistent styling and error handling
@@ -134,13 +111,10 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
   },
-  label: {
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: 'transparent',
-  },
   errorText: {
     marginTop: 4,
+  },
+  input: {
+            backgroundColor: theme.colors.transparent,
   },
 }); 

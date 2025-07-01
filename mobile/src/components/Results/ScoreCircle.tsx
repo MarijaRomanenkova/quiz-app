@@ -15,19 +15,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
-import { theme } from '../../theme';
-
-/**
- * Props interface for the ScoreCircle component
- * 
- * @interface ScoreCircleProps
- * @property {number} score - The number of correct answers
- * @property {number} total - The total number of questions
- */
-interface ScoreCircleProps {
-  score: number;
-  total: number;
-}
+import { ScoreCircleProps } from '../../types/components.types';
 
 /**
  * Score Circle component with circular progress indicator
@@ -104,20 +92,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   scoreContainer: {
-    position: 'absolute',
     alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
     height: '100%',
-  },
-  scoreLabel: {
-    fontSize: 18,
-    color: theme.colors.onSurface,
-    marginBottom: 8,
-  },
-  scoreText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
+    justifyContent: 'center',
+    position: 'absolute',
+    width: '100%',
   },
 }); 

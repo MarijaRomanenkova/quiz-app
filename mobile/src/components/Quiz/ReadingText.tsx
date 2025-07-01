@@ -1,14 +1,14 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
-import { theme } from '../../theme';
+import { theme, spacing, layout } from '../../theme';
+import { createTextStyles, createShadowStyles } from '../../utils/themeUtils';
+import { ReadingTextProps } from '../../types/components.types';
 
-interface ReadingTextProps {
-  text: {
-    title: string;
-    text: string;
-  };
-}
+// Create utility styles
+const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.onSurface);
+const textStyles = createTextStyles('large', 'regular', theme.colors.onSurface);
+const shadowStyles = createShadowStyles('large');
 
 export const ReadingText: React.FC<ReadingTextProps> = ({ text }) => {
   return (
@@ -32,51 +32,41 @@ export const ReadingText: React.FC<ReadingTextProps> = ({ text }) => {
 };
 
 const styles = StyleSheet.create({
-  questionCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 15,
-    padding: 24,
-    marginVertical: 12,
-    shadowColor: '#000000',
-    shadowOpacity: 0.15,
-    shadowOffset: {
-      width: 0,
-      height: 20,
-    },
-    shadowRadius: 50,
-    elevation: 8,
-  },
   fullScreenCard: {
+    borderRadius: layout.borderRadius.medium,
     flex: 1,
     margin: 0,
-    borderRadius: 15,
+  },
+  questionCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: layout.borderRadius.medium,
+    flex: 1,
+    marginVertical: spacing.md,
+    padding: spacing.xl,
+    ...shadowStyles.shadow,
   },
   questionContent: {
     flex: 1,
     width: '100%',
   },
+  readingText: {
+    ...textStyles.text,
+    lineHeight: 28,
+    paddingHorizontal: spacing.sm,
+    textAlign: 'justify',
+  },
   readingTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: theme.colors.onSurface,
-    marginBottom: 20,
+    ...titleStyles.text,
+    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.sm,
     textAlign: 'center',
-    paddingHorizontal: 8,
+  },
+  scrollContent: {
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.sm,
   },
   scrollView: {
     flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 20,
-    paddingHorizontal: 8,
-  },
-  readingText: {
-    fontSize: 18,
-    lineHeight: 28,
-    color: theme.colors.onSurface,
-    textAlign: 'justify',
-    paddingHorizontal: 8,
   },
 });
 

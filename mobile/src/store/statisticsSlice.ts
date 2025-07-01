@@ -1,17 +1,11 @@
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
-import { QuizAttempt, DailyQuizTime, StatisticsState } from '../types';
-import { RootState } from '../store';
+import { RootState } from './index';
+import { 
+  DailyQuizTime 
+} from '../types/statistics.types';
+import { QuizAttempt, StatisticsState } from '../types';
 
-/**
- * Statistics state interface
- * @interface StatisticsState
- * @property {QuizAttempt[]} attempts - Array of quiz attempts
- * @property {number} totalAttempts - Total number of attempts made
- * @property {DailyQuizTime[]} dailyQuizTimes - Array of daily quiz time entries
- * @property {number} totalQuizMinutes - Total minutes spent on quizzes
- * @property {string | null} currentSessionStart - ISO timestamp when current quiz session started
- */
-// interfaces moved to types/index.ts
+
 
 /**
  * Initial state for the statistics slice
@@ -353,7 +347,7 @@ const getLastFiveWeeksData = (dailyQuizTimes: DailyQuizTime[]) => {
     
     // For current week (i=0): same logic as getCurrentWeekData
     // For previous weeks (i=1,2,3,4): go back 7*i days from current week's Monday
-    let targetWeekMondayOffset = mondayOffset - (7 * i);
+    const targetWeekMondayOffset = mondayOffset - (7 * i);
     
     const weekStart = new Date(today);
     weekStart.setDate(today.getDate() + targetWeekMondayOffset);

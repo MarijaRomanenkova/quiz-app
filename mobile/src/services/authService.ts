@@ -1,65 +1,16 @@
-import { API_URL } from '../config/index';
+import { API_URL } from '../config';
+import { 
+  LoginCredentials, 
+  RegisterData, 
+  AuthResponse
+} from '../types/auth.types';
 
 /**
- * Interface for user login credentials
- */
-interface LoginCredentials {
-  /** User's email address */
-  email: string;
-  /** User's password */
-  password: string;
-}
-
-/**
- * Interface for user registration data
- */
-interface RegisterData {
-  /** User's email address */
-  email: string;
-  /** User's password */
-  password: string;
-  /** User's display name */
-  username: string;
-  /** User's preferred study pace setting */
-  studyPaceId: number;
-  /** Whether the user has agreed to terms and conditions */
-  agreedToTerms: boolean;
-}
-
-/**
- * Interface for authentication response from the server
- */
-interface AuthResponse {
-  /** JWT access token for API authentication */
-  access_token: string;
-  /** User data returned from the server */
-  user: {
-    /** Unique identifier for the user */
-    id: string;
-    /** User's email address */
-    email: string;
-    /** User's display name */
-    username: string;
-    /** Whether the user's email has been verified */
-    emailVerified: boolean;
-    /** Current level/grade of the user */
-    levelId: string;
-    /** User's preferred study pace setting */
-    studyPaceId: number;
-    /** Whether the user has agreed to terms and conditions */
-    agreedToTerms: boolean;
-    /** Whether the user has opted in to marketing emails */
-    marketingEmails: boolean;
-    /** Whether the user has enabled device sharing */
-    shareDevices: boolean;
-  };
-}
-
-/**
- * Authentication service for handling user authentication operations
+ * Authentication service for handling user login, registration, and profile management
  * 
- * This service provides methods for user login, registration, email verification,
- * and other authentication-related API calls.
+ * This service provides methods for user authentication, including login,
+ * registration, password reset, and profile updates. It handles API communication
+ * with the backend authentication endpoints.
  */
 const authService = {
   /**

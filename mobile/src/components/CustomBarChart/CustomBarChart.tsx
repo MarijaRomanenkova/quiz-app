@@ -17,6 +17,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { theme } from '../../theme';
 import { formatTime } from '../../utils/formatUtils';
+import { CustomBarChartProps } from '../../types/components.types';
 
 /**
  * Data structure for individual bar items
@@ -26,11 +27,6 @@ import { formatTime } from '../../utils/formatUtils';
  * @property {number} value - The numeric value to display (typically minutes)
  * @property {string} [color] - Optional custom color for the bar
  */
-interface BarData {
-  label?: string;
-  value: number;
-  color?: string;
-}
 
 /**
  * Props interface for the CustomBarChart component
@@ -45,16 +41,6 @@ interface BarData {
  * @property {number} [barWidth] - Custom width for bars (auto-calculated if not provided)
  * @property {string} [testID] - Optional testID for testing
  */
-interface CustomBarChartProps {
-  data: BarData[];
-  height?: number;
-  width?: number;
-  maxValue?: number;
-  showValues?: boolean;
-  barSpacing?: number;
-  barWidth?: number;
-  testID?: string;
-}
 
 // Constants
 const screenWidth = Dimensions.get('window').width;
@@ -82,8 +68,6 @@ const getBarHeight = (value: number, visualMax: number, containerHeight: number)
     return (compressedValue / visualMax) * (containerHeight - 20);
   }
 };
-
-
 
 /**
  * Custom Bar Chart component with interactive tooltips
@@ -131,7 +115,6 @@ export const CustomBarChart: React.FC<CustomBarChartProps> = ({
   height,
   width = screenWidth - 64,
   maxValue,
-  showValues = false,
   barSpacing = 2,
   barWidth,
   testID,
@@ -198,34 +181,34 @@ export const CustomBarChart: React.FC<CustomBarChartProps> = ({
 
 // Styles
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  barsContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    height: '100%',
+  bar: {
+    borderRadius: 4,
   },
   barWrapper: {
     alignItems: 'center',
     marginHorizontal: 1,
   },
-  bar: {
-    borderRadius: 4,
+  barsContainer: {
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    height: '100%',
+    justifyContent: 'center',
+  },
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tooltip: {
-    position: 'absolute',
-    top: -30,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    padding: 4,
+    backgroundColor: theme.colors.surface + 'CC', // 80% opacity
     borderRadius: 4,
+    left: 0,
+    padding: 4,
+    position: 'absolute',
+    right: 0,
+    top: -30,
   },
   tooltipText: {
-    color: '#fff',
+    color: theme.colors.onSurface,
     fontSize: 12,
   },
 }); 

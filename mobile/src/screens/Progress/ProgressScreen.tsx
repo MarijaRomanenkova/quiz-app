@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
+
 import { Card } from 'react-native-paper';
 import { theme, fonts, spacing, layout } from '../../theme';
 import { CustomBarChart } from '../../components/CustomBarChart';
@@ -135,80 +135,10 @@ const layoutStyles = createLayoutStyles();
 const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.text);
 
 const styles = StyleSheet.create({
-  container: {
-    ...layoutStyles.container,
-    backgroundColor: theme.colors.secondaryContainer,
-    padding: spacing.lg,
-  },
-  screenTitle: {
-    ...titleStyles.text,
-    marginBottom: spacing.xs,
-    textAlign: 'center',
-  },
-  mainContent: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  chartsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    gap: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingHorizontal: spacing.md,
-  },
-  staggeredChart: {
-    marginTop: ((Dimensions.get('window').width / 3)) / 3,
-  },
-  chartCard: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: layout.borderRadius.medium,
-    ...layout.shadow.large,
-  },
-  chartCardContent: {
-    flex: 1,
-  },
-  chartTitleArea: {
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    height: '50%',
-  },
-  chartBarsArea: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '50%',
-  },
-  chartTitle: {
-    fontSize: fonts.sizes.small,
-    fontFamily: fonts.weights.regular,
-    color: theme.colors.outline,
-    marginBottom: spacing.xs,
-  },
-  chartSubtitle: {
-    fontSize: fonts.sizes.medium,
-    fontFamily: fonts.weights.semiBold,
-    color: theme.colors.text,
-    marginBottom: spacing.xs,
-  },
-  chartSubtext: {
-    fontSize: fonts.sizes.small,
-    fontFamily: fonts.weights.regular,
-    color: theme.colors.outline,
-  },
-  levelSection: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
-  },
-  categorySection: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.sm,
-  },
   categoryItem: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingVertical: spacing.xs,
   },
   categoryName: {
@@ -219,22 +149,74 @@ const styles = StyleSheet.create({
     fontFamily: fonts.weights.semiBold,
     fontSize: fonts.sizes.large,
   },
-  buttonSection: {
-    marginTop: spacing.md,
-    marginBottom: spacing.md,
+  categorySection: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm,
   },
-  wideButton: {
-    width: '100%',
+  chartBarsArea: {
+    alignItems: 'center',
+    height: '50%',
+    justifyContent: 'center',
   },
-  categoryTitle: {
-    color: theme.colors.surface,
-    fontSize: fonts.sizes.medium,
+  chartCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: layout.borderRadius.medium,
+    ...layout.shadow.large,
+  },
+  chartCardContent: {
+    flex: 1,
+  },
+  chartSubtext: {
+    color: theme.colors.outline,
     fontFamily: fonts.weights.regular,
-    marginBottom: spacing.sm,
+    fontSize: fonts.sizes.small,
   },
-  categoryProgress: {
-    color: theme.colors.surface,
+  chartSubtitle: {
+    color: theme.colors.text,
+    fontFamily: fonts.weights.semiBold,
     fontSize: fonts.sizes.medium,
+    marginBottom: spacing.xs,
+  },
+  chartTitle: {
+    color: theme.colors.outline,
     fontFamily: fonts.weights.regular,
+    fontSize: fonts.sizes.small,
+    marginBottom: spacing.xs,
+  },
+  chartTitleArea: {
+    alignItems: 'flex-start',
+    height: '50%',
+    justifyContent: 'center',
+  },
+  chartsRow: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    gap: spacing.lg,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
+  },
+  container: {
+    ...layoutStyles.container,
+    backgroundColor: theme.colors.secondaryContainer,
+    padding: spacing.lg,
+  },
+  levelSection: {
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
+  },
+  mainContent: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  screenTitle: {
+    ...titleStyles.text,
+    marginBottom: spacing.xs,
+    textAlign: 'center',
+  },
+  staggeredChart: {
+    marginTop: ((Dimensions.get('window').width / 3)) / 3,
   },
 }); 

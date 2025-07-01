@@ -75,7 +75,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const { user, token } = useSelector((state: RootState) => state.auth);
   const questionsState = useSelector((state: RootState) => state.questions);
   const readingTextsState = useSelector((state: RootState) => state.questions);
-  const { topicProgress, categoryProgress } = useSelector((state: RootState) => state.progress);
+
 
   /**
    * Initial data loading for authenticated users
@@ -100,11 +100,11 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
         
         // Fetch questions for all topics
         dispatch(fetchAllQuestionsThunk()).unwrap()
-          .then((questionsData) => {
+          .then(() => {
             // Fetch reading texts after questions are loaded
             return dispatch(fetchAllReadingTextsThunk()).unwrap();
           })
-          .then((readingTextsData) => {
+          .then(() => {
             // Reading texts loaded successfully
           })
           .catch((error) => {
@@ -127,11 +127,11 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
       
       if (!hasQuestions) {
         dispatch(fetchAllQuestionsThunk()).unwrap()
-          .then((questionsData) => {
+          .then(() => {
             // Also trigger reading texts fetch
             return dispatch(fetchAllReadingTextsThunk()).unwrap();
           })
-          .then((readingTextsData) => {
+          .then(() => {
             // Manual reading texts fetch successful
           })
           .catch((error) => {
@@ -141,10 +141,10 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
         // Check if reading texts are loaded
         const hasReadingTexts = readingTextsState.readingTextsById && Object.keys(readingTextsState.readingTextsById).length > 0;
         if (!hasReadingTexts) {
-          dispatch(fetchAllReadingTextsThunk()).unwrap()
-            .then((readingTextsData) => {
-              // Manual reading texts fetch successful
-            })
+                  dispatch(fetchAllReadingTextsThunk()).unwrap()
+          .then(() => {
+            // Manual reading texts fetch successful
+          })
             .catch((error) => {
               console.error('HomeScreen - Manual reading texts fetch failed:', error);
             });
@@ -259,45 +259,45 @@ const layoutStyles = createLayoutStyles();
 const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.text);
 
 const styles = StyleSheet.create({
+  button: {
+    marginBottom: spacing.md,
+  },
+  buttonContainer: {
+    marginTop: spacing.lg,
+  },
   container: {
     ...layoutStyles.container,
-    padding: spacing.lg,
     backgroundColor: theme.colors.secondaryContainer,
+    padding: spacing.lg,
   },
-  title: {
-    ...titleStyles.text,
-    textAlign: 'center',
-    marginVertical: spacing.lg,
+  radioButton: {
+    marginVertical: 0,
   },
   radioContainer: {
     flex: 1,
     marginTop: spacing.md,
   },
   radioItem: {
-    marginBottom: spacing.sm,
     backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.outline,
     borderRadius: layout.borderRadius.large,
     borderWidth: 1,
-    borderColor: theme.colors.outline,
-  },
-  selectedRadioItem: {
-    borderWidth: 2,
-    borderColor: theme.colors.primaryContainer,
+    marginBottom: spacing.sm,
   },
   radioLabel: {
     fontSize: fonts.sizes.medium,
     fontWeight: 'bold',
   },
+  selectedRadioItem: {
+    borderColor: theme.colors.primaryContainer,
+    borderWidth: 2,
+  },
   selectedRadioLabel: {
     color: theme.colors.primaryContainer,
   },
-  radioButton: {
-    marginVertical: 0,
-  },
-  buttonContainer: {
-    marginTop: spacing.lg,
-  },
-  button: {
-    marginBottom: spacing.md,
+  title: {
+    ...titleStyles.text,
+    marginVertical: spacing.lg,
+    textAlign: 'center',
   },
 }); 

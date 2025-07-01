@@ -2,7 +2,6 @@ import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@r
 import { Topic } from '../types';
 import { fetchTopics } from '../services/api';
 import { RootState } from './index';
-import { updateCompletedTopicsCategories } from './progressSlice';
 
 /**
  * Interface representing the topic slice state

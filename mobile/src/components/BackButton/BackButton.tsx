@@ -15,10 +15,11 @@
  */
 
 import React from 'react';
-import { StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, TouchableOpacity, Text, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { theme } from '../../theme';
+import { theme, layout, spacing } from '../../theme';
+import { createTextStyles } from '../../utils/themeUtils';
 
 /**
  * Available button variants with their respective color schemes
@@ -35,7 +36,7 @@ type BackButtonVariant = 'dark' | 'light';
  * @property {BackButtonVariant} [variant='dark'] - Button color variant for different backgrounds
  * @property {number} [size] - Optional size for the icon (default: 32)
  * @property {string} [text] - Optional text to display next to the icon
- * @property {any} [style] - Optional additional styles
+ * @property {ViewStyle} [style] - Optional additional styles
  * @property {string} [testID] - Optional testID for testing
  */
 interface BackButtonProps {
@@ -43,7 +44,7 @@ interface BackButtonProps {
   variant?: BackButtonVariant;
   size?: number;
   text?: string;
-  style?: any;
+  style?: ViewStyle;
   testID?: string;
 }
 
@@ -59,7 +60,7 @@ interface BackButtonProps {
  * @param {BackButtonVariant} [props.variant] - Button color variant for different backgrounds
  * @param {number} [props.size] - Optional size for the icon (default: 32)
  * @param {string} [props.text] - Optional text to display next to the icon
- * @param {any} [props.style] - Optional additional styles
+ * @param {ViewStyle} [props.style] - Optional additional styles
  * @param {string} [props.testID] - Optional testID for testing
  * @returns {JSX.Element} A styled back button component
  * 
@@ -119,18 +120,19 @@ export const BackButton = ({
   );
 };
 
+const textStyles = createTextStyles('large', 'semiBold', theme.colors.surface);
+
 const styles = StyleSheet.create({
   button: {
-    flexDirection: 'row',
     alignItems: 'center',
-    padding: 8,
-    borderRadius: 20,
-    minWidth: 44,
+    borderRadius: layout.borderRadius.large,
+    flexDirection: 'row',
     minHeight: 44,
+    minWidth: 44,
+    padding: spacing.sm,
   },
   text: {
-    marginLeft: 8,
-    fontSize: 18,
-    fontFamily: 'Baloo2-SemiBold',
+    ...textStyles.text,
+    marginLeft: spacing.sm,
   },
 }); 

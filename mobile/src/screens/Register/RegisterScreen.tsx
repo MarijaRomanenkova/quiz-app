@@ -23,23 +23,19 @@ import { Text, TextInput, Surface, Switch, Portal } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
-import { useDispatch } from 'react-redux';
-import { setUser } from '../../store/userSlice';
-import { theme, spacing } from '../../theme';
-import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceSelector';
-import { Button } from '../../components/Button/Button';
-import { Input } from '../../components/Input/Input';
-import { CustomModal } from '../../components/Modal/CustomModal';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import authService from '../../services/authService';
 import { BackButton } from '../../components/BackButton';
 import { registerSchema, type RegisterFormData } from '../../utils/validationSchemas';
 import { usePasswordVisibility } from '../../hooks/usePasswordVisibility';
-import { useFormLoading } from '../../hooks/useFormLoading';
 import { handleApiError } from '../../utils/apiUtils';
-import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
-import { LoadingWrapper } from '../../components/common/LoadingWrapper';
+import { theme, fonts, spacing } from '../../theme';
+
+import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceSelector';
+import { Button } from '../../components/Button/Button';
+import { Input } from '../../components/Input/Input';
+import { CustomModal } from '../../components/Modal/CustomModal';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -73,13 +69,10 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
  */
 export const RegisterScreen = () => {
   const navigation = useNavigation<NavigationProp>();
-  const dispatch = useDispatch();
   const { showPassword, togglePasswordVisibility } = usePasswordVisibility();
   const { showPassword: showConfirmPassword, togglePasswordVisibility: toggleConfirmPasswordVisibility } = usePasswordVisibility();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showEmailExistsModal, setShowEmailExistsModal] = useState(false);
-  const { isLoading, withLoading } = useFormLoading();
-  const [error, setError] = useState('');
 
   const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -329,62 +322,61 @@ export const RegisterScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    gap: 8,
-  },
   backText: {
     color: theme.colors.surface,
-    fontSize: 16,
     fontFamily: 'Baloo2-Regular',
+    fontSize: fonts.sizes.medium,
+  },
+  buttonContainer: {
+    padding: spacing.md,
+    paddingBottom: spacing.xl,
+  },
+  container: {
+    backgroundColor: theme.colors.background,
+    flex: 1,
   },
   content: {
     flex: 1,
-    padding: 24,
+    padding: spacing.xl,
   },
-
+  errorText: {
+    marginTop: spacing.xs,
+  },
   formContainer: {
     flex: 1,
     justifyContent: 'center',
   },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+    padding: spacing.md,
+  },
+  scrollView: {
+    flex: 1,
+  },
   section: {
-    marginVertical: 24,
+    marginVertical: spacing.xl,
   },
   sectionTitle: {
     color: theme.colors.surface,
     textAlign: 'center',
   },
   termsContainer: {
-    marginTop: 16,
-    marginBottom: 12,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  toggleLabel: {
-    color: theme.colors.surface,
-    flex: 1,
+    marginBottom: spacing.md,
+    marginTop: spacing.md,
   },
   termsLink: {
     color: theme.colors.surface,
     textDecorationLine: 'underline',
   },
-  buttonContainer: {
-    padding: 12,
-    paddingBottom: 40,
+  toggleLabel: {
+    color: theme.colors.surface,
+    flex: 1,
   },
-  errorText: {
-    marginTop: 4,
+  toggleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.md,
   },
 }); 

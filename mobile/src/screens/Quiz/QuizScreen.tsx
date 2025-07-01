@@ -18,10 +18,9 @@ import { Surface } from 'react-native-paper';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import type { RootStackParamList } from '../../types/navigation';
-import { RootState } from '../../store';
 import { selectQuestionsLoading } from '../../store/questionsSlice';
 import Quiz from '../../components/Quiz/Quiz';
-import { theme, spacing } from '../../theme';
+import { theme } from '../../theme';
 import { LoadingWrapper } from '../../components/common/LoadingWrapper';
 import { createLayoutStyles } from '../../utils/themeUtils';
 

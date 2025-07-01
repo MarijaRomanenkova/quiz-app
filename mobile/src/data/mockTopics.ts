@@ -1,5 +1,4 @@
-import { Category } from '../types';
-import { QuizTopic} from '../types';
+import { QuizTopic } from '../types';
 
 export const mockTopics: QuizTopic[] = [
   // Grammar topics

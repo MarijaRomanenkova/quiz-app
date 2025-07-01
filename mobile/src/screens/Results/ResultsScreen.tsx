@@ -26,7 +26,7 @@ import { theme, spacing } from '../../theme';
 import { ScoreCircle } from '../../components/Results/ScoreCircle';
 import { RootState } from '../../store';
 import { Button as CustomButton } from '../../components/Button/Button';
-import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
+import { createLayoutStyles } from '../../utils/themeUtils';
 
 
 
@@ -135,6 +135,21 @@ export const ResultsScreen = () => {
 const layoutStyles = createLayoutStyles();
 
 const styles = StyleSheet.create({
+  button: {
+    width: '100%',
+  },
+  buttonContainer: {
+    gap: spacing.md,
+    marginTop: spacing.xl,
+    width: '100%',
+  },
+  congratsContainer: {
+    alignItems: 'center',
+    marginTop: spacing.xl,
+  },
+  congratsText: {
+    marginBottom: spacing.md,
+  },
   container: {
     ...layoutStyles.container,
     backgroundColor: theme.colors.secondaryContainer,
@@ -144,30 +159,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  congratsContainer: {
-    alignItems: 'center',
-    marginTop: spacing.xl,
-  },
-  congratsText: {
-    marginBottom: spacing.md,
-  },
   messageText: {
     marginBottom: spacing.lg,
   },
   questionText: {
     marginTop: spacing.md,
-    textAlign: 'center',
-  },
-  buttonContainer: {
-    width: '100%',
-    gap: spacing.md,
-    marginTop: spacing.xl,
-  },
-  button: {
-    width: '100%',
-  },
-  percentage: {
-    color: theme.colors.primaryContainer,
     textAlign: 'center',
   },
 }); 

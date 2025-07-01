@@ -13,7 +13,7 @@
 
 import React from 'react';
 import { Image, StyleSheet, Platform, ViewStyle, ImageStyle, View } from 'react-native';
-import QuizLogoSvg from '../../../assets/images/quiz_logo.svg';
+
 import { Svg, Rect, Text } from 'react-native-svg';
 
 /**
@@ -89,12 +89,12 @@ export const Logo = ({ width = 200, height = 200, style }: LogoProps) => {
 };
 
 const styles = StyleSheet.create({
-  logo: {
-    marginBottom: 24,
-  },
   container: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+  },
+  logo: {
+    marginBottom: 24,
   },
 }); 

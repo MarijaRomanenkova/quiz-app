@@ -35,7 +35,7 @@ export type ButtonVariant = 'success' | 'primary' | 'secondary';
  * // { backgroundColor: '#CCCCCC', textColor: '#666666' }
  * ```
  */
-export const getButtonColors = (variant: ButtonVariant, disabled: boolean = false) => {
+export const getButtonColors = (variant: ButtonVariant, disabled = false) => {
   if (disabled) {
     return {
       backgroundColor: '#CCCCCC', // gray when disabled

@@ -18,26 +18,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { theme } from '../../theme';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
-
-/**
- * Props interface for the AudioPlayer component
- * 
- * @interface AudioPlayerProps
- * @property {string} audioUrl - The URL of the audio file to play
- */
-interface AudioPlayerProps {
-  audioUrl: string;
-}
-
-/**
- * Ref interface for external control of the AudioPlayer
- * 
- * @interface AudioPlayerRef
- * @property {() => void} stop - Function to stop the current audio playback
- */
-export interface AudioPlayerRef {
-  stop: () => void;
-}
+import { AudioPlayerProps, AudioPlayerRef } from '../../types/components.types';
 
 /**
  * Audio Player component with circular progress indicator
@@ -196,26 +177,28 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(({ audio
   );
 });
 
+AudioPlayer.displayName = 'AudioPlayer';
+
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  playerContainer: {
-    width: 100,
-    height: 100,
+  playButton: {
     alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    borderRadius: 30,
+    height: 60,
     justifyContent: 'center',
+    width: 60,
+  },
+  playerContainer: {
+    alignItems: 'center',
+    height: 100,
+    justifyContent: 'center',
+    width: 100,
   },
   svg: {
     position: 'absolute',
-  },
-  playButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: theme.colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
   }
 }); 

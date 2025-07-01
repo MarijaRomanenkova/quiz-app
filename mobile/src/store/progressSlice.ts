@@ -2,62 +2,9 @@ import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@r
 import { RootState } from './index';
 import { fetchQuestions } from '../services/api';
 import { Topic } from '../types';
+import { CategoryProgress, ProgressState } from '../types/progress.types';
 
-/**
- * Interface representing progress data for a specific topic
- */
-interface TopicProgress {
-  /** Unique identifier for the topic */
-  topicId: string;
-  /** Category this topic belongs to */
-  categoryId: string;
-  /** Whether the topic has been completed */
-  completed: boolean;
-  /** Best score achieved on this topic (0-100) */
-  score: number;
-  /** Number of attempts made on this topic */
-  attempts: number;
-  /** ISO timestamp of the last attempt */
-  lastAttemptDate?: string;
-}
 
-/**
- * Interface representing progress data for a category
- */
-interface CategoryProgress {
-  /** Unique identifier for the category */
-  categoryId: string;
-  /** Number of completed topics in this category */
-  completedTopics: number;
-  /** Total number of topics in this category */
-  totalTopics: number;
-  /** Number of topics currently unlocked for this category */
-  unlockedTopics: number;
-}
-
-/**
- * Interface representing the complete progress state
- */
-interface ProgressState {
-  /** Progress data for individual topics, keyed by topicId */
-  topicProgress: Record<string, TopicProgress>;
-  /** Progress data for categories, keyed by categoryId */
-  categoryProgress: Record<string, CategoryProgress>;
-  /** Loading state for progress operations */
-  isLoading: boolean;
-  /** Error message from progress operations */
-  error: string | null;
-}
-
-/**
- * Initial state for the progress slice
- */
-const initialState: ProgressState = {
-  topicProgress: {},
-  categoryProgress: {},
-  isLoading: false,
-  error: null,
-};
 
 /**
  * Async thunk to load more questions when progress threshold is met
@@ -163,7 +110,12 @@ export const loadMoreQuestionsThunk = createAsyncThunk(
  */
 export const progressSlice = createSlice({
   name: 'progress',
-  initialState,
+  initialState: {
+    topicProgress: {},
+    categoryProgress: {},
+    isLoading: false,
+    error: null,
+  } as ProgressState,
   reducers: {
     /**
      * Initializes progress tracking for a category
@@ -189,7 +141,8 @@ export const progressSlice = createSlice({
         categoryId,
         completedTopics: existingProgress ? existingProgress.completedTopics : existingCompletedTopics,
         totalTopics,
-        unlockedTopics: existingProgress ? existingProgress.unlockedTopics : initialUnlocked
+        unlockedTopics: existingProgress ? existingProgress.unlockedTopics : initialUnlocked,
+
       };
     },
     

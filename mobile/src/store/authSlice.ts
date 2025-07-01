@@ -2,32 +2,9 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { fetchStatisticsData, syncStatisticsData, updateUserProfile } from '../services/api';
 import { loadStatisticsData } from './statisticsSlice';
 import authService from '../services/authService';
-import type { RootState, AppDispatch } from './index';
+import type { RootState } from './index';
 import { loadCompletedTopics } from './progressSlice';
-
-/**
- * Interface representing the user data structure in the authentication state
- */
-interface User {
-  /** Unique identifier for the user */
-  id: string;
-  /** User's email address */
-  email: string;
-  /** User's display name */
-  username: string;
-  /** Whether the user's email has been verified */
-  emailVerified: boolean;
-  /** Current level/grade of the user */
-  levelId: string;
-  /** User's preferred study pace setting */
-  studyPaceId: number;
-  /** Whether the user has agreed to terms and conditions */
-  agreedToTerms: boolean;
-  /** Whether the user has opted in to marketing emails */
-  marketingEmails: boolean;
-  /** Whether the user has enabled device sharing */
-  shareDevices: boolean;
-}
+import { User } from '../types/user.types';
 
 /**
  * Interface representing the complete authentication state

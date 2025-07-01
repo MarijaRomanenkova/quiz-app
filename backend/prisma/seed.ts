@@ -108,6 +108,7 @@ async function main() {
       { topicId: 'short-stories', levelId: 'A1.1', categoryId: 'reading', topicOrder: 1 },
       { topicId: 'dialogues', levelId: 'A1.1', categoryId: 'reading', topicOrder: 1 },
       { topicId: 'news-articles', levelId: 'A1.1', categoryId: 'reading', topicOrder: 2 },
+      { topicId: 'long-articles', levelId: 'A1.1', categoryId: 'reading', topicOrder: 3 },
       
       // Listening topics for A1.1 (Priority 1: Basic listening)
       { topicId: 'basic-listening', levelId: 'A1.1', categoryId: 'listening', topicOrder: 1 },
@@ -159,6 +160,11 @@ async function main() {
         id: 'r4',
         title: 'Das Wetter',
         textContent: 'Das Wetter in Deutschland ist sehr wechselhaft. Im Frühling ist es oft regnerisch und kühl. Die Temperaturen liegen zwischen 10 und 20 Grad Celsius. Im Sommer ist es warm und sonnig, manchmal auch heiß mit Temperaturen über 30 Grad. Im Herbst wird es wieder kühler und die Blätter fallen von den Bäumen. Im Winter ist es kalt und es schneit oft. Die Temperaturen können unter null Grad fallen. Heute ist es bewölkt und es regnet leicht. Die Temperatur beträgt 15 Grad. Morgen soll es sonnig werden mit 22 Grad. Am Wochenende wird es wieder kühler mit nur 12 Grad.'
+      },
+      {
+        id: 'r5',
+        title: 'Die Geschichte von Berlin',
+        textContent: 'Berlin ist die Hauptstadt von Deutschland und eine der größten Städte Europas. Die Geschichte der Stadt reicht bis ins 13. Jahrhundert zurück, als sie als kleine Handelsstadt an der Spree gegründet wurde. Im Laufe der Jahrhunderte entwickelte sich Berlin zu einem wichtigen politischen und kulturellen Zentrum. Im 18. Jahrhundert wurde Berlin unter Friedrich dem Großen zur Hauptstadt Preußens und erlebte eine kulturelle Blütezeit. Viele berühmte Gebäude wie das Brandenburger Tor wurden in dieser Zeit errichtet. Im 19. Jahrhundert wurde Berlin zur Hauptstadt des Deutschen Kaiserreichs und entwickelte sich zu einer modernen Großstadt mit Industrie, Wissenschaft und Kultur. Die Stadt wuchs schnell und wurde zu einem Zentrum der Innovation und des Fortschritts. Nach dem Ersten Weltkrieg wurde Berlin zur Hauptstadt der Weimarer Republik. In den 1920er Jahren erlebte die Stadt eine kulturelle Renaissance mit berühmten Künstlern, Schriftstellern und Wissenschaftlern. Das Nachtleben war legendär und die Stadt wurde als "Babylon der Moderne" bekannt. Nach dem Zweiten Weltkrieg wurde Berlin in vier Besatzungszonen aufgeteilt und später durch die Berliner Mauer getrennt. Die Mauer stand von 1961 bis 1989 und teilte die Stadt in Ost- und West-Berlin. Der Fall der Mauer am 9. November 1989 markierte das Ende des Kalten Krieges und führte zur Wiedervereinigung Deutschlands. Heute ist Berlin wieder die Hauptstadt eines vereinten Deutschlands und eine der dynamischsten Städte Europas. Die Stadt ist bekannt für ihre vielfältige Kultur, ihre Geschichte, ihre Museen und ihre lebendige Kunstszene. Berlin ist auch ein wichtiges Zentrum für Start-ups, Technologie und Innovation. Die Stadt hat eine einzigartige Atmosphäre, die Besucher aus der ganzen Welt anzieht. Die Menschen in Berlin sind offen, tolerant und weltoffen. Die Stadt bietet eine perfekte Mischung aus Geschichte und Moderne, Tradition und Innovation. Berlin ist nicht nur die politische Hauptstadt Deutschlands, sondern auch ein kulturelles und wirtschaftliches Zentrum von internationaler Bedeutung. Die Stadt hat sich zu einem Symbol für Freiheit, Toleranz und kulturelle Vielfalt entwickelt. Jedes Jahr besuchen Millionen von Touristen Berlin, um die historischen Sehenswürdigkeiten, die Museen, die Parks und die lebendige Atmosphäre der Stadt zu erleben. Berlin ist eine Stadt, die niemals schläft und immer etwas Neues zu bieten hat.'
       }
     ];
 
@@ -387,6 +393,43 @@ async function main() {
         correctAnswerId: '0',
         topicId: 'news-articles',
         readingTextId: 'r3'
+      },
+
+      // Reading - Long Articles
+      {
+        questionText: 'Berlin wurde im 13. Jahrhundert gegründet.',
+        options: ['True', 'False'],
+        correctAnswerId: '0',
+        topicId: 'long-articles',
+        readingTextId: 'r5'
+      },
+      {
+        questionText: 'Die Berliner Mauer stand von 1961 bis 1989.',
+        options: ['True', 'False'],
+        correctAnswerId: '0',
+        topicId: 'long-articles',
+        readingTextId: 'r5'
+      },
+      {
+        questionText: 'Berlin ist heute die Hauptstadt von Deutschland.',
+        options: ['True', 'False'],
+        correctAnswerId: '0',
+        topicId: 'long-articles',
+        readingTextId: 'r5'
+      },
+      {
+        questionText: 'Die Stadt wurde als "Babylon der Moderne" bekannt.',
+        options: ['True', 'False'],
+        correctAnswerId: '0',
+        topicId: 'long-articles',
+        readingTextId: 'r5'
+      },
+      {
+        questionText: 'Berlin ist ein wichtiges Zentrum für Start-ups.',
+        options: ['True', 'False'],
+        correctAnswerId: '0',
+        topicId: 'long-articles',
+        readingTextId: 'r5'
       },
 
       // Words - Fruit & Veggies

@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../types/navigation';
 import { useAuth } from './useAuth';
 
 /**
@@ -29,12 +31,11 @@ import { useAuth } from './useAuth';
  */
 export const useProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      // @ts-ignore - navigation type will be properly typed when used with specific navigator
-      navigation.replace('Login');
+      navigation.navigate('Login');
     }
   }, [isAuthenticated, isLoading, navigation]);
 

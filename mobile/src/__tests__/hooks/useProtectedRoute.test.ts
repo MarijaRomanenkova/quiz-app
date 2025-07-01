@@ -138,7 +138,7 @@ describe('useProtectedRoute', () => {
 
   it('should not redirect when authentication state changes from loading to authenticated', () => {
     // First render: loading
-    let mockAuthState = {
+    const mockAuthState = {
       isAuthenticated: false,
       isLoading: true,
       user: null,

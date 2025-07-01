@@ -29,8 +29,8 @@ import { Animated } from 'react-native';
  */
 export const createLoadingDotsAnimation = (
   dotAnimations: Animated.Value[],
-  delay: number = 200,
-  duration: number = 600
+  delay = 200,
+  duration = 600
 ): Animated.CompositeAnimation => {
   const animations = dotAnimations.map((anim, index) => {
     return Animated.sequence([
@@ -74,7 +74,7 @@ export const createLoadingDotsAnimation = (
  */
 export const createFadeInAnimation = (
   opacity: Animated.Value,
-  duration: number = 300
+  duration = 300
 ): Animated.CompositeAnimation => {
   return Animated.timing(opacity, {
     toValue: 1,
@@ -103,7 +103,7 @@ export const createFadeInAnimation = (
 export const createScaleAnimation = (
   scale: Animated.Value,
   toValue: number,
-  duration: number = 200
+  duration = 200
 ): Animated.CompositeAnimation => {
   return Animated.timing(scale, {
     toValue,

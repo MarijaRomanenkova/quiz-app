@@ -144,7 +144,7 @@ export const useAuth = () => {
    * );
    * ```
    */
-  const register = useCallback(async (email: string, password: string, username: string, studyPaceId: number = 1, agreedToTerms: boolean = false) => {
+  const register = useCallback(async (email: string, password: string, username: string, studyPaceId = 1, agreedToTerms = false) => {
     try {
       dispatch(setLoading(true));
       await authService.register({ email, password, username, studyPaceId, agreedToTerms });
