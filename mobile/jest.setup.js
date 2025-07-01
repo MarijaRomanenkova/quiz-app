@@ -75,29 +75,87 @@ jest.mock('react-native-svg', () => {
   };
 });
 
-// Mock React Native Paper components that cause issues in tests
+// Mock react-native-paper
 jest.mock('react-native-paper', () => {
   const React = require('react');
-  const { View, Text, TouchableOpacity } = require('react-native');
-  
+  const { View, Text, TouchableOpacity, TextInput } = require('react-native');
+
   const MD3LightTheme = {
     colors: {
-      primary: '#6200ee',
-      secondary: '#03dac6',
-      error: '#b00020',
-      background: '#f6f6f6',
-      surface: '#ffffff',
-      text: '#000000',
-      onPrimary: '#ffffff',
-      onSecondary: '#000000',
-      onError: '#ffffff',
-      onBackground: '#000000',
-      onSurface: '#000000',
+      primary: '#6750A4',
+      onPrimary: '#FFFFFF',
+      primaryContainer: '#EADDFF',
+      onPrimaryContainer: '#21005D',
+      secondary: '#625B71',
+      onSecondary: '#FFFFFF',
+      secondaryContainer: '#E8DEF8',
+      onSecondaryContainer: '#1D192B',
+      tertiary: '#7D5260',
+      onTertiary: '#FFFFFF',
+      tertiaryContainer: '#FFD8E4',
+      onTertiaryContainer: '#31111D',
+      error: '#B3261E',
+      onError: '#FFFFFF',
+      errorContainer: '#F9DEDC',
+      onErrorContainer: '#410E0B',
+      background: '#FFFBFE',
+      onBackground: '#1C1B1F',
+      surface: '#FFFBFE',
+      onSurface: '#1C1B1F',
+      surfaceVariant: '#E7E0EC',
+      onSurfaceVariant: '#49454F',
+      outline: '#79747E',
+      outlineVariant: '#CAC4D0',
+      shadow: '#000000',
+      scrim: '#000000',
+      inverseSurface: '#313033',
+      inverseOnSurface: '#F4EFF4',
+      inversePrimary: '#D0BCFF',
+      elevation: {
+        level0: 'transparent',
+        level1: '#FFFBFE',
+        level2: '#FFFBFE',
+        level3: '#FFFBFE',
+        level4: '#FFFBFE',
+        level5: '#FFFBFE',
+      },
     },
   };
-  
+
   return {
     MD3LightTheme,
+    TextInput: Object.assign(
+      ({ value, onChangeText, placeholder, label, error, secureTextEntry, keyboardType, style, ...props }) => {
+        const RNTextInput = require('react-native').TextInput;
+        return (
+          <View testID="paper-text-input">
+            {label && <Text testID="input-label">{label}</Text>}
+            <RNTextInput
+              value={value}
+              onChangeText={onChangeText}
+              placeholder={placeholder}
+              secureTextEntry={secureTextEntry}
+              keyboardType={keyboardType}
+              style={style}
+              testID="text-input"
+              {...props}
+            />
+            {error && <Text testID="input-error">{error}</Text>}
+          </View>
+        );
+      },
+      {
+        Icon: ({ icon, onPress }) => {
+          const React = require('react');
+          const { TouchableOpacity, Text } = require('react-native');
+          return (
+            <TouchableOpacity onPress={onPress} testID="text-input-icon">
+              <Text>{icon}</Text>
+            </TouchableOpacity>
+          );
+        },
+      }
+    ),
     Button: ({ onPress, children, disabled, style, ...props }) => (
       <TouchableOpacity 
         onPress={onPress} 
@@ -109,29 +167,32 @@ jest.mock('react-native-paper', () => {
         {children !== undefined && children !== '' ? <Text>{children}</Text> : null}
       </TouchableOpacity>
     ),
-    TextInput: ({ value, onChangeText, placeholder, label, error, secureTextEntry, keyboardType, style, ...props }) => {
-      const RNTextInput = require('react-native').TextInput;
-      return (
-        <View testID="paper-text-input">
-          {label && <Text testID="input-label">{label}</Text>}
-          <RNTextInput
-            value={value}
-            onChangeText={onChangeText}
-            placeholder={placeholder}
-            secureTextEntry={secureTextEntry}
-            keyboardType={keyboardType}
-            style={style}
-            testID="text-input"
-            {...props}
-          />
-          {error && <Text testID="input-error">{error}</Text>}
-        </View>
-      );
-    },
     Surface: ({ children, style, ...props }) => (
       <View style={style} testID="paper-surface" {...props}>
         {children}
       </View>
+    ),
+    Card: Object.assign(
+      ({ children, style, ...props }) => {
+        const React = require('react');
+        const { View } = require('react-native');
+        return (
+          <View style={style} testID="paper-card" {...props}>
+            {children}
+          </View>
+        );
+      },
+      {
+        Content: ({ children, style, ...props }) => {
+          const React = require('react');
+          const { View } = require('react-native');
+          return (
+            <View style={style} testID="paper-card-content" {...props}>
+              {children}
+            </View>
+          );
+        },
+      }
     ),
     Modal: ({ visible, children, ...props }) =>
       visible ? (
@@ -210,6 +271,24 @@ jest.mock('react-native-paper', () => {
         </View>
       );
     },
+    Portal: ({ children }) => {
+      const React = require('react');
+      const { View } = require('react-native');
+      return <View testID="portal">{children}</View>;
+    },
+    Switch: ({ value, onValueChange, color, testID }) => {
+      const React = require('react');
+      const { TouchableOpacity, View } = require('react-native');
+      return (
+        <TouchableOpacity
+          onPress={() => onValueChange(!value)}
+          testID={testID || 'switch'}
+          style={{ backgroundColor: value ? color : '#ccc', padding: 8 }}
+        >
+          <View />
+        </TouchableOpacity>
+      );
+    },
   };
 });
 
@@ -225,4 +304,17 @@ global.console = {
   // info: jest.fn(),
   // warn: jest.fn(),
   // error: jest.fn(),
-}; 
+};
+
+// Mock AsyncStorage
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+);
+
+// Mock react-native Settings
+jest.mock('react-native/Libraries/Settings/Settings', () => ({
+  get: jest.fn(),
+  set: jest.fn(),
+  watchKeys: jest.fn(),
+  clearWatch: jest.fn(),
+})); 

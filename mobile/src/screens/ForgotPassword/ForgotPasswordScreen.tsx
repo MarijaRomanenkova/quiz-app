@@ -130,7 +130,7 @@ export const ForgotPasswordScreen = () => {
   return (
     <Surface style={styles.container}>
       <View style={styles.header}>
-        <BackButton variant="dark" onPress={() => navigation.goBack()} />
+        <BackButton variant="dark" onPress={() => navigation.goBack()} testID="back-button" />
         <Text variant="titleMedium" style={styles.backText}>Back to Login</Text>
       </View>
 

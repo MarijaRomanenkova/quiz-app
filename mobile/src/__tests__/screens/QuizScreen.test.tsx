@@ -5,23 +5,34 @@ import { configureStore } from '@reduxjs/toolkit';
 import { QuizScreen } from '../../screens/Quiz/QuizScreen';
 import questionsReducer from '../../store/questionsSlice';
 
-// Mock the Quiz component
+// Mock the Quiz component with prop tracking
+const mockQuizProps: { quizId?: string; isRepeating?: boolean } = {};
 jest.mock('../../components/Quiz/Quiz', () => {
   const React = require('react');
   const { View, Text } = require('react-native');
   return {
     __esModule: true,
     default: ({ quizId, isRepeating }: { quizId: string; isRepeating?: boolean }) => {
+      // Track the props passed to Quiz component
+      mockQuizProps.quizId = quizId;
+      mockQuizProps.isRepeating = isRepeating;
+      
       return (
         <View testID="quiz-component">
-          <Text>Quiz Component</Text>
+          <Text testID="quiz-id">Quiz ID: {quizId}</Text>
+          <Text testID="quiz-repeating">Repeating: {isRepeating ? 'Yes' : 'No'}</Text>
         </View>
       );
     },
   };
 });
 
-// Mock navigation
+// Mock navigation with proper route params
+const mockRouteParams = {
+  quizId: 'test-quiz-123',
+  isRepeating: false,
+};
+
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
     navigate: jest.fn(),
@@ -31,17 +42,14 @@ jest.mock('@react-navigation/native', () => ({
     replace: jest.fn(),
   }),
   useRoute: () => ({
-    params: {
-      quizId: 'test-quiz-123',
-      isRepeating: false,
-    },
+    params: mockRouteParams,
   }),
 }));
 
 describe('QuizScreen', () => {
   let store: ReturnType<typeof setupStore>;
 
-  const setupStore = (questionsLoading = false) => {
+  const setupStore = (questionsLoading = false, error = null) => {
     return configureStore({
       reducer: {
         questions: questionsReducer,
@@ -52,7 +60,7 @@ describe('QuizScreen', () => {
           byTopicId: {},
           readingTextsById: {},
           readingTextsByTopicId: {},
-          error: null,
+          error,
         },
       },
     });
@@ -60,37 +68,43 @@ describe('QuizScreen', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset mock props
+    mockQuizProps.quizId = undefined;
+    mockQuizProps.isRepeating = undefined;
+    // Reset route params
+    mockRouteParams.quizId = 'test-quiz-123';
+    mockRouteParams.isRepeating = false;
   });
 
   describe('Loading State', () => {
     it('should show loading indicator when questions are loading', () => {
       store = setupStore(true);
 
-      const { getByText } = render(
+      const { getByText, queryByTestId } = render(
         <Provider store={store}>
           <QuizScreen />
         </Provider>
       );
 
-      const loadingText = getByText('Loading quiz...');
-      expect(loadingText).toBeTruthy();
+      expect(getByText('Loading quiz...')).toBeTruthy();
+      expect(queryByTestId('quiz-component')).toBeNull();
     });
 
     it('should not show loading indicator when questions are not loading', () => {
       store = setupStore(false);
 
-      const { queryByText } = render(
+      const { queryByText, getByTestId } = render(
         <Provider store={store}>
           <QuizScreen />
         </Provider>
       );
 
-      const loadingText = queryByText('Loading quiz...');
-      expect(loadingText).toBeNull();
+      expect(queryByText('Loading quiz...')).toBeNull();
+      expect(getByTestId('quiz-component')).toBeTruthy();
     });
   });
 
-  describe('Quiz Rendering', () => {
+  describe('Quiz Component Integration', () => {
     it('should render Quiz component when not loading', () => {
       store = setupStore(false);
 
@@ -100,11 +114,10 @@ describe('QuizScreen', () => {
         </Provider>
       );
 
-      const quizComponent = getByTestId('quiz-component');
-      expect(quizComponent).toBeTruthy();
+      expect(getByTestId('quiz-component')).toBeTruthy();
     });
 
-    it('should pass correct props to Quiz component', () => {
+    it('should pass correct quizId to Quiz component', () => {
       store = setupStore(false);
 
       const { getByTestId } = render(
@@ -113,11 +126,11 @@ describe('QuizScreen', () => {
         </Provider>
       );
 
-      const quizComponent = getByTestId('quiz-component');
-      expect(quizComponent).toBeTruthy();
+      expect(mockQuizProps.quizId).toBe('test-quiz-123');
+      expect(getByTestId('quiz-id')).toHaveTextContent('Quiz ID: test-quiz-123');
     });
 
-    it('should handle repeating quiz mode', () => {
+    it('should pass correct isRepeating prop to Quiz component', () => {
       store = setupStore(false);
 
       const { getByTestId } = render(
@@ -126,34 +139,75 @@ describe('QuizScreen', () => {
         </Provider>
       );
 
-      const quizComponent = getByTestId('quiz-component');
-      expect(quizComponent).toBeTruthy();
+      expect(mockQuizProps.isRepeating).toBe(false);
+      expect(getByTestId('quiz-repeating')).toHaveTextContent('Repeating: No');
+    });
+
+    it('should handle repeating quiz mode correctly', () => {
+      store = setupStore(false);
+      mockRouteParams.isRepeating = true;
+
+      const { getByTestId } = render(
+        <Provider store={store}>
+          <QuizScreen />
+        </Provider>
+      );
+
+      expect(mockQuizProps.isRepeating).toBe(true);
+      expect(getByTestId('quiz-repeating')).toHaveTextContent('Repeating: Yes');
+    });
+  });
+
+  describe('Route Parameters', () => {
+    it('should handle different quiz IDs', () => {
+      store = setupStore(false);
+      mockRouteParams.quizId = 'different-quiz-456';
+
+      const { getByTestId } = render(
+        <Provider store={store}>
+          <QuizScreen />
+        </Provider>
+      );
+
+      expect(mockQuizProps.quizId).toBe('different-quiz-456');
+      expect(getByTestId('quiz-id')).toHaveTextContent('Quiz ID: different-quiz-456');
+    });
+
+    it('should handle missing route params gracefully', () => {
+      store = setupStore(false);
+      // Mock useRoute to return undefined params
+      jest.doMock('@react-navigation/native', () => ({
+        useNavigation: () => ({
+          navigate: jest.fn(),
+          goBack: jest.fn(),
+        }),
+        useRoute: () => ({
+          params: undefined,
+        }),
+      }));
+
+      expect(() => {
+        render(
+          <Provider store={store}>
+            <QuizScreen />
+          </Provider>
+        );
+      }).not.toThrow();
     });
   });
 
   describe('Error Handling', () => {
-    it('should handle missing route params gracefully', () => {
-      store = setupStore(false);
+    it('should handle questions error state', () => {
+      store = setupStore(false, 'Failed to load questions' as any);
 
-      expect(() => {
-        render(
-          <Provider store={store}>
-            <QuizScreen />
-          </Provider>
-        );
-      }).not.toThrow();
-    });
+      const { getByTestId } = render(
+        <Provider store={store}>
+          <QuizScreen />
+        </Provider>
+      );
 
-    it('should handle undefined route params', () => {
-      store = setupStore(false);
-
-      expect(() => {
-        render(
-          <Provider store={store}>
-            <QuizScreen />
-          </Provider>
-        );
-      }).not.toThrow();
+      // Should still render Quiz component even with error
+      expect(getByTestId('quiz-component')).toBeTruthy();
     });
   });
 
@@ -180,8 +234,23 @@ describe('QuizScreen', () => {
         </Provider>
       );
 
-      const quizComponent = getByTestId('quiz-component');
-      expect(quizComponent).toBeTruthy();
+      expect(getByTestId('quiz-component')).toBeTruthy();
+    });
+  });
+
+  describe('Component Structure', () => {
+    it('should render Surface container', () => {
+      store = setupStore(false);
+
+      const { getByTestId } = render(
+        <Provider store={store}>
+          <QuizScreen />
+        </Provider>
+      );
+
+      // The Surface should be rendered (we can check by looking for the quiz component inside)
+      expect(getByTestId('quiz-component')).toBeTruthy();
     });
   });
 }); 
+

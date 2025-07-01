@@ -261,6 +261,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
           onPress={handleContinue}
           style={styles.button}
           disabled={!selectedCategoryId}
+          testID="continue-button"
         >
           Continue
         </Button>

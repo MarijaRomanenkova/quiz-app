@@ -225,15 +225,15 @@ export const ProfileScreen = () => {
                 Terms and Conditions
               </Text>
             </Text>
-            <Switch value={user.agreedToTerms} onValueChange={handleTermsChange} />
+            <Switch value={user.agreedToTerms} onValueChange={handleTermsChange} testID="terms-switch" />
           </View>
           <View style={styles.toggleRow}>
             <Text style={styles.toggleLabel}>Agree to Marketing Emails</Text>
-            <Switch value={user.marketingEmails} onValueChange={handleMarketingEmailsChange} />
+            <Switch value={user.marketingEmails} onValueChange={handleMarketingEmailsChange} testID="marketing-switch" />
           </View>
           <View style={styles.toggleRow}>
             <Text style={styles.toggleLabel}>Share Among Devices</Text>
-            <Switch value={user.shareDevices} onValueChange={handleShareDevicesChange} />
+            <Switch value={user.shareDevices} onValueChange={handleShareDevicesChange} testID="devices-switch" />
           </View>
         </View>
       </View>
