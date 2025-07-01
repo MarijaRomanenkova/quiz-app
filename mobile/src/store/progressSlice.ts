@@ -24,15 +24,10 @@ import { CategoryProgress, ProgressState } from '../types/progress.types';
 export const loadMoreQuestionsThunk = createAsyncThunk(
   'progress/loadMoreQuestions',
   async (categoryId: string, { getState, dispatch }) => {
-    console.log('Thunk started');
     const state = getState() as RootState;
     const token = state.auth.token || undefined;
     const topics = state.topic.topics;
     const categoryProgress = state.progress.categoryProgress[categoryId];
-    
-    console.log('loadMoreQuestionsThunk - categoryId:', categoryId);
-    console.log('loadMoreQuestionsThunk - categoryProgress:', categoryProgress);
-    console.log('loadMoreQuestionsThunk - topics:', topics);
     
     if (!categoryProgress) {
       throw new Error(`No progress found for category ${categoryId}`);
@@ -43,35 +38,23 @@ export const loadMoreQuestionsThunk = createAsyncThunk(
       .filter(topic => topic.categoryId === categoryId)
       .sort((a, b) => a.topicOrder - b.topicOrder);
 
-    console.log('loadMoreQuestionsThunk - categoryTopics:', categoryTopics);
-
     // Calculate how many more topics to unlock
     const currentUnlocked = categoryProgress.unlockedTopics;
     const nextUnlockThreshold = categoryId === 'listening' || categoryId === 'words' ? 2 : 3;
     
-    console.log('loadMoreQuestionsThunk - currentUnlocked:', currentUnlocked);
-    console.log('loadMoreQuestionsThunk - nextUnlockThreshold:', nextUnlockThreshold);
-    console.log('loadMoreQuestionsThunk - completedTopics:', categoryProgress.completedTopics);
-    console.log('loadMoreQuestionsThunk - categoryTopics.length:', categoryTopics.length);
     const unlockCondition = categoryProgress.completedTopics >= nextUnlockThreshold && currentUnlocked < categoryTopics.length;
-    console.log('loadMoreQuestionsThunk - unlockCondition:', unlockCondition);
     
     // If we've completed enough topics, unlock more
     if (unlockCondition) {
       
-      console.log('loadMoreQuestionsThunk - Unlock condition met!');
-      
       const newUnlockedCount = Math.min(currentUnlocked + 2, categoryTopics.length);
       const topicsToUnlock = categoryTopics.slice(currentUnlocked, newUnlockedCount);
-      
-      console.log('loadMoreQuestionsThunk - topicsToUnlock:', topicsToUnlock);
       
       // Fetch questions for newly unlocked topics
       const questionsByTopic: Record<string, any[]> = {};
       
       for (const topic of topicsToUnlock) {
         try {
-          console.log('loadMoreQuestionsThunk - Fetching questions for topic:', topic.topicId);
           const response = await fetchQuestions(topic.topicId, undefined, token);
           questionsByTopic[topic.topicId] = response.questions;
         } catch (error) {
@@ -92,9 +75,7 @@ export const loadMoreQuestionsThunk = createAsyncThunk(
         questionsByTopic
       };
     } else {
-      console.log('loadMoreQuestionsThunk - Unlock condition NOT met');
-      console.log('loadMoreQuestionsThunk - completedTopics >= threshold:', categoryProgress.completedTopics >= nextUnlockThreshold);
-      console.log('loadMoreQuestionsThunk - currentUnlocked < length:', currentUnlocked < categoryTopics.length);
+      // Unlock condition not met
     }
     
     return null;

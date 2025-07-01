@@ -46,7 +46,6 @@ export const statisticsSlice = createSlice({
     startQuizSession: (state) => {
       const now = new Date().toISOString();
       state.currentSessionStart = now;
-      console.log('Statistics - Starting quiz session at:', now);
     },
 
     /**
@@ -60,11 +59,7 @@ export const statisticsSlice = createSlice({
         const sessionStart = new Date(state.currentSessionStart);
         const sessionMinutes = Math.max(1, Math.round((sessionEnd.getTime() - sessionStart.getTime()) / (1000 * 60)));
         
-        console.log('Statistics - Ending quiz session:');
-        console.log('  Session start:', state.currentSessionStart);
-        console.log('  Session end:', sessionEnd.toISOString());
-        console.log('  Session duration (minutes):', sessionMinutes);
-        console.log('  Raw duration (ms):', sessionEnd.getTime() - sessionStart.getTime());
+
         
         // Ensure dailyQuizTimes array exists
         if (!state.dailyQuizTimes) {
@@ -78,7 +73,6 @@ export const statisticsSlice = createSlice({
         if (existingEntry) {
           existingEntry.minutes += sessionMinutes;
           existingEntry.lastUpdated = sessionEnd.toISOString();
-          console.log('Statistics - Updated existing daily entry:', existingEntry);
         } else {
           const newEntry = {
             date: today,
@@ -86,18 +80,15 @@ export const statisticsSlice = createSlice({
             lastUpdated: sessionEnd.toISOString(),
           };
           state.dailyQuizTimes.push(newEntry);
-          console.log('Statistics - Created new daily entry:', newEntry);
         }
         
         // Update total minutes
         state.totalQuizMinutes += sessionMinutes;
-        console.log('Statistics - Updated total quiz minutes:', state.totalQuizMinutes);
         
         // Reset session
         state.currentSessionStart = null;
-        console.log('Statistics - Quiz session reset');
       } else {
-        console.log('Statistics - No active quiz session to end');
+        // No active quiz session to end
       }
     },
 
@@ -277,35 +268,25 @@ const getCurrentWeekData = (dailyQuizTimes: DailyQuizTime[]) => {
   monday.setDate(today.getDate() + mondayOffset);
   monday.setHours(0, 0, 0, 0);
   
-  console.log('Statistics - getCurrentWeekData debug:');
-  console.log('  Today:', today.toISOString().split('T')[0]);
-  console.log('  Current day of week:', currentDay, '(0=Sunday, 1=Monday, etc.)');
-  console.log('  Monday offset:', mondayOffset);
-  console.log('  Monday date:', monday.toISOString().split('T')[0]);
-  console.log('  Available dailyQuizTimes:', dailyQuizTimes);
+
   
-  // Test: Calculate expected week dates manually
-  console.log('  Expected week dates:');
+  // Calculate expected week dates manually
   const expectedDates = [];
   for (let i = 0; i < 7; i++) {
     const date = new Date(monday);
     date.setDate(monday.getDate() + i);
     expectedDates.push(date.toISOString().split('T')[0]);
   }
-  console.log('    Monday-Sunday:', expectedDates);
   
   // Check if today's date is in the expected week
   const todayString = today.toISOString().split('T')[0];
   const isTodayInWeek = expectedDates.includes(todayString);
-  console.log('  Is today in calculated week?', isTodayInWeek);
   
   // If today is not in the calculated week, we need to adjust
   if (!isTodayInWeek) {
-    console.log('  WARNING: Today is not in calculated week! Adjusting...');
     // For Sunday, we want the week that starts with Monday and ends with Sunday
     // The current calculation gives us the previous week, so we need to go forward 7 days
     monday.setDate(monday.getDate() + 7);
-    console.log('  Adjusted Monday date:', monday.toISOString().split('T')[0]);
   }
   
   const weekData = [];
@@ -319,15 +300,12 @@ const getCurrentWeekData = (dailyQuizTimes: DailyQuizTime[]) => {
     const entry = dailyQuizTimes?.find(entry => entry.date === dateString);
     const minutes = entry?.minutes || 0;
     
-    console.log(`  Day ${i + 1} (${dateString}): ${minutes} minutes`, entry ? '(found)' : '(not found)');
-    
     weekData.push({
       minutes: minutes,
       date: dateString
     });
   }
   
-  console.log('Statistics - getCurrentWeekData result:', weekData);
   return weekData;
 };
 
@@ -374,17 +352,11 @@ const getLastFiveWeeksData = (dailyQuizTimes: DailyQuizTime[]) => {
     const finalStartDateString = weekStart.toISOString().split('T')[0];
     const finalEndDateString = weekEnd.toISOString().split('T')[0];
     
-    console.log(`Statistics - Week ${5-i} calculation:`);
-    console.log(`  Week start: ${finalStartDateString}, Week end: ${finalEndDateString}`);
-    
     // Get weekly quiz time from Redux
     const weekEntries = dailyQuizTimes?.filter(entry => 
       entry.date >= finalStartDateString && entry.date <= finalEndDateString
     ) || [];
     const totalMinutes = weekEntries.reduce((sum, entry) => sum + entry.minutes, 0);
-    
-    console.log(`  Week ${5-i} entries:`, weekEntries);
-    console.log(`  Week ${5-i} total minutes:`, totalMinutes);
     
     const weekLabel = `Week ${5 - i}`;
     weekData.push({
@@ -393,7 +365,6 @@ const getLastFiveWeeksData = (dailyQuizTimes: DailyQuizTime[]) => {
     });
   }
   
-  console.log('Statistics - getLastFiveWeeksData result:', weekData);
   return weekData;
 };
 
@@ -421,12 +392,7 @@ const getCurrentMonthTotal = (dailyQuizTimes: DailyQuizTime[]) => {
  */
 export const selectCurrentWeekData = createSelector(
   [(state: RootState) => state.statistics?.dailyQuizTimes],
-  (dailyQuizTimes) => {
-    console.log('Statistics - selectCurrentWeekData called with:', dailyQuizTimes);
-    const result = getCurrentWeekData(dailyQuizTimes || []);
-    console.log('Statistics - selectCurrentWeekData result:', result);
-    return result;
-  }
+  (dailyQuizTimes) => getCurrentWeekData(dailyQuizTimes || [])
 );
 
 /**

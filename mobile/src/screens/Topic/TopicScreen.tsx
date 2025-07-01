@@ -140,8 +140,7 @@ export const TopicScreen = () => {
   });
 
   // Debug: Log topics data
-  console.log('🔍 TopicScreen - categoryId:', categoryId);
-  console.log('🔍 TopicScreen - unlockedTopics:', unlockedTopics);
+
 
   const [selectedTopic, setSelectedTopic] = useState<string>('');
 

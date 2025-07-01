@@ -27,7 +27,7 @@ const authService = {
    *     email: 'user@example.com',
    *     password: 'password123'
    *   });
-   *   console.log('Login successful:', response.access_token);
+   *   // Login successful
    * } catch (error) {
    *   console.error('Login failed:', error.message);
    * }
@@ -72,7 +72,7 @@ const authService = {
    *     studyPaceId: 1,
    *     agreedToTerms: true
    *   });
-   *   console.log('Registration successful:', result.message);
+   *   // Registration successful
    * } catch (error) {
    *   console.error('Registration failed:', error.message);
    * }
@@ -112,7 +112,7 @@ const authService = {
    * ```typescript
    * try {
    *   const result = await authService.verifyEmail('verification-token-here');
-   *   console.log('Email verified:', result.message);
+   *   // Email verified
    * } catch (error) {
    *   console.error('Email verification failed:', error.message);
    * }
@@ -141,7 +141,7 @@ const authService = {
    * ```typescript
    * try {
    *   const result = await authService.resendVerification('user@example.com');
-   *   console.log('Verification email resent:', result.message);
+   *   // Verification email resent
    * } catch (error) {
    *   console.error('Failed to resend verification:', error.message);
    * }

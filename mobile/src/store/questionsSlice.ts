@@ -48,9 +48,7 @@ export const fetchAllQuestionsThunk = createAsyncThunk(
     const token = state.auth.token || undefined;
     const topics = state.topic.topics;
     
-    console.log('fetchAllQuestionsThunk - Starting with token:', token ? 'Present' : 'Missing');
-    console.log('fetchAllQuestionsThunk - Topics count:', topics.length);
-    console.log('fetchAllQuestionsThunk - Topics:', topics);
+
     
     const questionsByTopic: Record<string, Question[]> = {};
     
@@ -63,7 +61,7 @@ export const fetchAllQuestionsThunk = createAsyncThunk(
       topicsByCategory[topic.categoryId].push(topic);
     });
     
-    console.log('fetchAllQuestionsThunk - Topics by category:', Object.keys(topicsByCategory));
+
     
     // Sort topics within each category by topicOrder
     Object.keys(topicsByCategory).forEach(categoryId => {
@@ -78,19 +76,15 @@ export const fetchAllQuestionsThunk = createAsyncThunk(
       if (categoryId === 'listening' || categoryId === 'words') {
         // Only fetch first 3 topics for listening and words
         topicsToFetch = categoryTopics.slice(0, 3);
-        console.log(`fetchAllQuestionsThunk - Fetching first 3 topics for ${categoryId}:`, topicsToFetch.map(t => t.topicId));
       } else {
         // Fetch all topics for grammar and reading
-        console.log(`fetchAllQuestionsThunk - Fetching all topics for ${categoryId}:`, topicsToFetch.map(t => t.topicId));
       }
       
       // Fetch questions for selected topics
       for (const topic of topicsToFetch) {
         try {
-          console.log(`fetchAllQuestionsThunk - Fetching questions for topic: ${topic.topicId}`);
           const response = await fetchQuestions(topic.topicId, undefined, token);
           questionsByTopic[topic.topicId] = response.questions;
-          console.log(`fetchAllQuestionsThunk - Fetched ${response.questions.length} questions for topic ${topic.topicId}`);
         } catch (error) {
           console.warn(`fetchAllQuestionsThunk - Failed to fetch questions for topic ${topic.topicId}:`, error);
           questionsByTopic[topic.topicId] = [];
@@ -98,8 +92,6 @@ export const fetchAllQuestionsThunk = createAsyncThunk(
       }
     }
     
-    console.log('fetchAllQuestionsThunk - Questions fetch completed. Total topics with questions:', Object.keys(questionsByTopic).length);
-    console.log('fetchAllQuestionsThunk - Questions by topic:', questionsByTopic);
     return questionsByTopic;
   }
 );

@@ -37,7 +37,7 @@ import { ButtonProps } from '../../types/components.types';
  * 
  * @example
  * ```tsx
- * <Button onPress={() => console.log('Pressed!')} variant="primary">
+ * <Button onPress={() => {}} variant="primary">
  *   Submit
  * </Button>
  * ```

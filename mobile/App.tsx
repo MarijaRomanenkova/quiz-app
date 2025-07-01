@@ -46,13 +46,9 @@ if (Image.queryCache) {
   Image.queryCache(['yourImageKey1', 'yourImageKey2']).then((cached) => {
     Object.keys(cached).forEach((key) => {
       Image.prefetch(key).then((result) => {
-        if (result) {
-          console.log(`Image ${key} prefetched successfully.`);
-        } else {
-          console.log(`Failed to prefetch image ${key}.`);
-        }
+        // Image prefetch result handled
       }).catch((error) => {
-        console.error(`Error prefetching image ${key}:`, error);
+        // Error prefetching image
       });
     });
   });

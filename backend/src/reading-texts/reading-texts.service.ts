@@ -15,7 +15,7 @@ import { Prisma } from '@prisma/client';
  * ```typescript
  * // Get reading texts for a topic and user
  * const readingTexts = await readingTextsService.findAll(userId, 'articles');
- * console.log(readingTexts.length); // Number of reading texts
+ * // Number of reading texts
  * ```
  */
 @Injectable()

@@ -15,7 +15,7 @@ import { Prisma } from '@prisma/client';
  * ```typescript
  * // Get categories for a user
  * const categories = await categoriesService.findAll(userId);
- * console.log(categories.length); // Number of categories
+ * // Number of categories
  * ```
  */
 @Injectable()

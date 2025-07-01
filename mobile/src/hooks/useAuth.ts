@@ -24,7 +24,7 @@ import { fetchUserProfile, fetchStatisticsData, syncStatisticsData } from '../se
  * const handleLogin = async () => {
  *   const success = await login('user@example.com', 'password123');
  *   if (success) {
- *     console.log('Login successful');
+ *     // Login successful
  *   }
  * };
  * ```

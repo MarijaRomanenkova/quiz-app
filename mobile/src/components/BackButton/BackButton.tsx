@@ -70,7 +70,7 @@ interface BackButtonProps {
  * <BackButton />
  * 
  * // Custom onPress handler
- * <BackButton onPress={() => console.log('Custom back action')} />
+ * <BackButton onPress={() => {}} />
  * 
  * // Custom styling
  * <BackButton variant="light" size={32} />

@@ -4,11 +4,8 @@ import { hash } from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Starting seed...');
-  
   try {
     // Create CEFR Levels with sublevels
-    console.log('Creating levels...');
     const levels = [
       // A1 Levels
       { levelId: 'A1.1', description: 'Basic German - First Steps' },
@@ -42,7 +39,6 @@ async function main() {
     ];
 
     for (const level of levels) {
-      console.log(`Creating level: ${level.levelId}`);
       await prisma.level.upsert({
         where: { levelId: level.levelId },
         update: {},
@@ -52,10 +48,8 @@ async function main() {
         } as unknown as Prisma.LevelCreateInput
       });
     }
-    console.log('Levels created successfully');
 
     // Create Categories
-    console.log('Creating categories...');
     const categories = [
       {
         categoryId: 'grammar',
@@ -80,7 +74,6 @@ async function main() {
     ];
 
     for (const category of categories) {
-      console.log(`Creating category: ${category.categoryId}`);
       await prisma.category.upsert({
         where: { categoryId: category.categoryId },
         update: {},
@@ -91,10 +84,8 @@ async function main() {
         } as unknown as Prisma.CategoryCreateInput
       });
     }
-    console.log('Categories created successfully');
 
     // Create Topics
-    console.log('Creating topics...');
     const topics = [
       // Grammar topics for A1.1 (Priority 1: Core fundamentals)
       { topicId: 'articles', levelId: 'A1.1', categoryId: 'grammar', topicOrder: 1 },
@@ -124,7 +115,6 @@ async function main() {
     ];
 
     for (const topic of topics) {
-      console.log(`Creating topic: ${topic.topicId}`);
       await prisma.topic.upsert({
         where: { topicId: topic.topicId },
         update: { topicOrder: topic.topicOrder } as Prisma.TopicUpdateInput,
@@ -136,10 +126,8 @@ async function main() {
         } as Prisma.TopicUncheckedCreateInput
       });
     }
-    console.log('Topics created successfully');
 
     // Create Reading Texts
-    console.log('Creating reading texts...');
     const readingTexts = [
       {
         id: 'r1',
@@ -169,7 +157,6 @@ async function main() {
     ];
 
     for (const text of readingTexts) {
-      console.log(`Creating reading text: ${text.id}`);
       await prisma.readingText.upsert({
         where: { id: text.id },
         update: {},
@@ -180,10 +167,8 @@ async function main() {
         }
       });
     }
-    console.log('Reading texts created successfully');
 
     // Create Questions
-    console.log('Creating questions...');
     const questions = [
       // Grammar - Articles
       {
@@ -458,41 +443,40 @@ async function main() {
     ];
 
     for (const question of questions) {
-      console.log(`Creating question: ${question.questionText}`);
       await prisma.question.create({
         data: {
           questionText: question.questionText,
           options: question.options,
           correctAnswerId: question.correctAnswerId,
           topicId: question.topicId,
-          ...(question.readingTextId && { readingTextId: question.readingTextId }),
+          readingTextId: question.readingTextId || null,
           ...(question.imageUrl && { imageUrl: question.imageUrl }),
           ...(question.audioUrl && { audioUrl: question.audioUrl })
-        } as Prisma.QuestionUncheckedCreateInput
+        }
       });
     }
-    console.log('Questions created successfully');
 
     // Create development user
-    console.log('Creating development user...');
-    const hashedPassword = await hash('devpassword', 10);
+    const hashedPassword = await hash('password123', 10);
     await prisma.user.upsert({
       where: { email: 'dev@example.com' },
       update: {},
       create: {
         email: 'dev@example.com',
-        username: 'devuser',
         password: hashedPassword,
-        emailVerified: true,
-        levelId: 'A1.1'
+        username: 'devuser',
+        levelId: 'A1.1',
+        agreedToTerms: true,
+        emailVerified: true
       }
     });
-    console.log('Development user created successfully');
 
-    console.log('Database has been seeded! 🌱');
+    // Database has been seeded! 🌱
   } catch (error) {
     console.error('Error during seeding:', error);
     throw error;
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -502,6 +486,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    console.log('Seeding finished');
     await prisma.$disconnect();
   });

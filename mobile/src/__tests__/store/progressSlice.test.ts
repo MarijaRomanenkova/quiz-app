@@ -122,12 +122,8 @@ describe('progressSlice', () => {
       
       // Complete enough topics to unlock more (need 3 for non-listening/words categories)
       store.dispatch(completeTopic({ topicId: 't1', categoryId: 'cat1', score: 90 }));
-      console.log('After t1 completion:', store.getState().progress.categoryProgress['cat1']);
       store.dispatch(completeTopic({ topicId: 't2', categoryId: 'cat1', score: 80 }));
-      console.log('After t2 completion:', store.getState().progress.categoryProgress['cat1']);
       store.dispatch(completeTopic({ topicId: 't3', categoryId: 'cat1', score: 85 }));
-      console.log('After t3 completion:', store.getState().progress.categoryProgress['cat1']);
-      console.log('Topic progress:', store.getState().progress.topicProgress);
       
       // Mock API
       mockFetchQuestions.mockResolvedValue({ questions: [{

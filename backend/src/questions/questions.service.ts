@@ -18,8 +18,8 @@ import { Prisma } from '@prisma/client';
  * const questions = await questionsService.findAll(userId, 'articles');
  * 
  * // Questions are filtered by user's level automatically
- * console.log(questions.questions.length); // Number of questions
- * console.log(questions.hasMore); // Pagination info
+ * // Number of questions
+ * // Pagination info
  * ```
  */
 @Injectable()

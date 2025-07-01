@@ -16,7 +16,7 @@ import { Prisma } from '@prisma/client';
  * ```typescript
  * // Get topics for a category and user
  * const topics = await topicsService.findAll(userId, 'grammar');
- * console.log(topics.length); // Number of topics
+ * // Number of topics
  * ```
  */
 @Injectable()

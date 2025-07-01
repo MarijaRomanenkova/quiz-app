@@ -116,77 +116,52 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId }) => {
   const categoryId = route.params?.categoryId;
 
   const handleReadingText = (questions: Question[]) => {
-    console.log('🔍 handleReadingText called');
-    console.log('🔍 activeQuiz:', activeQuiz);
-    
     if (!activeQuiz) {
-      console.log('🔍 No activeQuiz, returning');
       return;
     }
     
     // Get the reading text ID from the first question that has one
     const questionWithReadingText = questions.find(q => q.readingTextId);
     if (!questionWithReadingText?.readingTextId) {
-      console.log('🔍 No reading text ID found in questions');
       return;
     }
     
     // Get the reading text by its ID
     const readingText = selectReadingTextById(store.getState(), questionWithReadingText.readingTextId);
-    console.log('🔍 readingText by ID:', readingText);
     
     if (readingText) {
-      console.log('🔍 Setting reading text:', readingText);
       setReadingTextState(readingText);
-    } else {
-      console.log('🔍 No reading text found for ID:', questionWithReadingText.readingTextId);
     }
   };
 
   const loadQuestions = async () => {
     try {
-      console.log('🔍 loadQuestions called for quizId:', quizId);
-      console.log('🔍 questions.length:', questions.length);
-      console.log('🔍 first question:', questions[0]);
-      
       if (route.params?.isRepeating && wrongQuestions?.length) {
-        console.log('🔍 Repeating wrong questions');
         handleReadingText(wrongQuestions);
         return;
       }
 
       // Use questions from Redux (loaded in bulk during app initialization)
       if (questions.length > 0) {
-        console.log('🔍 Questions loaded successfully, length:', questions.length);
-        
         // For reading categories, check if reading texts are loaded
         if (categoryId === 'reading') {
-          console.log('🔍 Reading category detected');
-          
           // Check if reading texts are loaded in Redux
           const state = store.getState();
           const readingTextsLoaded = Object.keys(state.questions.readingTextsById).length > 0;
-          console.log('🔍 readingTextsLoaded:', readingTextsLoaded);
           
           if (!readingTextsLoaded) {
-            console.log('🔍 Reading texts not loaded, waiting...');
             // Wait a bit and try again
             setTimeout(() => {
               loadQuestions();
             }, 1000);
             return;
           }
-          
-          console.log('🔍 Reading texts loaded, will handle reading text in useEffect');
-        } else {
-          console.log('🔍 Not a reading category:', categoryId);
         }
         return;
       }
 
       // If no questions found, this might be an error in the data loading strategy
       console.error('No questions found for topic:', quizId);
-      console.error('This should not happen if the data loading strategy is working correctly');
     } catch (error) {
       console.error('Failed to load questions:', error);
     }
@@ -217,7 +192,6 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId }) => {
   // Handle reading text after activeQuiz is available
   useEffect(() => {
     if (activeQuiz && questions.length > 0 && categoryId === 'reading' && !readingText && !hasShownReadingText) {
-      console.log('🔍 activeQuiz is now available, handling reading text for reading category');
       handleReadingText(questions);
       setHasShownReadingText(true);
     }
@@ -242,15 +216,11 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId }) => {
   };
 
   const handleNext = () => {
-    console.log('🔍 handleNext called');
-    console.log('🔍 readingText:', !!readingText);
-    
     if (!activeQuiz) return;
     
     dispatch(selectAnswer(null));
     
     if (readingText) {
-      console.log('🔍 Hiding reading text');
       setReadingTextState(null);
       return;
     }
@@ -304,10 +274,7 @@ const Quiz: React.FC<QuizProps> = ({ quizId: propQuizId }) => {
     }
   };
 
-  // Debug: Monitor reading text state changes
-  useEffect(() => {
-    console.log('🔍 Reading text state changed - readingText:', !!readingText);
-  }, [readingText]);
+
 
   // Graceful handling for no questions
   useEffect(() => {

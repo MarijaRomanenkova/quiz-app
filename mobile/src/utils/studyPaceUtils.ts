@@ -44,7 +44,7 @@ export const handlePaceChange = (
  * ```tsx
  * const selectedPace = getSelectedPace(userStudyPace);
  * if (selectedPace) {
- *   console.log(selectedPace.description);
+ *   // Selected pace description
  * }
  * ```
  */
