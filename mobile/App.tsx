@@ -18,17 +18,19 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { LogBox, Image, ActivityIndicator, View } from 'react-native';
+
 import { Provider as PaperProvider } from 'react-native-paper';
 import { Provider as StoreProvider } from 'react-redux';
-import { AppNavigator } from './src/navigation/AppNavigator';
-import { store, persistor } from './src/store';
-import { theme } from './src/theme';
-import { LogBox, Image, ActivityIndicator, View } from 'react-native';
 import { PersistGate } from 'redux-persist/integration/react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { enableScreens } from 'react-native-screens';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Font from 'expo-font';
+
+import { store, persistor } from './src/store';
+import { theme } from './src/theme';
+import { AppNavigator } from './src/navigation/AppNavigator';
 
 // Enable screens for better performance
 enableScreens();
