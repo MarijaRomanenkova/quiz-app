@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
-import { RootState } from './index';
+
 import { fetchQuestions } from '../services/api';
+import { RootState } from './index';
 import { Topic } from '../types';
 import { CategoryProgress, ProgressState } from '../types/progress.types';
 

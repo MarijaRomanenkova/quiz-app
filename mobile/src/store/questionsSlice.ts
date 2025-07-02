@@ -22,9 +22,10 @@
  */
 
 import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
-import { Question, ReadingText } from '../types';
+
 import { fetchQuestions, fetchReadingTexts } from '../services/api';
 import { RootState } from './index';
+import { Question, ReadingText } from '../types';
 
 /**
  * Interface representing the questions slice state

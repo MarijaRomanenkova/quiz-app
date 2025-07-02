@@ -23,9 +23,10 @@
  */
 
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { Category } from '../types';
+
 import { fetchCategories } from '../services/api';
 import { RootState } from './index';
+import { Category } from '../types';
 
 /**
  * Async thunk to fetch categories from the backend

@@ -25,9 +25,10 @@
  */
 
 import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
-import { Topic } from '../types';
+
 import { fetchTopics } from '../services/api';
 import { RootState } from './index';
+import { Topic } from '../types';
 
 /**
  * Interface representing the topic slice state
