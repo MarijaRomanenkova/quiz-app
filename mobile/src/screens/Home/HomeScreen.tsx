@@ -275,14 +275,15 @@ const styles = StyleSheet.create({
   },
   radioContainer: {
     flex: 1,
-    marginTop: spacing.md,
+    justifyContent: 'flex-end',
+    marginBottom: 40,
   },
   radioItem: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.outline,
     borderRadius: layout.borderRadius.large,
     borderWidth: 1,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
   },
   radioLabel: {
     fontSize: fonts.sizes.medium,
