@@ -11,6 +11,7 @@
  * @module components/AppIcon
  */
 
+// React and core libraries
 import React from 'react';
 import { View } from 'react-native';
 import Svg, { Rect, Text } from 'react-native-svg';

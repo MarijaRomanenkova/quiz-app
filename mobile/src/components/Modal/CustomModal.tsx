@@ -12,13 +12,22 @@
  * @module components/Modal
  */
 
+// React and core libraries
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Modal, Text } from 'react-native-paper';
-import { theme, spacing, layout } from '../../theme';
+
+// Project utilities and services
 import { createTextStyles } from '../../utils/themeUtils';
+
+// Project components
 import { Button } from '../Button/Button';
+
+// Types and interfaces
 import { CustomModalProps } from '../../types/components.types';
+
+// Theme and styling
+import { theme, spacing, layout } from '../../theme';
 
 /**
  * Custom Modal component with consistent styling and button layout

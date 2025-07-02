@@ -12,11 +12,18 @@
  * @module components/Button
  */
 
+// React and core libraries
 import { StyleSheet } from 'react-native';
 import { Button as PaperButton } from 'react-native-paper';
-import { theme } from '../../theme';
+
+// Project utilities and services
 import { getButtonColors } from '../../utils/buttonUtils';
+
+// Types and interfaces
 import { ButtonProps } from '../../types/components.types';
+
+// Theme and styling
+import { theme } from '../../theme';
 
 /**
  * Custom Button component with predefined variants and styling

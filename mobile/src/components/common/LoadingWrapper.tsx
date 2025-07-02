@@ -14,11 +14,16 @@
  * @module components/common/LoadingWrapper
  */
 
+// React and core libraries
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
-import { theme, spacing } from '../../theme';
+
+// Project utilities and services
 import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
+
+// Theme and styling
+import { theme, spacing } from '../../theme';
 
 /**
  * Props interface for the LoadingWrapper component

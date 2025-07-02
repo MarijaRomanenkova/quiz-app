@@ -11,9 +11,12 @@
  * @module components/Terms
  */
 
+// React and core libraries
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
+
+// Theme and styling
 import { theme } from '../../theme';
 
 /**

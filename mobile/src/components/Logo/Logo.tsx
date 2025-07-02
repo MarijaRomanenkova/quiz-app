@@ -11,9 +11,9 @@
  * @module components/Logo
  */
 
+// React and core libraries
 import React from 'react';
 import { Image, StyleSheet, Platform, ViewStyle, ImageStyle, View } from 'react-native';
-
 import { Svg, Rect, Text } from 'react-native-svg';
 
 /**

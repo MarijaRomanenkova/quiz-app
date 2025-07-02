@@ -11,12 +11,19 @@
  * @module components/Input
  */
 
+// React and core libraries
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TextInput, Text } from 'react-native-paper';
-import { theme, layout } from '../../theme';
+
+// Project utilities and services
 import { createInputStyles } from '../../utils/themeUtils';
+
+// Types and interfaces
 import { InputProps } from '../../types/components.types';
+
+// Theme and styling
+import { theme, layout } from '../../theme';
 
 /**
  * Custom Input component with consistent styling and error handling

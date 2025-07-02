@@ -12,13 +12,20 @@
  * @module components/AudioPlayer
  */
 
+// React and core libraries
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
-import { theme } from '../../theme';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
+
+// Third-party libraries
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+// Types and interfaces
 import { AudioPlayerProps, AudioPlayerRef } from '../../types/components.types';
+
+// Theme and styling
+import { theme } from '../../theme';
 
 /**
  * Audio Player component with circular progress indicator

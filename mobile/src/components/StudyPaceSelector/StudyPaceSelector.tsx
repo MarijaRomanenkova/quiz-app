@@ -11,12 +11,17 @@
  * @module components/StudyPaceSelector
  */
 
+// React and core libraries
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SegmentedButtons, Text } from 'react-native-paper';
-import { theme } from '../../theme';
+
+// Project utilities and services
 import { STUDY_PACES } from '../../constants';
 import { handlePaceChange, getSelectedPace } from '../../utils/studyPaceUtils';
+
+// Theme and styling
+import { theme } from '../../theme';
 
 /**
  * Props interface for the StudyPaceSelector component
