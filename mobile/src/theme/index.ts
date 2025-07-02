@@ -56,7 +56,7 @@ export const theme = {
     surface: '#FFFFFF',
     text: '#000000',
     textSecondary: '#FFFFFF80',
-    outline: '#6750A4', // New outline color
+    outline: '#4313E2', // New outline color
     // Override any blue colors from MD3LightTheme
     primaryContainer: '#4313E2',
     secondaryContainer: '#EDE7FF',

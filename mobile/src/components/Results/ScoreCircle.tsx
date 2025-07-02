@@ -62,7 +62,7 @@ export const ScoreCircle: React.FC<ScoreCircleProps> = ({ score, total }) => {
           cx={radius}
           cy={radius}
           r={radius - 8}
-          stroke="#583FB0"
+          stroke="#4313E2"
           strokeWidth={16}
           fill="none"
           strokeDasharray={circumference}
