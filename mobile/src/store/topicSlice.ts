@@ -1,3 +1,29 @@
+/**
+ * Topic slice for managing quiz topics and topic selection
+ * 
+ * This slice handles topic data management and organization including:
+ * - Topic data fetching and storage from backend
+ * - Topic selection state management
+ * - Topic sorting and organization by category and order
+ * - Integration with progress and questions slices
+ * 
+ * Key features:
+ * - Automatic topic data fetching with authentication support
+ * - Topic selection persistence and state management
+ * - Topic sorting by topicOrder, categoryId, and topicId
+ * - Integration with progress slice for completed topic tracking
+ * - Error handling and loading states for topic operations
+ * 
+ * State management:
+ * - topics: Array of available topics with metadata and ordering
+ * - selectedTopicId: Currently selected topic for navigation
+ * - isLoading: Loading state for topic operations
+ * - error: Error state for failed operations
+ * 
+ * Selectors:
+ * - selectSortedTopics: Returns topics sorted by topicOrder, categoryId, and topicId
+ */
+
 import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import { Topic } from '../types';
 import { fetchTopics } from '../services/api';

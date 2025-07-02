@@ -1,5 +1,49 @@
+/**
+ * Theme configuration for the mobile application
+ * 
+ * This module defines the complete design system including colors, typography,
+ * spacing, and component-specific styling. The theme is based on Material Design 3
+ * principles and customized for the learning platform's visual identity.
+ * 
+ * Key features:
+ * - Material Design 3 color system with custom palette
+ * - Consistent typography using Baloo 2 font family
+ * - Standardized spacing and layout tokens
+ * - Component-specific theme variants (buttons, inputs)
+ * - Shadow and elevation system
+ * 
+ * Color palette:
+ * - Primary: Pale violet (#EDE7FF) for main actions and branding
+ * - Secondary: Bright green (#8BF224) for success states and CTAs
+ * - Tertiary: Lighter violet (#6B4EFF) for accents and highlights
+ * - Error: Bright red (#FF4B4B) for error states and warnings
+ * - Background: Semi-transparent violet for depth and atmosphere
+ * 
+ * Usage:
+ * ```tsx
+ * import { theme, fonts, spacing } from '../theme';
+ * 
+ * // Use theme colors
+ * <View style={{ backgroundColor: theme.colors.primary }}>
+ * 
+ * // Use typography
+ * <Text style={{ fontSize: fonts.sizes.large, fontFamily: fonts.weights.bold }}>
+ * 
+ * // Use spacing
+ * <View style={{ padding: spacing.md }}>
+ * ```
+ */
+
 import { MD3LightTheme } from 'react-native-paper';
 
+/**
+ * Main theme object containing all design tokens
+ * 
+ * Extends Material Design 3 light theme with custom colors and component
+ * styling. Provides consistent visual design across the application.
+ * 
+ * @type {Object}
+ */
 export const theme = {
   ...MD3LightTheme,
   colors: {
@@ -68,8 +112,24 @@ export const theme = {
   },
 };
 
+/**
+ * TypeScript type for the application theme
+ * 
+ * Provides type safety when using theme properties throughout the application.
+ * Automatically inferred from the theme object structure.
+ * 
+ * @type {Object}
+ */
 export type AppTheme = typeof theme;
 
+/**
+ * Typography configuration for the application
+ * 
+ * Defines font sizes and font family weights using the Baloo 2 font family.
+ * Provides consistent typography scaling and font selection across the app.
+ * 
+ * @type {Object}
+ */
 export const fonts = {
   sizes: {
     xs: 12,
@@ -95,6 +155,14 @@ export const fonts = {
   }
 };
 
+/**
+ * Spacing tokens for consistent layout spacing
+ * 
+ * Provides standardized spacing values for margins, padding, and layout gaps.
+ * Uses a consistent scale for visual harmony across the application.
+ * 
+ * @type {Object}
+ */
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -104,6 +172,14 @@ export const spacing = {
   xxl: 48,
 };
 
+/**
+ * Layout configuration including border radius and shadows
+ * 
+ * Defines consistent border radius values and shadow styles for components.
+ * Provides depth and visual hierarchy through elevation and rounded corners.
+ * 
+ * @type {Object}
+ */
 export const layout = {
   borderRadius: {
     small: 8,

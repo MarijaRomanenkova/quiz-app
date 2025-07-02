@@ -1,3 +1,26 @@
+/**
+ * Questions slice for managing quiz questions and reading texts
+ * 
+ * This slice handles comprehensive question and reading text management including:
+ * - Category-specific question fetching with intelligent filtering
+ * - Reading text organization and lookup
+ * - Dynamic question loading based on topic unlocking
+ * - Efficient data organization for quiz performance
+ * 
+ * Key features:
+ * - Smart question fetching: Only first 3 topics for listening/words, all topics for grammar/reading
+ * - Reading text detection and fetching based on question analysis
+ * - Questions organized by topic ID for efficient quiz access
+ * - Reading texts indexed by ID for quick lookup during quizzes
+ * - Integration with progress slice for dynamic question loading
+ * 
+ * Business logic:
+ * - Category filtering: Listening and Words categories limited to first 3 topics to reduce initial load
+ * - Reading text discovery: Analyzes questions to find topics with reading texts, then fetches all texts
+ * - Data organization: Questions stored by topic ID, reading texts by ID for optimal performance
+ * - Error handling: Graceful degradation when question fetching fails for individual topics
+ */
+
 import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import { Question, ReadingText } from '../types';
 import { fetchQuestions, fetchReadingTexts } from '../services/api';

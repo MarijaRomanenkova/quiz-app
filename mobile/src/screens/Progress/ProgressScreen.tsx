@@ -1,3 +1,22 @@
+/**
+ * @fileoverview Progress Screen component for the mobile application
+ * 
+ * This component provides a comprehensive progress tracking interface where users
+ * can view their learning statistics, study habits, and achievement progress.
+ * It displays various charts and metrics to help users understand their learning
+ * journey and stay motivated.
+ * 
+ * The component features:
+ * - Weekly and monthly quiz time charts with goal progress
+ * - Level completion progress with visual indicators
+ * - Category-specific progress tracking
+ * - Responsive design with adaptive chart sizing
+ * - Goal percentage calculations and formatting
+ * - Real-time statistics from Redux store
+ * 
+ * @module screens/Progress
+ */
+
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
@@ -29,7 +48,28 @@ const chartHeight = chartWidth; // Square charts
 
 
 /**
- * Statistics screen displaying user's progress and study habits
+ * Progress Screen component for learning statistics and achievement tracking
+ * 
+ * Displays comprehensive learning progress including weekly/monthly quiz time,
+ * level completion status, and category-specific progress. Uses responsive
+ * charts and visual indicators to present statistics in an engaging way.
+ * 
+ * Key features:
+ * - Weekly quiz time chart with goal progress indicators
+ * - Monthly quiz time chart with weekly breakdown
+ * - Level completion progress with visual indicators
+ * - Category-specific progress percentages
+ * - Responsive design with adaptive chart sizing
+ * - Real-time data from Redux store selectors
+ * - Goal percentage calculations and formatting
+ * 
+ * @returns {JSX.Element} The progress screen with charts and statistics
+ * 
+ * @example
+ * ```tsx
+ * // Navigation to progress screen
+ * navigation.navigate('Progress');
+ * ```
  */
 export const ProgressScreen = () => {
   // Hooks

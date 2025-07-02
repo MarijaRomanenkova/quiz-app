@@ -1,3 +1,27 @@
+/**
+ * Category slice for managing quiz categories and category selection
+ * 
+ * This slice handles category data management and user interaction including:
+ * - Category data fetching and storage from backend
+ * - Category selection state management
+ * - Category progress tracking and updates
+ * - Integration with topic and progress slices
+ * 
+ * Key features:
+ * - Automatic category data fetching with authentication support
+ * - Category selection persistence and state management
+ * - Category progress updates based on topic completion
+ * - Last updated tracking for data freshness
+ * - Error handling and loading states for category operations
+ * 
+ * State management:
+ * - categories: Array of available categories with metadata
+ * - selectedCategoryId: Currently selected category for navigation
+ * - lastUpdated: Timestamp of last successful data fetch
+ * - isLoading: Loading state for category operations
+ * - error: Error state for failed operations
+ */
+
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { Category } from '../types';
 import { fetchCategories } from '../services/api';

@@ -1,3 +1,19 @@
+/**
+ * @fileoverview Authentication slice for managing user authentication state
+ * 
+ * This slice handles all authentication-related state management including:
+ * - User login/logout with automatic statistics synchronization
+ * - JWT token management and user session data
+ * - Loading states and error handling for auth operations
+ * - User preferences management within the auth context
+ * 
+ * Key features:
+ * - Automatic statistics data loading on login
+ * - Statistics and preferences syncing on logout
+ * - Integration with backend authentication endpoints
+ * - Redux Persist integration for session persistence
+ */
+
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { fetchStatisticsData, syncStatisticsData, updateUserProfile } from '../services/api';
 import { loadStatisticsData } from './statisticsSlice';

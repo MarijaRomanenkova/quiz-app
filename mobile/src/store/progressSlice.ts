@@ -273,9 +273,20 @@ export const selectTopicProgress = (state: RootState, topicId: string) =>
 
 /**
  * Selector to get progress data for a specific category with calculated total topics
+ * 
+ * This selector combines category progress data with actual topic counts from the topics slice
+ * to provide accurate progress calculations. It ensures that progress percentages are based
+ * on the actual number of topics available rather than stored totals.
+ * 
  * @param state - Root state
  * @param categoryId - Category ID to get progress for
  * @returns Category progress data with actual total topics or undefined if not found
+ * 
+ * @example
+ * ```typescript
+ * const progress = useSelector(state => selectCategoryProgress(state, 'grammar'));
+ * // Returns: { categoryId: 'grammar', completedTopics: 5, totalTopics: 12, unlockedTopics: 8 }
+ * ```
  */
 export const selectCategoryProgress = createSelector(
   [(state: RootState) => state.progress.categoryProgress,
@@ -297,7 +308,20 @@ export const selectCategoryProgress = createSelector(
 
 /**
  * Selector to get unlocked topics for a category
- * @returns Array of unlocked topics for the specified category
+ * 
+ * Returns an array of topics that are currently unlocked for a specific category,
+ * sorted by topicOrder. This selector is used to determine which topics are
+ * available for the user to attempt based on their progress.
+ * 
+ * @param state - Root state
+ * @param categoryId - Category ID to get unlocked topics for
+ * @returns Array of unlocked topics for the specified category, sorted by topicOrder
+ * 
+ * @example
+ * ```typescript
+ * const unlockedTopics = useSelector(state => selectUnlockedTopicsForCategory(state, 'listening'));
+ * // Returns array of unlocked listening topics sorted by order
+ * ```
  */
 export const selectUnlockedTopicsForCategory = createSelector(
   [(state: RootState) => state.topic.topics, 

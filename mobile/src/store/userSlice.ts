@@ -1,3 +1,28 @@
+/**
+ * User slice for managing user profile data and preferences
+ * 
+ * This slice handles user profile management separate from authentication including:
+ * - User profile data storage and updates
+ * - User preferences management (study pace, marketing emails, device sharing)
+ * - Profile data synchronization with backend
+ * - Loading and error states for user operations
+ * 
+ * Key features:
+ * - Separate user data management from authentication state
+ * - User preferences updates with backend synchronization
+ * - Profile data clearing and reset functionality
+ * - Loading and error state management for user operations
+ * 
+ * State management:
+ * - user: Complete user profile data including preferences and settings
+ * - loading: Loading state for user operations
+ * - error: Error state for failed operations
+ * 
+ * Note: This slice is separate from auth slice to allow for different
+ * persistence strategies and to handle user data independently of
+ * authentication state.
+ */
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { User } from '../types/user.types';
 

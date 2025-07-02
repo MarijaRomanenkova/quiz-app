@@ -1,3 +1,16 @@
+/**
+ * @fileoverview Quiz Top Bar component for the mobile application
+ * 
+ * This component provides a navigation bar for quiz screens with a back button
+ * and question counter. It displays the current question number and total
+ * questions, and provides navigation back to the previous screen.
+ * 
+ * The component automatically hides itself when reading text is displayed
+ * to provide a cleaner reading experience for comprehension questions.
+ * 
+ * @module components/Quiz/QuizTopBar
+ */
+
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -6,6 +19,37 @@ import { BackButton } from '../BackButton';
 import { QuizTopBarProps } from '../../types/components.types';
 import { theme } from '../../theme';
 
+/**
+ * Quiz Top Bar component with navigation and progress
+ * 
+ * Displays a navigation bar for quiz screens with back button and
+ * question counter. The component automatically hides when reading
+ * text is shown to provide an unobstructed reading experience.
+ * 
+ * @param {QuizTopBarProps} props - The quiz top bar props
+ * @param {number} props.currentQuestion - Index of the current question (0-based)
+ * @param {number} props.totalQuestions - Total number of questions in the quiz
+ * @param {boolean} props.showReadingText - Whether reading text is currently displayed
+ * @returns {JSX.Element} A navigation bar with back button and question counter
+ * 
+ * @example
+ * ```tsx
+ * <QuizTopBar
+ *   currentQuestion={2}
+ *   totalQuestions={10}
+ *   showReadingText={false}
+ * />
+ * ```
+ * 
+ * @example
+ * ```tsx
+ * <QuizTopBar
+ *   currentQuestion={0}
+ *   totalQuestions={5}
+ *   showReadingText={true}
+ * />
+ * ```
+ */
 export const QuizTopBar: React.FC<QuizTopBarProps> = ({ 
   currentQuestion, 
   totalQuestions,

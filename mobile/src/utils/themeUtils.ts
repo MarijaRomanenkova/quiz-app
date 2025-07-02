@@ -4,8 +4,24 @@ import { theme, fonts, spacing, layout } from '../theme';
 /**
  * Theme utility functions for creating consistent styles
  * 
- * These utilities work with your existing theme system to help
- * create consistent styles without duplication across components.
+ * This module provides a comprehensive set of utility functions for creating
+ * consistent, theme-aware styles across the application. These utilities work
+ * with the Material Design 3 theme system to generate StyleSheet objects that
+ * maintain visual consistency and follow the design system.
+ * 
+ * Key features:
+ * - Component-specific style generators (cards, buttons, inputs, text)
+ * - Theme-aware color and spacing management
+ * - Consistent shadow and elevation system
+ * - Layout utility functions for common patterns
+ * - Type-safe style generation with proper TypeScript support
+ * 
+ * Usage patterns:
+ * - Use createCardStyles() for consistent card components
+ * - Use createButtonStyles() for theme-aware button styling
+ * - Use createTextStyles() for consistent typography
+ * - Use createLayoutStyles() for common layout patterns
+ * - Use createColorStyles() for dynamic color management
  * 
  * @module utils/themeUtils
  */
@@ -13,8 +29,19 @@ import { theme, fonts, spacing, layout } from '../theme';
 /**
  * Creates common card styles using theme values
  * 
+ * Generates consistent card styles with different variants for various use cases.
+ * Each variant provides different visual emphasis and interaction states.
+ * 
  * @param variant - Card variant ('default', 'selected', 'elevated')
  * @returns StyleSheet object with card styles
+ * 
+ * @example
+ * ```tsx
+ * const styles = createCardStyles('selected');
+ * <View style={styles.card}>
+ *   // Card content
+ * </View>
+ * ```
  */
 export const createCardStyles = (variant: 'default' | 'selected' | 'elevated' = 'default') => {
   const baseCard = {

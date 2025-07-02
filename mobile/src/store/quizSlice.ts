@@ -1,14 +1,33 @@
+/**
+ * Quiz slice for managing active quiz sessions and quiz-related state
+ * 
+ * This slice handles comprehensive quiz session management including:
+ * - Active quiz state with current question, score, and answer tracking
+ * - Wrong questions collection for review purposes
+ * - Reading text integration during quizzes
+ * - Quiz result storage and management
+ * - Daily statistics tracking for quiz activity
+ * 
+ * Key features:
+ * - Complete quiz session lifecycle management (start, progress, end)
+ * - Wrong questions tracking for targeted review
+ * - Reading text display control during quizzes
+ * - Score tracking and result storage
+ * - Integration with statistics slice for daily activity tracking
+ * 
+ * State management:
+ * - activeQuiz: Current quiz session state with question index, score, and UI state
+ * - wrongQuestions: Collection of incorrectly answered questions for review
+ * - currentResult: Most recent quiz result for display
+ * - dailyStats: Daily quiz activity for statistics tracking
+ * - currentTopicId: Currently selected topic for quiz context
+ */
+
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { RootState } from './index';
 import { Question } from '../types';
 import { QuizResult, QuizState } from '../types/quiz.types';
 
-/**
- * Redux slice for managing quiz state
- * 
- * This slice handles the current quiz session, including the active quiz,
- * quiz results, wrong questions tracking, and daily statistics.
- */
 export const quizSlice = createSlice({
   name: 'quiz',
   initialState: {

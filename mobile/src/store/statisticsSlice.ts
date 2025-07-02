@@ -1,3 +1,27 @@
+/**
+ * Statistics slice for managing quiz statistics and learning analytics
+ * 
+ * This slice handles comprehensive quiz statistics and learning analytics including:
+ * - Daily quiz time tracking with session management
+ * - Weekly and monthly goal progress calculations
+ * - Level completion progress tracking
+ * - Study pace goal calculations and progress monitoring
+ * - Backend synchronization of statistics data
+ * 
+ * Key features:
+ * - Automatic session timing with startQuizSession/endQuizSession
+ * - Daily quiz time aggregation and persistence
+ * - Weekly goal calculations based on user study pace (Relaxed/Moderate/Intensive)
+ * - Level progress tracking with completion percentages
+ * - Integration with backend statistics endpoints
+ * 
+ * Business logic:
+ * - Study pace goals: Relaxed (12 weeks), Moderate (6 weeks), Intensive (3 weeks) for 40-hour level completion
+ * - Session timing: Minimum 1 minute per session, automatic daily aggregation
+ * - Level progress: Calculated from completed topics vs total topics for user's level
+ * - Weekly/monthly goals: Based on study pace with 4 weeks per month calculation
+ */
+
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { RootState } from './index';
 import { 
@@ -247,8 +271,18 @@ export const selectIsQuizSessionActive = (state: { statistics: StatisticsState }
 
 /**
  * Utility function to get current week's quiz data
+ * 
+ * Calculates the current week's quiz data from Monday to Sunday, handling
+ * edge cases where the current day might not be in the calculated week.
+ * 
  * @param dailyQuizTimes - Array of daily quiz time entries
  * @returns Array of quiz time data for the current week (Monday to Sunday)
+ * 
+ * @example
+ * ```typescript
+ * const weekData = getCurrentWeekData(dailyQuizTimes);
+ * // Returns array of 7 objects with minutes and date for current week
+ * ```
  */
 const getCurrentWeekData = (dailyQuizTimes: DailyQuizTime[]) => {
   const today = new Date();
@@ -481,7 +515,19 @@ const getStudyPaceGoal = (studyPaceId: number): number => {
 
 /**
  * Selector for level progress information
- * @returns Object containing level progress details
+ * 
+ * Calculates the user's progress through their current level by comparing
+ * completed topics against total topics for their level. This selector
+ * provides comprehensive level progress information for display in the UI.
+ * 
+ * @param state - Root state
+ * @returns Object containing level progress details including completion percentage
+ * 
+ * @example
+ * ```typescript
+ * const levelProgress = useSelector(selectLevelProgress);
+ * // Returns: { level: 'beginner', completedTopics: 15, totalTopics: 30, percentage: 50 }
+ * ```
  */
 export const selectLevelProgress = createSelector(
   [(state: RootState) => state.topic.topics,
