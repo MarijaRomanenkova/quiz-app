@@ -17,25 +17,35 @@
  * @module screens/Register
  */
 
+// React and core libraries
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, TextInput, Surface, Switch, Portal } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../types/navigation';
 import { useForm, Controller } from 'react-hook-form';
+
+// Third-party libraries
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { zodResolver } from '@hookform/resolvers/zod';
+
+// Project utilities and services
 import authService from '../../services/authService';
-import { BackButton } from '../../components/BackButton';
 import { registerSchema, type RegisterFormData } from '../../utils/validationSchemas';
 import { usePasswordVisibility } from '../../hooks/usePasswordVisibility';
 import { handleApiError } from '../../utils/apiUtils';
-import { theme, fonts, spacing } from '../../theme';
 
+// Project components
+import { BackButton } from '../../components/BackButton';
 import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceSelector';
 import { Button } from '../../components/Button/Button';
 import { Input } from '../../components/Input/Input';
 import { CustomModal } from '../../components/Modal/CustomModal';
+
+// Types and interfaces
+import type { RootStackParamList } from '../../types/navigation';
+
+// Theme and styling
+import { theme, fonts, spacing } from '../../theme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 

@@ -17,15 +17,13 @@
  * @module screens/Progress
  */
 
+// React and core libraries
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
-
 import { Card } from 'react-native-paper';
-import { theme, fonts, spacing, layout } from '../../theme';
-import { CustomBarChart } from '../../components/CustomBarChart';
-import { LevelProgress } from '../../components/Results/LevelProgress';
 
+// Project utilities and services
 import { 
   selectCurrentWeekData,
   selectLastFiveWeeksData,
@@ -38,6 +36,13 @@ import {
 import { selectAllCategoryProgress } from '../../store/progressSlice';
 import { createLayoutStyles, createTextStyles} from '../../utils/themeUtils';
 import { formatTime, formatGoalPercentage } from '../../utils/formatUtils';
+
+// Project components
+import { CustomBarChart } from '../../components/CustomBarChart';
+import { LevelProgress } from '../../components/Results/LevelProgress';
+
+// Theme and styling
+import { theme, fonts, spacing, layout } from '../../theme';
 
 // Constants
 const screenWidth = Dimensions.get('window').width;

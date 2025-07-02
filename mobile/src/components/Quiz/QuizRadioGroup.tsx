@@ -14,9 +14,12 @@
  * @module components/Quiz/QuizRadioGroup
  */
 
+// React and core libraries
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { RadioButton } from 'react-native-paper';
+
+// Theme and styling
 import { theme } from '../../theme';
 
 /**

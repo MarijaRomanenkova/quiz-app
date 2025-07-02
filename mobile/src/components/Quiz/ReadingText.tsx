@@ -15,12 +15,19 @@
  * @module components/Quiz/ReadingText
  */
 
+// React and core libraries
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
-import { theme, spacing, layout } from '../../theme';
+
+// Project utilities and services
 import { createTextStyles, createShadowStyles } from '../../utils/themeUtils';
+
+// Types and interfaces
 import { ReadingTextProps } from '../../types/components.types';
+
+// Theme and styling
+import { theme, spacing, layout } from '../../theme';
 
 // Create utility styles
 const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.onSurface);

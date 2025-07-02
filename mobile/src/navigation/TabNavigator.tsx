@@ -22,12 +22,19 @@
  * @module navigation/TabNavigator
  */
 
+// React and core libraries
 import React from 'react';
+
+// Third-party libraries
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+// Project components
 import { HomeScreen } from '../screens/Home';
 import { ProfileScreen } from '../screens/Profile';
 import { ProgressScreen } from '../screens/Progress';
+
+// Theme and styling
 import { theme } from '../theme';
 
 const Tab = createBottomTabNavigator();

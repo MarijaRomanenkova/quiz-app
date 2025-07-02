@@ -21,11 +21,18 @@
  * @module components/CustomBarChart
  */
 
+// React and core libraries
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import { theme } from '../../theme';
+
+// Project utilities and services
 import { formatTime } from '../../utils/formatUtils';
+
+// Types and interfaces
 import { CustomBarChartProps } from '../../types/components.types';
+
+// Theme and styling
+import { theme } from '../../theme';
 
 /**
  * Data structure for individual bar items

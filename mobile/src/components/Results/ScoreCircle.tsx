@@ -11,10 +11,13 @@
  * @module components/Results/ScoreCircle
  */
 
+// React and core libraries
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
+
+// Types and interfaces
 import { ScoreCircleProps } from '../../types/components.types';
 
 /**

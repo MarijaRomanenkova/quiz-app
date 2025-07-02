@@ -11,13 +11,20 @@
  * @module components/Results/LevelProgress
  */
 
+// React and core libraries
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
-import { theme } from '../../theme';
+
+// Project utilities and services
 import { createTextStyles, createShadowStyles } from '../../utils/themeUtils';
+
+// Types and interfaces
 import { LevelProgressProps } from '../../types/components.types';
+
+// Theme and styling
+import { theme } from '../../theme';
 
 /**
  * Level Progress component with circular progress indicator

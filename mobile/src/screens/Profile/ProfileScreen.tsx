@@ -17,25 +17,35 @@
  * @module screens/Profile
  */
 
+// React and core libraries
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Surface, Switch } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../types/navigation';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../store';
 
+// Third-party libraries
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+// Project utilities and services
 import { updateUserPreferences } from '../../store/authSlice';
-import { theme, fonts, spacing } from '../../theme';
+import { useAuth } from '../../hooks/useAuth';
+import { deleteUserAccount } from '../../services/api';
+import { handleApiError } from '../../utils/apiUtils';
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
+
+// Project components
 import { StudyPaceSelector } from '../../components/StudyPaceSelector/StudyPaceSelector';
 import { Button } from '../../components/Button/Button';
 import { CustomModal } from '../../components/Modal/CustomModal';
-import { useAuth } from '../../hooks/useAuth';
-import { deleteUserAccount } from '../../services/api';
 import { BackButton } from '../../components/BackButton';
-import { handleApiError } from '../../utils/apiUtils';
-import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
+
+// Types and interfaces
+import type { RootStackParamList } from '../../types/navigation';
+import { RootState } from '../../store';
+
+// Theme and styling
+import { theme, fonts, spacing } from '../../theme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 

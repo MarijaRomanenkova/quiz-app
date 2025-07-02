@@ -16,21 +16,32 @@
  * @module screens/Topic
  */
 
+// React and core libraries
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation, RouteProp, useRoute } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../navigation/AppNavigator';
-import { theme, fonts, spacing, layout } from '../../theme';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
-import { Button } from '../../components/Button/Button';
+
+// Third-party libraries
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import type { QuizTopic } from '../../types';
-import { selectUnlockedTopicsForCategory, selectTopicProgress } from '../../store/progressSlice';
-import { BackButton } from '../../components/BackButton';
+
+// Project utilities and services
 import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
+import { selectUnlockedTopicsForCategory, selectTopicProgress } from '../../store/progressSlice';
+
+// Project components
+import { Button } from '../../components/Button/Button';
+import { BackButton } from '../../components/BackButton';
+
+// Types and interfaces
+import type { RootStackParamList } from '../../navigation/AppNavigator';
+import type { QuizTopic } from '../../types';
+import { RootState } from '../../store';
+
+// Theme and styling
+import { theme, fonts, spacing, layout } from '../../theme';
 
 /**
  * Props interface for the TopicItem component

@@ -13,17 +13,19 @@
  * @module components/Quiz
  */
 
+// React and core libraries
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../types/navigation';
-import { theme, spacing, layout } from '../../theme';
-import { createTextStyles, createShadowStyles, createColorStyles } from '../../utils/themeUtils';
-import type { Question } from '../../types';
 import { useSelector, useDispatch } from 'react-redux';
-import type { RootState, AppDispatch } from '../../store';
+
+// Third-party libraries
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+// Project utilities and services
+import { createTextStyles, createShadowStyles, createColorStyles } from '../../utils/themeUtils';
+import { useToken } from '../../hooks/useToken';
 import { 
   updateDailyStats,
   startQuiz,
@@ -31,26 +33,32 @@ import {
   nextQuestion,
   updateScore,
   endQuiz,
-  selectActiveQuiz
-} from '../../store/quizSlice';
-import { selectQuestionsForTopic, selectReadingTextById } from '../../store/questionsSlice';
-import { store } from '../../store';
-import { Button as CustomButton } from '../../components/Button/Button';
-import { 
+  selectActiveQuiz,
   addWrongQuestion, 
   selectWrongQuestions, 
   setQuizResult 
 } from '../../store/quizSlice';
+import { selectQuestionsForTopic, selectReadingTextById, fetchAllQuestionsThunk } from '../../store/questionsSlice';
 import { completeTopic, updateTopicAttempt, loadMoreQuestionsThunk } from '../../store/progressSlice';
 import { startQuizSession, endQuizSession } from '../../store/statisticsSlice';
+
+// Project components
+import { Button as CustomButton } from '../../components/Button/Button';
 import { AudioPlayer } from '../AudioPlayer/AudioPlayer';
-import { AudioPlayerRef } from '../../types/components.types';
 import { QuizRadioGroup } from './QuizRadioGroup';
 import { ReadingText } from './ReadingText';
 import { QuizTopBar } from './QuizTopBar';
-import { useToken } from '../../hooks/useToken';
-import { fetchAllQuestionsThunk } from '../../store/questionsSlice';
+
+// Types and interfaces
+import type { RootStackParamList } from '../../types/navigation';
+import type { RootState, AppDispatch } from '../../store';
+import type { Question } from '../../types';
 import type { ReadingText as ReadingTextType } from '../../types';
+import type { AudioPlayerRef } from '../../types/components.types';
+import { store } from '../../store';
+
+// Theme and styling
+import { theme, spacing, layout } from '../../theme';
 
 type QuizScreenRouteProp = RouteProp<RootStackParamList, 'Quiz'>;
 type QuizScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;

@@ -17,25 +17,35 @@
  * @module screens/Login
  */
 
+// React and core libraries
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Text, Surface, Portal } from 'react-native-paper';
+import { Text, Surface, Portal, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { useForm, Controller } from 'react-hook-form';
+
+// Third-party libraries
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../types';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+// Project utilities and services
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
+import { loginSchema, type LoginFormData } from '../../utils/validationSchemas';
+import { useAuth } from '../../hooks/useAuth';
+import { usePasswordVisibility } from '../../hooks/usePasswordVisibility';
+
+// Project components
 import { Logo } from '../../components/Logo';
 import { Button } from '../../components/Button/Button';
 import { Input } from '../../components/Input/Input';
 import { CustomModal } from '../../components/Modal/CustomModal';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { theme, fonts, spacing } from '../../theme';
-import { useAuth } from '../../hooks/useAuth';
-import { TextInput } from 'react-native-paper';
-import { loginSchema, type LoginFormData } from '../../utils/validationSchemas';
-import { usePasswordVisibility } from '../../hooks/usePasswordVisibility';
-import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
 import { LoadingWrapper } from '../../components/common/LoadingWrapper';
+
+// Types and interfaces
+import type { RootStackParamList } from '../../types';
+
+// Theme and styling
+import { theme, fonts, spacing } from '../../theme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 

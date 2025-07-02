@@ -15,24 +15,34 @@
  * @module screens/Home
  */
 
+// React and core libraries
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, RadioButton } from 'react-native-paper';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../navigation/AppNavigator';
-import { theme, fonts, spacing, layout } from '../../theme';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../store';
+
+// Third-party libraries
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+// Project utilities and services
+import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
 import { fetchCategoriesThunk, setSelectedCategory } from '../../store/categorySlice';
 import { fetchTopicsThunk } from '../../store/topicSlice';
-import { fetchAllQuestionsThunk } from '../../store/questionsSlice';
-import { fetchAllReadingTextsThunk } from '../../store/questionsSlice';
+import { fetchAllQuestionsThunk, fetchAllReadingTextsThunk } from '../../store/questionsSlice';
 import { initializeCategoryProgress, updateCompletedTopicsCategories } from '../../store/progressSlice';
-import type { AppDispatch } from '../../store';
+
+// Project components
 import { Button } from '../../components/Button/Button';
-import type { Topic } from '../../types';
 import { LoadingWrapper } from '../../components/common/LoadingWrapper';
-import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
+
+// Types and interfaces
+import type { RootStackParamList } from '../../navigation/AppNavigator';
+import type { AppDispatch } from '../../store';
+import type { Topic } from '../../types';
+import { RootState } from '../../store';
+
+// Theme and styling
+import { theme, fonts, spacing, layout } from '../../theme';
 
 /**
  * Props interface for the HomeScreen component

@@ -14,12 +14,19 @@
  * @module components/BackButton
  */
 
+// React and core libraries
 import React from 'react';
 import { StyleSheet, TouchableOpacity, Text, ViewStyle } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { theme, layout, spacing } from '../../theme';
+
+// Third-party libraries
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+// Project utilities and services
 import { createTextStyles } from '../../utils/themeUtils';
+
+// Theme and styling
+import { theme, layout, spacing } from '../../theme';
 
 /**
  * Available button variants with their respective color schemes

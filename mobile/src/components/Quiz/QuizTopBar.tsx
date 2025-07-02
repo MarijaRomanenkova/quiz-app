@@ -11,12 +11,19 @@
  * @module components/Quiz/QuizTopBar
  */
 
+// React and core libraries
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+
+// Project components
 import { BackButton } from '../BackButton';
+
+// Types and interfaces
 import { QuizTopBarProps } from '../../types/components.types';
+
+// Theme and styling
 import { theme } from '../../theme';
 
 /**
