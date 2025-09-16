@@ -45,8 +45,6 @@ web-build/
 
 # Documentation
 **/doc/
-**/docs/
-*.md
 
 # Misc
 .cache/
@@ -107,8 +105,4 @@ prisma/migrations/
 .tmp/
 
 # Ignore all doc folders
-**/doc/
-**/docs/
-
-# Ignore all markdown files
-*.md 
+**/doc/ 
