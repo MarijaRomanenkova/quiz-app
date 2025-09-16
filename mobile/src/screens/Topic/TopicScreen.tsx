@@ -17,7 +17,7 @@
  */
 
 // React and core libraries
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation, RouteProp, useRoute } from '@react-navigation/native';
@@ -30,6 +30,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 // Project utilities and services
 import { createLayoutStyles, createTextStyles } from '../../utils/themeUtils';
 import { selectUnlockedTopicsForCategory, selectTopicProgress } from '../../store/progressSlice';
+import { createSelector } from '@reduxjs/toolkit';
 
 // Project components
 import { Button } from '../../components/Button/Button';
@@ -141,14 +142,23 @@ export const TopicScreen = () => {
     selectUnlockedTopicsForCategory(state, categoryId)
   );
 
+  // Memoized selector for topics progress to prevent unnecessary re-renders
+  const selectTopicsProgress = useMemo(
+    () => createSelector(
+      [(state: RootState) => state.progress.topicProgress, (state: RootState) => unlockedTopics],
+      (topicProgress, topics) => {
+        const progress: Record<string, { completed: boolean }> = {};
+        topics.forEach(topic => {
+          progress[topic.topicId] = topicProgress[topic.topicId] || { completed: false };
+        });
+        return progress;
+      }
+    ),
+    [unlockedTopics]
+  );
+
   // Get progress for all unlocked topics
-  const topicsProgress = useSelector((state: RootState) => {
-    const progress: Record<string, { completed: boolean }> = {};
-    unlockedTopics.forEach(topic => {
-      progress[topic.topicId] = selectTopicProgress(state, topic.topicId) || { completed: false };
-    });
-    return progress;
-  });
+  const topicsProgress = useSelector(selectTopicsProgress);
 
   // Debug: Log topics data
 
@@ -208,7 +218,7 @@ export const TopicScreen = () => {
         ))}
       </ScrollView>
 
-      <View >
+      <View style={styles.buttonContainer}>
         <Button
           variant="primary"
           onPress={handleQuizPress}
@@ -227,6 +237,9 @@ const titleStyles = createTextStyles('xlarge', 'semiBold', theme.colors.text);
 const styles = StyleSheet.create({
   backButton: {
     marginBottom: spacing.md,
+  },
+  buttonContainer: {
+    marginBottom: 40,
   },
   completedRadioItem: {
     backgroundColor: theme.colors.primaryContainer + '20',
